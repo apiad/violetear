@@ -24,25 +24,25 @@ class Color:
         return colorsys.rgb_to_hsv(self.red / 255, self.green / 255, self.blue / 255)
 
     def saturated(self, saturation: float) -> "Color":
-        h, s, v = self.to_hsv()
+        h, _, v = self.to_hsv()
         return Color.from_hsv(h, saturation, v, self.alpha)
 
-    def lighted(self, value: float) -> "Color":
-        h, s, v = self.to_hsv()
+    def lit(self, value: float) -> "Color":
+        h, s, _ = self.to_hsv()
         return Color.from_hsv(h, s, value, self.alpha)
 
     @classmethod
     def red(cls, value: float = 1.0):
-        return Color(255, 0, 0, 1).lighted(value)
+        return Color(255, 0, 0, 1).lit(value)
 
     @classmethod
     def green(cls, value: float = 1.0):
-        return Color(0, 255, 0, 1).lighted(value)
+        return Color(0, 255, 0, 1).lit(value)
 
     @classmethod
     def blue(cls, value: float = 1.0):
-        return Color(0, 0, 255, 1).lighted(value)
+        return Color(0, 0, 255, 1).lit(value)
 
     @classmethod
     def gray(cls, value: float = 1.0):
-        return Color(255, 255, 255, 1).lighted(value)
+        return Color(255, 255, 255, 1).lit(value)
