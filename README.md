@@ -8,6 +8,12 @@
 
 `violetear` is a minimalist CSS generator in Python. You write Python code and obtain a CSS definition, that you can either render to a file and serve statically, or inject dynamically into your HTML, or use inline styles directly in your markup.
 
+It is a pure Python package with zero dependencies. Install with:
+
+```bash
+pip install violetear
+```
+
 ## Why?
 
 For fun, mostly... but also, because CSS is boring and repetitive. But using a full-featured programming language allows me to unlock orders of magnitude of productivity generating styles programatically.
