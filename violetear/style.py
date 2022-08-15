@@ -4,13 +4,18 @@ from .color import Color
 
 
 class Style:
-    def __init__(self, *class_name: str, id: str = None, selector=None) -> None:
+    def __init__(self, *class_name: str, id: str = None, selector=None, parent:"Style" = None) -> None:
         if selector is not None:
             self._selector = selector
         else:
             self._selector = Selector(id, *class_name)
 
         self._rules = {}
+
+        if parent:
+            self._parent = parent
+        else:
+            self._parent = self
 
     def rule(self, attr: str, value) -> "Style":
         self._rules[attr] = value
@@ -58,7 +63,10 @@ class Style:
 
         return f"{' '*indent*4}{self._selector.css()} {{\n{rules}\n{' '*indent*4}}}"
 
-    def render(self, fp, indent: int = 0):
+    def render(self, dynamic, fp, indent: int = 0, used=None):
+        if dynamic and not self._parent in used:
+            return
+
         fp.write(self.css(indent=indent))
 
     def inline(self) -> str:
