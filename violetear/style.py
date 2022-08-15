@@ -28,9 +28,16 @@ class Style:
 
         return self
 
-    def color(self, color:Color) -> "Style":
-        if isinstance(color, str):
-            color = Color.from_name(color)
+    def color(
+        self, color: Color = None, *, rgb=None, hsv=None, alpha: float = None
+    ) -> "Style":
+        if color is None:
+            if rgb is not None:
+                r, g, b = rgb
+                color = Color(r, g, b, alpha)
+            if hsv is not None:
+                h, s, v = hsv
+                color = Color.from_hsv(h, s, v, alpha)
 
         self.rule("color", color)
 
