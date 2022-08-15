@@ -37,13 +37,20 @@ class Style:
 
         return self
 
-    def css(self) -> str:
+    def css(self, indent: int = 0) -> str:
         rules = "\n".join(
-            f"    {attr}: {value};" for attr, value in self._rules.items()
+            f"{' '*(indent+1)*4}{attr}: {value};" for attr, value in self._rules.items()
         )
 
-        return f"{self._selector.css()} {{\n{rules}\n}}"
+        return f"{' '*indent*4}{self._selector.css()} {{\n{rules}\n{' '*indent*4}}}"
+
+    def render(self, fp, indent: int = 0):
+        fp.write(self.css(indent=indent))
 
     def inline(self) -> str:
         rules = " ".join(f"{attr}: {value};" for attr, value in self._rules.items())
         return f'style="{rules}"'
+
+    def classes(self) -> str:
+        classname = " ".join(self._selector._class_name)
+        return f'class="{classname}"'
