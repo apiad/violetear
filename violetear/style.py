@@ -1,5 +1,6 @@
 from .selector import Selector
 from .units import Unit, pt
+from .color import Color
 
 
 class Style:
@@ -26,6 +27,12 @@ class Style:
             self.rule("font-weight", weight)
 
         return self
+
+    def color(self, color:Color) -> "Style":
+        if isinstance(color, str):
+            color = Color.from_name(color)
+
+        self.rule("color", color)
 
     def display(self, display: str) -> "Style":
         self.rule("display", display)
