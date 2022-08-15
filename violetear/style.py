@@ -1,5 +1,5 @@
 from .selector import Selector
-from .units import Unit, pt
+from .units import Unit, pc, pt, px
 from .color import Color
 
 
@@ -50,18 +50,39 @@ class Style:
         self.rule("display", display)
         return self
 
-    def apply(self, other: "Style") -> "Style":
-        for attr, value in other._rules.items():
-            self.rule(attr, value)
+    def apply(self, *others: "Style") -> "Style":
+        for other in others:
+            for attr, value in other._rules.items():
+                self.rule(attr, value)
 
         return self
+
+    def margin(self, all=None, *, left=None, right=None, top=None, bottom=None):
+        if all is not None:
+            self.rule("margin", Unit.infer(all))
+        if left is not None:
+            self.rule("margin-left", Unit.infer(left))
+        if right is not None:
+            self.rule("margin-right", Unit.infer(right))
+        if top is not None:
+            self.rule("margin-top", Unit.infer(top))
+        if bottom is not None:
+            self.rule("margin-bottom", Unit.infer(bottom))
+
+        return self
+
+    def width(self, value):
+        return self.rule("width", Unit.infer(value))
+
+    def height(self, value):
+        return self.rule("height", Unit.infer(value))
 
     def css(self, indent: int = 0) -> str:
         rules = "\n".join(
             f"{' '*(indent+1)*4}{attr}: {value};" for attr, value in self._rules.items()
         )
 
-        return f"{' '*indent*4}{self._selector.css()} {{\n{rules}\n{' '*indent*4}}}"
+        return f"{' '*indent*4}{self._selector.css()} {{\n{rules}\n{' '*indent*4}}}\n"
 
     def render(self, dynamic, fp, indent: int = 0, used=None):
         if dynamic and not self._parent in used:
@@ -76,3 +97,6 @@ class Style:
     def classes(self) -> str:
         classname = " ".join(self._selector._class_name)
         return f'class="{classname}"'
+
+    def __str__(self) -> str:
+        return self.classes()

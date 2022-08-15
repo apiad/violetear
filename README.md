@@ -1,2 +1,3 @@
 # violetear
-A minimalist CSS generator
+
+> A minimalist CSS generator
