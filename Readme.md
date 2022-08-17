@@ -22,7 +22,7 @@ Using a general-purpose programming language to generate CSS we can obtain the b
 
 But it gets better quickly. Using `violetear` you can compose simpler styles into more complex ones, reusing common rules to reduce repetition to a minimum. This way you can build up complex layouts via composition.
 
-You can manipulate magnitudes, such as colors, making it much easier to generate a specific color pallete, for instance. Since you have a full-featured programming language, you can leverage variables and methods to, for example, generate dynamic themes on-the-fly based on user-defined preferences.
+You can manipulate magnitudes, such as colors and font-sizes, making it much easier to generate a specific color pallete, for instance. Since you have a full-featured programming language, you can leverage variables and methods to, for example, generate dynamic themes on-the-fly based on user-defined preferences.
 
 Finally, `violetear` can generate only the subset of styles used in any given template from a single Pyhon source. This means you can happily define all your styles globally and then deliver the minimum CSS subset necessary for each view.
 
@@ -45,8 +45,8 @@ sheet = StyleSheet()
 Then you add your styles using common CSS selectors and a fluid API to quickly build complex rule sets:
 
 ```python
-title = sheet.add("#title").font(14, weight="lighter").margin(5, top=0)
-subtitle = sheet.add(".subtitle").apply(title).font(12)
+title = sheet.select("#title").font(14, weight="lighter").margin(5, top=0)
+subtitle = sheet.select(".subtitle").apply(title).font(12)
 ```
 
 You can add conditional (media query) styles with a simple API:
@@ -54,6 +54,12 @@ You can add conditional (media query) styles with a simple API:
 ```python
 with sheet.media(min_width=768):
     sheet.redefine(title).display("inline")
+```
+
+And you can style specific states:
+
+```python
+style.add(title.on("hover").font(weight="bolder"))
 ```
 
 Once your stylesheet is complete, you have a few options to deliver the styles to your frontend.
@@ -102,6 +108,10 @@ Likewise, if you're feeling adventurous, go ahead and add some fluid methods to 
 - Color palletes
 - Cover all basic CSS rules.
 - Docs!
+
+### v0.4
+
+- Support for custom states with the `on` method.
 
 ### v0.3
 
