@@ -49,8 +49,8 @@ markdown_extensions:
       emoji_generator: !!python/name:materialx.emoji.to_svg
 
 nav:
-  - User Guide:
-    - Quick Start: index.md
+  - Home: index.md
+  - User Guide: guide.md
   - API:
     - Style Sheets: stylesheet.md
     - Styles: style.md
