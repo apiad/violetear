@@ -1,0 +1,59 @@
+site_name: "violetear"
+site_url: https://apiad.net/violetear
+repo_url: https://github.com/apiad/violetear
+
+remote_branch: main
+
+theme:
+  name: material
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.instant
+    - toc.integrate
+    - navigation.top
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/lightbulb
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: deep-orange
+      accent: deep-orange
+      toggle:
+        icon: material/lightbulb-outline
+        name: Switch to light mode
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/apiad
+    - icon: fontawesome/brands/twitter
+      link: https://twitter.com/AlejandroPiad
+    - icon: fontawesome/brands/telegram
+      link: https://t.me/apiadnet
+
+copyright: CC 4.0 BY-NC-SA &copy; 2022 - Alejandro Piad Morffis
+
+markdown_extensions:
+  - codehilite
+  - toc:
+      permalink: True
+  - admonition
+  - pymdownx.emoji:
+      emoji_index: !!python/name:materialx.emoji.twemoji
+      emoji_generator: !!python/name:materialx.emoji.to_svg
+
+nav:
+  - User Guide:
+    - Quick Start: index.md
+  - API:
+    - Style Sheets: stylesheet.md
+    - Styles: style.md
+    - Selectors: selector.md
+    - Colors: color.md
+    - Units: units.md
