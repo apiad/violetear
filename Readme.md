@@ -88,11 +88,23 @@ Or you can automatically add the corresponding selector attributes to a given ta
 
 License is MIT, so all contributions are welcome!
 
+The easiest way to contribute is simply by installing the library, using it to build some style you want, and then open an issue telling me what was hard or impossible for you to do. This will help me decide what to prioritize, since CSS is damn huge!
+
+Likewise, if you're feeling adventurous, go ahead and add some fluid methods to the `violetear.style.Style` class to cover new CSS rules, and then open a PR.
+
 ## Roadmap
+
+### Future
+
+- Support for media queries via context managers
+- Support for flexbox and grid layouts with helper methods
+- Color palletes
+- Cover all basic CSS rules.
 
 ### v0.2
 
--
+- Refactored style API
+- Added support for basic CSS selectors
 
 ### v0.1
 
