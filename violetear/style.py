@@ -13,7 +13,7 @@ class Style:
         self._rules[attr] = value
         return self
 
-    def font(self, size: Unit = None, weight: str = None) -> "Style":
+    def font(self, size: Unit = None, *, weight: str = None) -> "Style":
         if size:
             if not isinstance(size, Unit):
                 size = pt(size)
