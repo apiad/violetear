@@ -5,8 +5,8 @@ import textwrap
 
 
 class Style:
-    def __init__(self, selector:Selector=None) -> None:
-        self._selector = selector
+    def __init__(self, selector: Selector = None) -> None:
+        self.selector = selector
         self._rules = {}
 
     def rule(self, attr: str, value) -> "Style":
@@ -36,7 +36,20 @@ class Style:
                 h, s, v = hsv
                 color = Color.from_hsv(h, s, v, alpha)
 
-        self.rule("color", color)
+        return self.rule("color", color)
+
+    def background(
+        self, color: Color, *, rgb=None, hsv=None, alpha: float = None
+    ) -> "Style":
+        if color is None:
+            if rgb is not None:
+                r, g, b = rgb
+                color = Color(r, g, b, alpha)
+            if hsv is not None:
+                h, s, v = hsv
+                color = Color.from_hsv(h, s, v, alpha)
+
+        return self.rule("background", color)
 
     def display(self, display: str) -> "Style":
         self.rule("display", display)
@@ -63,13 +76,27 @@ class Style:
 
         return self
 
+    def padding(self, all=None, *, left=None, right=None, top=None, bottom=None):
+        if all is not None:
+            self.rule("padding", Unit.infer(all))
+        if left is not None:
+            self.rule("padding-left", Unit.infer(left))
+        if right is not None:
+            self.rule("padding-right", Unit.infer(right))
+        if top is not None:
+            self.rule("padding-top", Unit.infer(top))
+        if bottom is not None:
+            self.rule("padding-bottom", Unit.infer(bottom))
+
+        return self
+
     def width(self, value):
         return self.rule("width", Unit.infer(value))
 
     def height(self, value):
         return self.rule("height", Unit.infer(value))
 
-    def css(self, inline:bool=False) -> str:
+    def css(self, inline: bool = False) -> str:
         separator = "" if inline else "\n"
 
         rules = separator.join(
@@ -79,10 +106,10 @@ class Style:
         if inline:
             return rules
 
-        return f"{self._selector.css()} {{\n{textwrap.indent(rules, 4*' ')}\n}}"
+        return f"{self.selector.css()} {{\n{textwrap.indent(rules, 4*' ')}\n}}"
 
     def markup(self) -> str:
-        return self._selector.markup()
+        return self.selector.markup()
 
     def __str__(self):
         return self.markup()
