@@ -62,12 +62,38 @@ You can render the stylesheet into a static file:
 sheet.render("static/css/main.css")
 ```
 
-Or you can embed it into your HTML (e.g, using Jinja):
+You can embed it into your HTML (e.g, using Jinja):
 
-```html
-...
+```jinja
 <style>
     {{ style.render() }}
 </style>
-...
 ```
+
+You can use inline styles:
+
+```jinja
+<h2 {{ style.subtitle.inline() }}>Subtitle</h2>
+```
+
+Or you can automatically add the corresponding selector attributes to a given tag:
+
+```jinja
+<h2 {{ style.subtitle.markup() }}>Subtitle</h2>
+<!-- Becomes -->
+<h2 class="subtitle">Subtitle</h2>
+```
+
+## Contribution
+
+License is MIT, so all contributions are welcome!
+
+## Roadmap
+
+### v0.2
+
+-
+
+### v0.1
+
+- Basic API
