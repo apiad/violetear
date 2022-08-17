@@ -1,13 +1,14 @@
 from .selector import Selector
-from .units import Unit, pc, pt, px
+from .units import Unit, pc, pt, px, em, rem
 from .color import Color
 import textwrap
 
 
 class Style:
-    def __init__(self, selector: Selector = None) -> None:
+    def __init__(self, selector: Selector = None, *, parent:"Style"=None) -> None:
         self.selector = selector
         self._rules = {}
+        self.parent = parent
 
     def rule(self, attr: str, value) -> "Style":
         self._rules[attr] = value
@@ -15,10 +16,7 @@ class Style:
 
     def font(self, size: Unit = None, *, weight: str = None) -> "Style":
         if size:
-            if not isinstance(size, Unit):
-                size = pt(size)
-
-            self.rule("font-size", size)
+            self.rule("font-size", Unit.infer(size))
 
         if weight:
             self.rule("font-weight", weight)
@@ -26,30 +24,36 @@ class Style:
         return self
 
     def color(
-        self, color: Color = None, *, rgb=None, hsv=None, alpha: float = None
+        self, color: Color = None, *, rgb=None, hsv=None, hls=None, alpha: float = None
     ) -> "Style":
         if color is None:
             if rgb is not None:
                 r, g, b = rgb
                 color = Color(r, g, b, alpha)
-            if hsv is not None:
+            elif hsv is not None:
                 h, s, v = hsv
                 color = Color.from_hsv(h, s, v, alpha)
+            elif hls is not None:
+                h, l, s = hls
+                color = Color.from_hls(h, l, s, alpha)
 
         return self.rule("color", color)
 
     def background(
-        self, color: Color, *, rgb=None, hsv=None, alpha: float = None
+        self, color: Color = None, *, rgb=None, hsv=None, hls=None, alpha: float = None
     ) -> "Style":
         if color is None:
             if rgb is not None:
                 r, g, b = rgb
                 color = Color(r, g, b, alpha)
-            if hsv is not None:
+            elif hsv is not None:
                 h, s, v = hsv
                 color = Color.from_hsv(h, s, v, alpha)
+            elif hls is not None:
+                h, l, s = hls
+                color = Color.from_hls(h, l, s, alpha)
 
-        return self.rule("background", color)
+        return self.rule("background-color", color)
 
     def display(self, display: str) -> "Style":
         self.rule("display", display)
@@ -90,11 +94,31 @@ class Style:
 
         return self
 
+    def absolute(self, *, left:int=None, right:int=None, top:int=None, bottom:int=None) -> "Style":
+        self.rule("position", "absolute")
+
+        if left is not None:
+            self.rule("left", Unit.infer(left))
+        if right is not None:
+            self.rule("right", Unit.infer(right))
+        if top is not None:
+            self.rule("top", Unit.infer(top))
+        if bottom is not None:
+            self.rule("bottom", Unit.infer(bottom))
+
+        return self
+
+    def rounded(self, radius:Unit=None):
+        if radius is None:
+            radius = 0.25
+
+        return self.rule("border-radius", Unit.infer(radius))
+
     def width(self, value):
-        return self.rule("width", Unit.infer(value))
+        return self.rule("width", Unit.infer(value, on_float=pc))
 
     def height(self, value):
-        return self.rule("height", Unit.infer(value))
+        return self.rule("height", Unit.infer(value, on_float=pc))
 
     def css(self, inline: bool = False) -> str:
         separator = "" if inline else "\n"
@@ -113,6 +137,9 @@ class Style:
 
     def markup(self) -> str:
         return self.selector.markup()
+
+    def on(self, state) -> "Style":
+        return Style(self.selector.on(state))
 
     def __str__(self):
         return self.markup()

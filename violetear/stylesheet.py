@@ -60,13 +60,14 @@ class StyleSheet:
         fp.close()
         return result
 
-    def add(self, selector: str=None, style:Style=None, *, name:str=None) -> Style:
+    def select(self, selector:str, *, name:str=None):
         if name is None and selector is not None:
             name = selector.replace("#", "_").replace(".", "_").replace("-","_").strip("_")
 
-        if not style:
-            style = Style(Selector.from_css(selector))
+        style = Style(Selector.from_css(selector))
+        return self.add(style, name=name)
 
+    def add(self, style:Style=None, *, name:str=None) -> Style:
         if self._media is None:
             self.styles.append(style)
         else:

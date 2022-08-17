@@ -5,13 +5,15 @@ TOKEN = rf"({TOKEN_PART}\-)*{TOKEN_PART}"
 TAG = rf"{TOKEN}"
 ID = rf"\#{TOKEN}"
 CLASSES = rf"\.{TOKEN}"
-SELECTOR = rf"(?P<tag>{TAG})?(?P<id>{ID})?(?P<classes>({CLASSES})*)"
+STATE = rf":{TOKEN}"
+SELECTOR = rf"(?P<tag>{TAG})?(?P<id>{ID})?(?P<classes>({CLASSES})*)(?P<state>{STATE})?"
 
 class Selector:
-    def __init__(self, tag: str = None, id: str = None, *classes: str) -> None:
+    def __init__(self, tag: str = None, id: str = None, classes: str = (), state:str=None) -> None:
         self._id = id
         self._tag = tag
         self._classes = classes
+        self._state = state
 
     def css(self) -> str:
         parts = []
@@ -25,13 +27,19 @@ class Selector:
         for cls in self._classes:
             parts.append(f".{cls}")
 
+        if self._state:
+            parts.append(f":{self._state}")
+
         return "".join(parts)
+
+    def on(self, state) -> "Selector":
+        return Selector(self._tag, self._id, self._classes, state)
 
     def __str__(self) -> str:
         return self.css()
 
     def __repr__(self) -> str:
-        return f"Selector(tag={repr(self._tag)}, id={repr(self._id)}, classes={repr(self._classes)})"
+        return f"Selector(tag={repr(self._tag)}, id={repr(self._id)}, classes={repr(self._classes)}, state={repr(self._state)})"
 
     def markup(self) -> str:
         parts = []
@@ -68,4 +76,9 @@ class Selector:
         else:
             classes = []
 
-        return Selector(tag, id, *classes)
+        state = match.group("state")
+
+        if state:
+            state = state[1:]
+
+        return Selector(tag, id, classes, state)
