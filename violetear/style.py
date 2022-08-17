@@ -5,7 +5,7 @@ import textwrap
 
 
 class Style:
-    def __init__(self, selector: Selector = None, *, parent:"Style"=None) -> None:
+    def __init__(self, selector: Selector = None, *, parent: "Style" = None) -> None:
         self.selector = selector
         self._rules = {}
         self.parent = parent
@@ -94,7 +94,14 @@ class Style:
 
         return self
 
-    def absolute(self, *, left:int=None, right:int=None, top:int=None, bottom:int=None) -> "Style":
+    def absolute(
+        self,
+        *,
+        left: int = None,
+        right: int = None,
+        top: int = None,
+        bottom: int = None,
+    ) -> "Style":
         self.rule("position", "absolute")
 
         if left is not None:
@@ -108,7 +115,10 @@ class Style:
 
         return self
 
-    def rounded(self, radius:Unit=None):
+    def center(self) -> "Style":
+        return self.rule("text-align", "center")
+
+    def rounded(self, radius: Unit = None):
         if radius is None:
             radius = 0.25
 

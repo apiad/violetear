@@ -13,6 +13,9 @@ Use a better box model (opinionated).
 ::before,
 ::after {
 	box-sizing: border-box;
+	border-width: 0;             /* Taken from tailwind.css */
+	border-style: solid;         /* Taken from tailwind.css */
+	border-color: currentColor;  /* Taken from tailwind.css */
 }
 
 /**
