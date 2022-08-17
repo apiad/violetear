@@ -98,10 +98,14 @@ Likewise, if you're feeling adventurous, go ahead and add some fluid methods to 
 
 ### Future
 
-- Support for media queries via context managers
 - Support for flexbox and grid layouts with helper methods
 - Color palletes
 - Cover all basic CSS rules.
+- Docs!
+
+### v0.3
+
+- Support for media queries via context managers
 
 ### v0.2
 

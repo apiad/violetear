@@ -108,6 +108,9 @@ class Style:
 
         return f"{self.selector.css()} {{\n{textwrap.indent(rules, 4*' ')}\n}}"
 
+    def inline(self) -> str:
+        return f'style="{self.css(inline=True)}"'
+
     def markup(self) -> str:
         return self.selector.markup()
 
