@@ -33,6 +33,21 @@ class Selector:
     def __repr__(self) -> str:
         return f"Selector(tag={repr(self._tag)}, id={repr(self._id)}, classes={repr(self._classes)})"
 
+    def markup(self) -> str:
+        parts = []
+
+        if self._tag:
+            parts.append(self._tag)
+
+        if self._id:
+            parts.append(f'id="{self._id}"')
+
+        if self._classes:
+            classes = ' '.join(self._classes)
+            parts.append(f'class="{classes}"')
+
+        return " ".join(parts)
+
     @classmethod
     def from_css(cls, selector:str) -> "Selector":
         match = re.match(SELECTOR, selector)

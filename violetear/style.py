@@ -1,21 +1,13 @@
 from .selector import Selector
 from .units import Unit, pc, pt, px
 from .color import Color
+import textwrap
 
 
 class Style:
-    def __init__(self, *class_name: str, id: str = None, selector=None, parent:"Style" = None) -> None:
-        if selector is not None:
-            self._selector = selector
-        else:
-            self._selector = Selector(id, *class_name)
-
+    def __init__(self, selector:Selector=None) -> None:
+        self._selector = selector
         self._rules = {}
-
-        if parent:
-            self._parent = parent
-        else:
-            self._parent = self
 
     def rule(self, attr: str, value) -> "Style":
         self._rules[attr] = value
@@ -77,26 +69,20 @@ class Style:
     def height(self, value):
         return self.rule("height", Unit.infer(value))
 
-    def css(self, indent: int = 0) -> str:
-        rules = "\n".join(
-            f"{' '*(indent+1)*4}{attr}: {value};" for attr, value in self._rules.items()
+    def css(self, inline:bool=False) -> str:
+        separator = "" if inline else "\n"
+
+        rules = separator.join(
+            f"{attr}: {value};" for attr, value in self._rules.items()
         )
 
-        return f"{' '*indent*4}{self._selector.css()} {{\n{rules}\n{' '*indent*4}}}\n"
+        if inline:
+            return rules
 
-    def render(self, dynamic, fp, indent: int = 0, used=None):
-        if dynamic and not self._parent in used:
-            return
+        return f"{self._selector.css()} {{\n{textwrap.indent(rules, 4*' ')}\n}}"
 
-        fp.write(self.css(indent=indent))
+    def markup(self) -> str:
+        return self._selector.markup()
 
-    def inline(self) -> str:
-        rules = " ".join(f"{attr}: {value};" for attr, value in self._rules.items())
-        return f'style="{rules}"'
-
-    def classes(self) -> str:
-        classname = " ".join(self._selector._class_name)
-        return f'class="{classname}"'
-
-    def __str__(self) -> str:
-        return self.classes()
+    def __str__(self):
+        return self.markup()
