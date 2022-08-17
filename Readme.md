@@ -109,6 +109,10 @@ Likewise, if you're feeling adventurous, go ahead and add some fluid methods to 
 - Cover all basic CSS rules.
 - Docs!
 
+### Main
+
+- Support for `text-align: center`
+
 ### v0.4
 
 - Support for custom states with the `on` method.
