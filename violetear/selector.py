@@ -11,15 +11,26 @@ SELECTOR = rf"(?P<tag>{TAG})?(?P<id>{ID})?(?P<classes>({CLASSES})*)(?P<state>{ST
 
 class Selector:
     def __init__(
-        self, tag: str = None, id: str = None, classes: str = (), state: str = None
+        self,
+        tag: str = None,
+        id: str = None,
+        classes: str = (),
+        state: str = None,
+        *,
+        parent: "Selector" = None,
     ) -> None:
         self._id = id
         self._tag = tag
         self._classes = classes
         self._state = state
+        self._parent = parent
 
     def css(self) -> str:
         parts = []
+
+        if self._parent:
+            parts.append(self._parent.css())
+            parts.append(">")
 
         if self._tag:
             parts.append(self._tag)
@@ -36,7 +47,15 @@ class Selector:
         return "".join(parts)
 
     def on(self, state) -> "Selector":
-        return Selector(self._tag, self._id, self._classes, state)
+        return Selector(self._tag, self._id, self._classes, state, parent=self._parent)
+
+    def children(self, selector: str, *, nth: int = None) -> "Selector":
+        s = Selector.from_css(selector, parent=self)
+
+        if nth is not None:
+            s = s.on(f"nth-child({nth})")
+
+        return s
 
     def __str__(self) -> str:
         return self.css()
@@ -57,7 +76,7 @@ class Selector:
         return " ".join(parts)
 
     @classmethod
-    def from_css(cls, selector: str) -> "Selector":
+    def from_css(cls, selector: str, *, parent: "Selector" = None) -> "Selector":
         match = re.match(SELECTOR, selector)
 
         if not match:
@@ -81,4 +100,4 @@ class Selector:
         if state:
             state = state[1:]
 
-        return Selector(tag, id, classes, state)
+        return Selector(tag, id, classes, state, parent=parent)

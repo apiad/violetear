@@ -6,6 +6,9 @@ import textwrap
 
 class Style:
     def __init__(self, selector: Selector = None, *, parent: "Style" = None) -> None:
+        if isinstance(selector, str):
+            selector = Selector.from_css(selector)
+
         self.selector = selector
         self._rules = {}
         self._parent = parent
@@ -95,6 +98,10 @@ class Style:
 
         return self
 
+    def flexbox(self) -> "Style":
+        self.rule("display", "flex")
+        return self
+
     def absolute(
         self,
         *,
@@ -169,6 +176,11 @@ class Style:
 
     def on(self, state) -> "Style":
         style = Style(self.selector.on(state))
+        self._children.append(style)
+        return style
+
+    def children(self, selector: str = None, *, nth: int = None) -> "Style":
+        style = Style(self.selector.children(selector, nth=nth))
         self._children.append(style)
         return style
 

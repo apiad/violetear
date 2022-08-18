@@ -217,4 +217,52 @@ To apply these styles, we'll need to modify our `example.html` source to put the
 3. Paragraph content is hidden for simplicity.
 4. Paragraph content is hidden for simplicity.
 
-Now you can begin to appreciate the power of using something like `violetear` instead of plain CSS, or even CSS supersets like Sass or Less. Combining a few parameters and loops you can imagine how to create complex design systems with dozens of font sizes, styles, colors, etc.
+!!! note
+    Now you can begin to appreciate the power of using something like `violetear` instead of plain CSS, or even CSS supersets like Sass or Less. Combining a few parameters and loops you can imagine how to create complex design systems with dozens of font sizes, styles, colors, etc.
+
+    Furthermore, `violetear` is completely unopinionated. Do you want to style an existing HTML? Do you want to create a complete semantic design system like Bootstrap? Do you prefer a simple utility system like Tailwind? Since `violetear` is just a thin layer on top of CSS, it doesn't force you into any specific design philosophy. You can even mix and match different designs.
+
+## Playing with colors
+
+Now let's take a taste of `violetear`'s power to create expressive designs with minimum effort.
+We will create a color pallete and use it to style a row of `div`s.
+
+Firs the markup, add the following at the end of your `body` tag:
+
+```html title="example.html"
+<!-- (1) -->
+<body>
+    <!-- (2) -->
+    <div id="color-pallete">
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
+    </div>
+</body>
+```
+
+1. The rest of the HTML is hidden for simplicity.
+2. The rest of the HTML is hidden for simplicity.
+
+Back to our `styles.py` file, let's create a color pallete. The method `Color.pallete` works similarly to `Unit.scale`, but with colors. It accepts start and end colors (here, `red(0.3)` and `blue(0.7)`) and a number of steps, and it outputs a sequence of `Color` objects that equally distributed in color space (you can pass a `space` parameter, `"hsl"`, `"hsv"` or `"rgb"`):
+
+```python title="styles.py" hl_lines="3"
+# ... (1)
+
+pallete = Color.pallete(Color.red(0.3), Color.blue(0.7), 10)
+root = sheet.select("#color-pallete").flexbox()
+
+for i, color in enumerate(pallete):
+    root.children('div', nth=i+1).width(100).height(10).margin(0.1).background(color)
+
+sheet.render("styles.css")
+```
+
+1. The first part of the script is hidden for simplicity.
