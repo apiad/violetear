@@ -105,9 +105,14 @@ Likewise, if you're feeling adventurous, go ahead and add some fluid methods to 
 
 **Future**
 
-- Support for flexbox and grid layouts with helper methods
+- Support for grid layouts with helper methods
 - Cover all basic CSS rules.
 - Docs!
+
+**0.6**
+
+- Changed `Color.palette` method name
+- Support for `visibility: hidden`
 
 **0.5.1**
 
