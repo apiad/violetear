@@ -19,9 +19,9 @@ Using a general-purpose programming language to generate CSS we can obtain the b
 
 `violetear` is a bridge between Python and CSS. The simplest use case is a fluid API for generating CSS, full with code completion, documentation, and shorthand methods for the most common CSS rule sets.
 
-But it gets better quickly. Using `violetear` you can compose simpler styles into more complex ones, reusing common rules to reduce repetition to a minimum. This way you can build up complex layouts via composition.
+But it gets better quickly. Using `violetear` you can [compose simpler styles into more complex ones](https://apiad.net/violetear/guide/#simple-styling), reusing common rules to reduce repetition to a minimum. This way you can build up complex layouts via composition.
 
-You can manipulate magnitudes, such as colors and font-sizes, making it much easier to generate a specific color pallete, for instance. Since you have a full-featured programming language, you can leverage variables and methods to, for example, generate dynamic themes on-the-fly based on user-defined preferences.
+You can manipulate magnitudes, such as colors and font-sizes, making it much easier to [generate a specific color pallete](https://apiad.net/violetear/guide/#playing-with-colors), for instance. Since you have a full-featured programming language, you can leverage variables and methods to, for example, generate dynamic themes on-the-fly based on user-defined preferences.
 
 Finally, `violetear` can generate only the subset of styles used in any given template from a single Pyhon source. This means you can happily define all your styles globally and then deliver the minimum CSS subset necessary for each view.
 
@@ -90,6 +90,8 @@ Or you can automatically add the corresponding selector attributes to a given ta
 <!-- Becomes -->
 <h2 class="subtitle">Subtitle</h2>
 ```
+
+See the full user guide at <https://apiad.net/violetear/guide/>.
 
 ## Contribution
 
