@@ -3,7 +3,6 @@
 ![PyPI](https://img.shields.io/pypi/v/violetear)
 ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/violetear)
 ![PyPI - License](https://img.shields.io/pypi/l/violetear)
-
 [![Documentation](https://github.com/apiad/violetear/actions/workflows/pages.yml/badge.svg)](https://apiad.net/violetear)
 
 > A minimalist CSS generator
@@ -59,7 +58,7 @@ with sheet.media(min_width=768):
 And you can style specific states:
 
 ```python
-style.add(title.on("hover").font(weight="bolder"))
+title.on("hover").font(weight="bolder")
 ```
 
 Once your stylesheet is complete, you have a few options to deliver the styles to your frontend.
@@ -111,6 +110,8 @@ Likewise, if you're feeling adventurous, go ahead and add some fluid methods to 
 
 ### Main
 
+- Create scales of a given unit (e.g., font sizes)
+- Better support for sub-styles (e.g, `:hover`)
 - Support for `text-align: center`
 
 ### v0.4
