@@ -75,7 +75,7 @@ Now go ahead and add the style link to your HTML:
 
 Now we're ready to start adding some markup and styles.
 
-## Text markup
+## Simple styling
 
 Let's start by adding some content: a title, a subtitle, and some paragraphs (in latin!):
 
@@ -139,6 +139,8 @@ sheet = StyleSheet(normalize=True, base=base_style)
 ```
 
 1. Here are all the rules.
+
+## Creating styles programmatically
 
 Finally, let's change the all the fonts to some custom values. For this purpose we will first create a sequence of sizes using `Unit.scale`, and then programatically create the three styles with a simple `for` loop.
 
