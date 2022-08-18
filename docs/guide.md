@@ -124,7 +124,7 @@ Go ahead and run `styles.py` before reloading the page and you'll see that now w
 Let's break down that one-liner to see what's happening in slow-motion:
 
 - `sheet.select(...)` defines a new blank style. The `select` method receives a CSS selector, in this case, it's the simplest possible selector (`"body"`) but you can use id (e.g., `"#title"`), classes (e.g., `".btn"`) and states (e.g., `":hover"`). The method returns and instance of the `Style` class which lets you chain methods to add the actual CSS rules.
-- `.width(...)` defines the rules for the width of the element. In this case we're setting the width to 2/3 of the parent width, but with a maximum of 768 pixels. As a general idea, anytime you have a set of related attributes in CSS (e.g., `width`, `min-width`, and `max-width`), you'll have a single method in `violetear` that let's you set several of those related attributes in a single call.
+- `.width(...)` defines the rules for the width of the element. In this case we're setting the width to 80% of the parent width, but with a maximum of 768 pixels. As a general idea, anytime you have a set of related attributes in CSS (e.g., `width`, `min-width`, and `max-width`), you'll have a single method in `violetear` that let's you set several of those related attributes in a single call.
 - `.margin(...)` defines the overall margin (`auto`) plus a specific value for the top margin of 50 pixels. All methods in `violetear` that take numerical units can receive an instance of the `Unit` class, which can represent pixels, percentages, em, rem, points, etc. For simplicity, plain ints and floats are converted to a sensible unit (e.g., floats are treated as percentages in the case of box geometry, but as rem in the case of font sizes). Later on we'll see how to use `Unit` explicitely.
 
 As a fine tweak, let's soften the colors a little bit. For this purpose, we can define custom styles for the tags`<h1>`. `<h2>` and `<p>`, but that would be kinda repetitive. So instead, we'll define a *base style* in the `StyleSheet` constructor that all styles will inherit. We will need to import `Style` and `Color` to create a base style, and rewrite our constructor call:
@@ -139,6 +139,8 @@ sheet = StyleSheet(normalize=True, base=base_style)
 ```
 
 1. Here are all the rules.
+
+`Color.gray(...)` defines a new color using a gray tone with a given luminosity, such that `0` is black and `1` is white. Similarly, you'll find `red`, `green` and `blue` methods to create colors for every luminosity value. More about colors follows [further down](#playing-with-colors) in this guide.
 
 ## Creating styles programmatically
 
