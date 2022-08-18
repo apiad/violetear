@@ -132,7 +132,7 @@ As a final tweak, let's soften the colors a little bit. For this purpose, we can
 
 from violetear import StyleSheet, Style, Color
 
-sheet = StyleSheet(normalize=True, base=Style().color(Color.gray(0.2)))
+sheet = StyleSheet(normalize=True, base=Style().color(Color.gray(0.3)))
 
 # ... here come the rules
 ```
