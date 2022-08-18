@@ -125,11 +125,29 @@ class Style:
 
         return self.rule("border-radius", Unit.infer(radius))
 
-    def width(self, value):
-        return self.rule("width", Unit.infer(value, on_float=pc))
+    def width(self, value=None, *, min=None, max=None):
+        if value is not None:
+            self.rule("width", Unit.infer(value, on_float=pc))
 
-    def height(self, value):
-        return self.rule("height", Unit.infer(value, on_float=pc))
+        if min is not None:
+            self.rule("min-width", Unit.infer(min, on_float=pc))
+
+        if max is not None:
+            self.rule("max-width", Unit.infer(max, on_float=pc))
+
+        return self
+
+    def height(self, value=None, *, min=None, max=None):
+        if value is not None:
+            self.rule("height", Unit.infer(value, on_float=pc))
+
+        if min is not None:
+            self.rule("min-height", Unit.infer(min, on_float=pc))
+
+        if max is not None:
+            self.rule("max-height", Unit.infer(max, on_float=pc))
+
+        return self
 
     def css(self, inline: bool = False) -> str:
         separator = "" if inline else "\n"
