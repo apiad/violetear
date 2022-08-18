@@ -3,7 +3,6 @@
 ![PyPI](https://img.shields.io/pypi/v/violetear)
 ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/violetear)
 ![PyPI - License](https://img.shields.io/pypi/l/violetear)
-
 [![Documentation](https://github.com/apiad/violetear/actions/workflows/pages.yml/badge.svg)](https://apiad.net/violetear)
 
 > A minimalist CSS generator
