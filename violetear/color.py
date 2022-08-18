@@ -63,13 +63,16 @@ class Color:
         return Color(255, 255, 255, 1).lit(lightness)
 
     @staticmethod
-    def pallete(start:"Color", end:"Color", steps:int, space="hls"):
+    def pallete(start: "Color", end: "Color", steps: int, space="hls"):
         from_space = getattr(Color, f"from_{space}")
         to_space = getattr(Color, f"to_{space}")
 
         start_values = to_space(start)
         end_values = to_space(end)
-        step_values = [list(Unit.scale(float, s, e, steps)) for s,e in zip(start_values, end_values)]
+        step_values = [
+            list(Unit.scale(float, s, e, steps))
+            for s, e in zip(start_values, end_values)
+        ]
 
         for tuple in zip(*step_values):
             yield from_space(*tuple)

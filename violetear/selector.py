@@ -76,7 +76,7 @@ class Selector:
         return " ".join(parts)
 
     @classmethod
-    def from_css(cls, selector: str, *, parent: "Selector" = None) -> "Selector":
+    def from_css(cls, selector: str = "*", *, parent: "Selector" = None) -> "Selector":
         match = re.match(SELECTOR, selector)
 
         if not match:

@@ -217,7 +217,8 @@ To apply these styles, we'll need to modify our `example.html` source to put the
 3. Paragraph content is hidden for simplicity.
 4. Paragraph content is hidden for simplicity.
 
-!!! note
+!!! tip "More than just CSS"
+
     Now you can begin to appreciate the power of using something like `violetear` instead of plain CSS, or even CSS supersets like Sass or Less. Combining a few parameters and loops you can imagine how to create complex design systems with dozens of font sizes, styles, colors, etc.
 
     Furthermore, `violetear` is completely unopinionated. Do you want to style an existing HTML? Do you want to create a complete semantic design system like Bootstrap? Do you prefer a simple utility system like Tailwind? Since `violetear` is just a thin layer on top of CSS, it doesn't force you into any specific design philosophy. You can even mix and match different designs.
@@ -260,9 +261,49 @@ pallete = Color.pallete(Color.red(0.3), Color.blue(0.7), 10)
 root = sheet.select("#color-pallete").flexbox()
 
 for i, color in enumerate(pallete):
-    root.children('div', nth=i+1).width(100).height(10).margin(0.1).background(color)
+    root.children('div', nth=i+1).width(1.0).height(10).margin(0.1).background(color)
 
 sheet.render("styles.css")
 ```
 
 1. The first part of the script is hidden for simplicity.
+
+Next, we select the container `div` with id `color-pallete` and apply a simple *flexbox* style. This causes that all children `div`s are automatically layout in row. More on the flexbox and other layout options [later on in this guide](#layout-options).
+
+```python title="styles.py" hl_lines="4"
+# ... (1)
+
+pallete = Color.pallete(Color.red(0.3), Color.blue(0.7), 10)
+root = sheet.select("#color-pallete").flexbox()
+
+for i, color in enumerate(pallete):
+    root.children('div', nth=i+1).width(1.0).height(10).margin(0.1).background(color)
+
+sheet.render("styles.css")
+```
+
+1. The first part of the script is hidden for simplicity.
+
+And finally, we iteratively style each of the children `div`s with `.children('div', nth=i+1)`.
+This method creates and returns a blank style for the selected child(ren) to which you can chain additional styling methods.
+Since these `div`s are already layout as flex items, we just need to give them an appropiate width (100% in this case) and height (25 pixels), a minimum margin (`0.1 rem`) and apply one of the colors of the scale.
+
+```python title="styles.py" hl_lines="6 7"
+# ... (1)
+
+pallete = Color.pallete(Color.red(0.3), Color.blue(0.7), 10)
+root = sheet.select("#color-pallete").flexbox()
+
+for i, color in enumerate(pallete):
+    root.children('div', nth=i+1).width(1.0).height(10).margin(0.1).background(color).rounded()
+
+sheet.render("styles.css")
+```
+
+1. The first part of the script is hidden for simplicity.
+
+!!! tip "Choose your own style"
+    This is yet another example of `violetear`'s unopinionated philosophy. Here we are styling children by the `:nth-child()` selector instead of having to explicitely define classes in the HTML.
+    Whether you prefer explicit or implicit is up to your design philosophy, `violetear` will help you either way.
+
+## Layout options

@@ -12,6 +12,13 @@ pallete = Color.pallete(Color.red(0.3), Color.blue(0.7), 10)
 root = sheet.select("#color-pallete").flexbox()
 
 for i, color in enumerate(pallete):
-    root.children('div', nth=i+1).width(100).height(10).margin(0.1).background(color)
+    root.children("div", nth=i + 1).width(1.0).height(10).margin(0.1).background(
+        color
+    ).rounded()
+
+gallery = sheet.select("#gallery").flexbox(wrap=True)
+gallery.children("div").flex(1).width(min=100, max=1.0).height(100).background(
+    Color.gray(0.9)
+).margin(0.1)
 
 sheet.render("styles.css")

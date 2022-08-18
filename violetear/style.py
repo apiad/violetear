@@ -98,8 +98,31 @@ class Style:
 
         return self
 
-    def flexbox(self) -> "Style":
+    def flexbox(
+        self, direction: str = "row", *, wrap: bool = False, reverse: bool = False
+    ) -> "Style":
         self.rule("display", "flex")
+
+        if reverse:
+            direction += "-reverse"
+
+        self.rule("flex-direction", direction)
+
+        if wrap:
+            self.rule("flex-wrap", "wrap")
+
+        return self
+
+    def flex(self, grow: float = None, shrink: float = None, basis: int = None):
+        if grow is not None:
+            self.rule("flex-grow", float(grow))
+
+        if shrink is not None:
+            self.rule("flex-shrink", float(shrink))
+
+        if basis is not None:
+            self.rule("flex-basis", Unit.infer(basis, on_float=pc))
+
         return self
 
     def absolute(
@@ -179,7 +202,7 @@ class Style:
         self._children.append(style)
         return style
 
-    def children(self, selector: str = None, *, nth: int = None) -> "Style":
+    def children(self, selector: str = "*", *, nth: int = None) -> "Style":
         style = Style(self.selector.children(selector, nth=nth))
         self._children.append(style)
         return style
