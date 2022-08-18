@@ -108,8 +108,9 @@ Likewise, if you're feeling adventurous, go ahead and add some fluid methods to 
 - Cover all basic CSS rules.
 - Docs!
 
-### Main
+### v0.4.1
 
+- Add min/max width and height
 - Create scales of a given unit (e.g., font sizes)
 - Better support for sub-styles (e.g, `:hover`)
 - Support for `text-align: center`

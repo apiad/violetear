@@ -12,6 +12,7 @@ theme:
     - navigation.instant
     - toc.integrate
     - navigation.top
+    - content.code.annotate
   palette:
     - media: "(prefers-color-scheme: light)"
       scheme: default
@@ -40,7 +41,9 @@ extra:
 copyright: CC 4.0 BY-NC-SA &copy; 2022 - Alejandro Piad Morffis
 
 markdown_extensions:
-  - codehilite
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.superfences
   - toc:
       permalink: True
   - admonition
