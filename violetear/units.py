@@ -1,17 +1,17 @@
-def pt(x: int):
+def px(x: int):
+    return Unit(x, "px")
+
+
+def pt(x: float):
     return Unit(x, "pt")
 
 
-def em(x: int):
+def em(x: float):
     return Unit(x, "em")
 
 
-def rem(x: int):
+def rem(x: float):
     return Unit(x, "rem")
-
-
-def px(x: int):
-    return Unit(x, "px")
 
 
 def pc(x: float):
@@ -34,3 +34,12 @@ class Unit:
             return on_float(x)
 
         return x
+
+    @staticmethod
+    def scale(unit, min_value, max_value, steps):
+        current = min_value
+        delta = (max_value - min_value) / (steps - 1)
+
+        for _ in range(steps):
+            yield unit(current)
+            current += delta

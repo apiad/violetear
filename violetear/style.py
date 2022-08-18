@@ -8,7 +8,8 @@ class Style:
     def __init__(self, selector: Selector = None, *, parent: "Style" = None) -> None:
         self.selector = selector
         self._rules = {}
-        self.parent = parent
+        self._parent = parent
+        self._children = []
 
     def rule(self, attr: str, value) -> "Style":
         self._rules[attr] = value
@@ -149,7 +150,9 @@ class Style:
         return self.selector.markup()
 
     def on(self, state) -> "Style":
-        return Style(self.selector.on(state))
+        style = Style(self.selector.on(state))
+        self._children.append(style)
+        return style
 
     def __str__(self):
         return self.markup()

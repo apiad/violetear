@@ -2,9 +2,7 @@ from .style import Style
 
 
 class MediaQuery:
-    def __init__(
-        self, sheet, min_width: int = None, max_width: int = None
-    ) -> None:
+    def __init__(self, sheet, min_width: int = None, max_width: int = None) -> None:
         super().__init__()
 
         self._sheet = sheet

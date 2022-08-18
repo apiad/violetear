@@ -8,8 +8,11 @@ CLASSES = rf"\.{TOKEN}"
 STATE = rf":{TOKEN}"
 SELECTOR = rf"(?P<tag>{TAG})?(?P<id>{ID})?(?P<classes>({CLASSES})*)(?P<state>{STATE})?"
 
+
 class Selector:
-    def __init__(self, tag: str = None, id: str = None, classes: str = (), state:str=None) -> None:
+    def __init__(
+        self, tag: str = None, id: str = None, classes: str = (), state: str = None
+    ) -> None:
         self._id = id
         self._tag = tag
         self._classes = classes
@@ -44,20 +47,17 @@ class Selector:
     def markup(self) -> str:
         parts = []
 
-        if self._tag:
-            parts.append(self._tag)
-
         if self._id:
             parts.append(f'id="{self._id}"')
 
         if self._classes:
-            classes = ' '.join(self._classes)
+            classes = " ".join(self._classes)
             parts.append(f'class="{classes}"')
 
         return " ".join(parts)
 
     @classmethod
-    def from_css(cls, selector:str) -> "Selector":
+    def from_css(cls, selector: str) -> "Selector":
         match = re.match(SELECTOR, selector)
 
         if not match:
