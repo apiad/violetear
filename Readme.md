@@ -104,9 +104,13 @@ Likewise, if you're feeling adventurous, go ahead and add some fluid methods to 
 ### Future
 
 - Support for flexbox and grid layouts with helper methods
-- Color palletes
 - Cover all basic CSS rules.
 - Docs!
+
+### v0.5
+
+- Support for color palletes
+- Basic flexbox layout
 
 ### v0.4.1
 
