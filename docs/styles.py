@@ -16,8 +16,8 @@ for i, color in enumerate(pallete):
         color
     ).rounded()
 
-gallery = sheet.select("#gallery").flexbox(wrap=True)
-gallery.children("div").flex(1).width(min=100, max=1.0).height(100).background(
+gallery = sheet.select("#gallery").flexbox(wrap=True, justify="space-around")
+gallery.children("div").flex(1).width(min=100, max=200).height(100).background(
     Color.gray(0.9)
 ).margin(0.1)
 

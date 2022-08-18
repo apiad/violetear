@@ -99,7 +99,13 @@ class Style:
         return self
 
     def flexbox(
-        self, direction: str = "row", *, wrap: bool = False, reverse: bool = False
+        self,
+        direction: str = "row",
+        *,
+        wrap: bool = False,
+        reverse: bool = False,
+        align: str = None,
+        justify: str = None,
     ) -> "Style":
         self.rule("display", "flex")
 
@@ -111,9 +117,20 @@ class Style:
         if wrap:
             self.rule("flex-wrap", "wrap")
 
+        if align is not None:
+            self.rule("align-items", align)
+
+        if justify is not None:
+            self.rule("justify-content", justify)
+
         return self
 
-    def flex(self, grow: float = None, shrink: float = None, basis: int = None):
+    def flex(
+        self,
+        grow: float = None,
+        shrink: float = None,
+        basis: int = None,
+    ):
         if grow is not None:
             self.rule("flex-grow", float(grow))
 

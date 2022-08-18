@@ -307,3 +307,54 @@ sheet.render("styles.css")
     Whether you prefer explicit or implicit is up to your design philosophy, `violetear` will help you either way.
 
 ## Layout options
+
+The previous section showed you a glimpse of the `.flexbox()` layout method. Let's explore it's options. Start by adding a bunch of `div`s to play with:
+
+```html title="example.html"
+<!-- (1) -->
+<body>
+    <!-- (2) -->
+    <div id="gallery">
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
+    </div>
+</body>
+```
+
+1. The rest of the HTML is hidden for simplicity.
+2. The rest of the HTML is hidden for simplicity.
+
+First we style the `div#gallery` with a flexbox style with item wraping. The `.flexbox()` method configures the flexbox container, allowing to set the direction, wrap, reverse, alignment and justification of items.
+
+```python title="styles.py" hl_lines="3"
+# ... (1)
+
+gallery = sheet.select("#gallery").flexbox(wrap=True, justify="space-around")
+gallery.children("div").flex(1).width(min=100, max=200).height(100).background(
+    Color.gray(0.9)
+).margin(0.1)
+
+sheet.render("styles.css")
+```
+
+1. The first part of the script is hidden for simplicity.
+
+Next we style the children, setting the minimum and maximum width to 100 and 200 pixels respectively, and a light gray color to make them easier to distinguish. The most important method is `.flex()` which configures the flex items. The first parameter is the grow factor. You can also configure the shrink factor and the initial basis.
+
+```python title="styles.py" hl_lines="4 5 6"
+# ... (1)
+
+gallery = sheet.select("#gallery").flexbox(wrap=True, justify="space-around")
+gallery.children("div").flex(1).width(min=100, max=200).height(100).background(
+    Color.gray(0.9)
+).margin(0.1)
+
+sheet.render("styles.css")
+```
+
+1. The first part of the script is hidden for simplicity.
+
+Try resizing the browser window to check the effect.

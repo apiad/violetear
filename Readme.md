@@ -109,6 +109,10 @@ Likewise, if you're feeling adventurous, go ahead and add some fluid methods to 
 - Cover all basic CSS rules.
 - Docs!
 
+### 0.5.1
+
+- Improved support for flexbox
+
 ### v0.5
 
 - Support for color palletes
