@@ -59,12 +59,6 @@ class Style:
     def justify(self) -> "Style":
         return self.text(align="justify")
 
-    def rounded(self, radius: Unit = None):
-        if radius is None:
-            radius = 0.25
-
-        return self.rule("border-radius", Unit.infer(radius))
-
     # Color
 
     def color(
@@ -168,6 +162,12 @@ class Style:
 
         return self
 
+    def rounded(self, radius: Unit = None):
+        if radius is None:
+            radius = 0.25
+
+        return self.rule("border-radius", Unit.infer(radius))
+
     # Layout
 
     def flexbox(
@@ -214,15 +214,16 @@ class Style:
 
         return self
 
-    def absolute(
+    def position(
         self,
+        position: str,
         *,
         left: int = None,
         right: int = None,
         top: int = None,
         bottom: int = None,
     ) -> "Style":
-        self.rule("position", "absolute")
+        self.rule("position", position)
 
         if left is not None:
             self.rule("left", Unit.infer(left))
@@ -234,6 +235,26 @@ class Style:
             self.rule("bottom", Unit.infer(bottom))
 
         return self
+
+    def absolute(
+        self,
+        *,
+        left: int = None,
+        right: int = None,
+        top: int = None,
+        bottom: int = None,
+    ) -> "Style":
+        return self.position("absolute", left=left, right=right, top=top, bottom=bottom)
+
+    def relative(
+        self,
+        *,
+        left: int = None,
+        right: int = None,
+        top: int = None,
+        bottom: int = None,
+    ) -> "Style":
+        return self.position("relative", left=left, right=right, top=top, bottom=bottom)
 
     # Sub-styles
 
