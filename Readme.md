@@ -103,41 +103,41 @@ Likewise, if you're feeling adventurous, go ahead and add some fluid methods to 
 
 ## Roadmap
 
-### Future
+**Future**
 
 - Support for flexbox and grid layouts with helper methods
 - Cover all basic CSS rules.
 - Docs!
 
-### 0.5.1
+**0.5.1**
 
 - Improved support for flexbox
 
-### v0.5
+**v0.5**
 
 - Support for color palletes
 - Basic flexbox layout
 
-### v0.4.1
+**v0.4.1**
 
 - Add min/max width and height
 - Create scales of a given unit (e.g., font sizes)
 - Better support for sub-styles (e.g, `:hover`)
 - Support for `text-align: center`
 
-### v0.4
+**v0.4**
 
 - Support for custom states with the `on` method.
 
-### v0.3
+**v0.3**
 
 - Support for media queries via context managers
 
-### v0.2
+**v0.2**
 
 - Refactored style API
 - Added support for basic CSS selectors
 
-### v0.1
+**v0.1**
 
 - Basic API
