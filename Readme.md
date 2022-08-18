@@ -17,7 +17,7 @@ Using a general-purpose programming language to generate CSS we can obtain the b
 
 ## What?
 
-`violetear` is a bridge between Python and CSS. The simplest use case is a fluid API for generating CSS, full with code completion, documentation, and shorthand methods for the most common CSS rule sets.
+`violetear` is a bridge between Python and CSS. The simplest use case is a fluid API for generating CSS, full with code completion, documentation, and shorthand methods for the most common CSS rule sets, including [flexbox and grid layouts](https://apiad.net/violetear/guide/#layout-options).
 
 But it gets better quickly. Using `violetear` you can [compose simpler styles into more complex ones](https://apiad.net/violetear/guide/#simple-styling), reusing common rules to reduce repetition to a minimum. This way you can build up complex layouts via composition.
 
