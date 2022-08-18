@@ -163,6 +163,9 @@ class Style:
 
         return self
 
+    def hidden(self) -> "Style":
+        return self.rule("visibility", "hidden")
+
     def center(self) -> "Style":
         return self.rule("text-align", "center")
 

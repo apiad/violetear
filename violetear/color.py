@@ -63,7 +63,7 @@ class Color:
         return Color(255, 255, 255, 1).lit(lightness)
 
     @staticmethod
-    def pallete(start: "Color", end: "Color", steps: int, space="hls"):
+    def palette(start: "Color", end: "Color", steps: int, space="hls"):
         from_space = getattr(Color, f"from_{space}")
         to_space = getattr(Color, f"to_{space}")
 

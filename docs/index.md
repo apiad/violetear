@@ -21,7 +21,7 @@ Using a general-purpose programming language to generate CSS we can obtain the b
 
 But it gets better quickly. Using `violetear` you can compose simpler styles into more complex ones, reusing common rules to reduce repetition to a minimum. This way you can build up complex layouts via composition.
 
-You can manipulate magnitudes, such as colors and font-sizes, making it much easier to generate a specific color pallete, for instance. Since you have a full-featured programming language, you can leverage variables and methods to, for example, generate dynamic themes on-the-fly based on user-defined preferences.
+You can manipulate magnitudes, such as colors and font-sizes, making it much easier to generate a specific color palette, for instance. Since you have a full-featured programming language, you can leverage variables and methods to, for example, generate dynamic themes on-the-fly based on user-defined preferences.
 
 Finally, `violetear` can generate only the subset of styles used in any given template from a single Pyhon source. This means you can happily define all your styles globally and then deliver the minimum CSS subset necessary for each view.
 
@@ -104,7 +104,7 @@ Likewise, if you're feeling adventurous, go ahead and add some fluid methods to 
 ### Future
 
 - Support for flexbox and grid layouts with helper methods
-- Color palletes
+- Color palettes
 - Cover all basic CSS rules.
 - Docs!
 

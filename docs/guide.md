@@ -226,7 +226,7 @@ To apply these styles, we'll need to modify our `example.html` source to put the
 ## Playing with colors
 
 Now let's take a taste of `violetear`'s power to create expressive designs with minimum effort.
-We will create a color pallete and use it to style a row of `div`s.
+We will create a color palette and use it to style a row of `div`s.
 
 Firs the markup, add the following at the end of your `body` tag:
 
@@ -234,7 +234,7 @@ Firs the markup, add the following at the end of your `body` tag:
 <!-- (1) -->
 <body>
     <!-- (2) -->
-    <div id="color-pallete">
+    <div id="color-palette">
         <div></div>
         <div></div>
         <div></div>
@@ -252,15 +252,15 @@ Firs the markup, add the following at the end of your `body` tag:
 1. The rest of the HTML is hidden for simplicity.
 2. The rest of the HTML is hidden for simplicity.
 
-Back to our `styles.py` file, let's create a color pallete. The method `Color.pallete` works similarly to `Unit.scale`, but with colors. It accepts start and end colors (here, `red(0.3)` and `blue(0.7)`) and a number of steps, and it outputs a sequence of `Color` objects that equally distributed in color space (you can pass a `space` parameter, `"hsl"`, `"hsv"` or `"rgb"`):
+Back to our `styles.py` file, let's create a color palette. The method `Color.palette` works similarly to `Unit.scale`, but with colors. It accepts start and end colors (here, `red(0.3)` and `blue(0.7)`) and a number of steps, and it outputs a sequence of `Color` objects that equally distributed in color space (you can pass a `space` parameter, `"hsl"`, `"hsv"` or `"rgb"`):
 
 ```python title="styles.py" hl_lines="3"
 # ... (1)
 
-pallete = Color.pallete(Color.red(0.3), Color.blue(0.7), 10)
-root = sheet.select("#color-pallete").flexbox()
+palette = Color.palette(Color.red(0.3), Color.blue(0.7), 10)
+root = sheet.select("#color-palette").flexbox()
 
-for i, color in enumerate(pallete):
+for i, color in enumerate(palette):
     root.children('div', nth=i+1).width(1.0).height(10).margin(0.1).background(color)
 
 sheet.render("styles.css")
@@ -268,15 +268,15 @@ sheet.render("styles.css")
 
 1. The first part of the script is hidden for simplicity.
 
-Next, we select the container `div` with id `color-pallete` and apply a simple *flexbox* style. This causes that all children `div`s are automatically layout in row. More on the flexbox and other layout options [later on in this guide](#layout-options).
+Next, we select the container `div` with id `color-palette` and apply a simple *flexbox* style. This causes that all children `div`s are automatically layout in row. More on the flexbox and other layout options [later on in this guide](#layout-options).
 
 ```python title="styles.py" hl_lines="4"
 # ... (1)
 
-pallete = Color.pallete(Color.red(0.3), Color.blue(0.7), 10)
-root = sheet.select("#color-pallete").flexbox()
+palette = Color.palette(Color.red(0.3), Color.blue(0.7), 10)
+root = sheet.select("#color-palette").flexbox()
 
-for i, color in enumerate(pallete):
+for i, color in enumerate(palette):
     root.children('div', nth=i+1).width(1.0).height(10).margin(0.1).background(color)
 
 sheet.render("styles.css")
@@ -291,10 +291,10 @@ Since these `div`s are already layout as flex items, we just need to give them a
 ```python title="styles.py" hl_lines="6 7"
 # ... (1)
 
-pallete = Color.pallete(Color.red(0.3), Color.blue(0.7), 10)
-root = sheet.select("#color-pallete").flexbox()
+palette = Color.palette(Color.red(0.3), Color.blue(0.7), 10)
+root = sheet.select("#color-palette").flexbox()
 
-for i, color in enumerate(pallete):
+for i, color in enumerate(palette):
     root.children('div', nth=i+1).width(1.0).height(10).margin(0.1).background(color).rounded()
 
 sheet.render("styles.css")
@@ -358,3 +358,96 @@ sheet.render("styles.css")
 1. The first part of the script is hidden for simplicity.
 
 Try resizing the browser window to check the effect.
+
+## Media queries
+
+Even with flexible and responsive layouts, sometimes you just need to do things differently in different screens. This is when media queries come in handy.
+To define styles conditioned on media queries, `violetear` provides a context manager API that allows configuring different media sets.
+
+```python title="example.py" hl_lines="3"
+# ... (1)
+
+with sheet.media(max_width=600):
+    sheet.select("body").width(1.0).padding(left=10, right=10)
+    sheet.redefine(root).flexbox("column").children("div").width(max=200)
+    sheet.redefine(gallery).hidden()
+
+sheet.render("styles.css")
+```
+
+1. The first part of the script is hidden for simplicity.
+
+When inside the context manager scope, `.select(...)` creates styles that are conditioned to a given media query.
+Hence, you can override an existing style simply by using the same selector and applying only the style that changes.
+In this case, we want the body to extend to the full width (minus some padding) when the screen is small enough.
+
+
+```python title="example.py" hl_lines="4"
+# ... (1)
+
+with sheet.media(max_width=600):
+    sheet.select("body").width(1.0).padding(left=10, right=10)
+    sheet.redefine(root).flexbox("column").children("div").width(max=200)
+    sheet.redefine(gallery).hidden()
+
+sheet.render("styles.css")
+```
+
+1. The first part of the script is hidden for simplicity.
+
+However, since writing the same selectors isn't very DRY, you can use the `.redefine()` method to copy the selector from an existing style. This way, if your markup changes, and thus the selectors, you only need to change them in one place, the first time you define them.
+
+Here we change the palette flexbox direction to column-wise instead of row-wise, and immediately reset the children width. Afterwards, we hide the `#gallery` element altogether. Try resizing the browser to less than 600 pixels wide to see the effect.
+
+```python title="example.py" hl_lines="5 6"
+# ... (1)
+
+with sheet.media(max_width=600):
+    sheet.select("body").width(1.0).padding(left=10, right=10)
+    sheet.redefine(root).flexbox("column").children("div").width(max=200)
+    sheet.redefine(gallery).hidden()
+
+sheet.render("styles.css")
+```
+
+1. The first part of the script is hidden for simplicity.
+
+After running the script, check out the `style.css` file to confirm that our media query is indeed defined as we expected:
+
+```css title="styles.css"
+/* (1) */
+
+@media (max-width: 600px){
+    body {
+        color: rgba(76,76,76,1);
+        width: 100.0%;
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+
+    #color-palette {
+        display: flex;
+        flex-direction: column;
+    }
+
+    #color-palette>div {
+        max-width: 200px;
+    }
+
+    #gallery {
+        visibility: hidden;
+    }
+
+}
+```
+
+1. The rest of the CSS file is omited for simplicity.
+
+!!! question "Mobile-first or Desktop-first?"
+
+    When designing your layout, an important question is whether to go mobile- or desktop-first.
+    In a mobile-first design, your main layout (without media queries) is optimized for a mobile screen,
+    and then you add media queries at different break points of bigger screens (using increasingly bigger values for `min_width`).
+    Alternatively, in a desktop-first design, your main layout is optimized for a normal screen and then you add media queries for smaller screens (with increasingly smaller values for `max_width`).
+
+    Like in all previous design decisions, `violetear` will not force you to choose either approach. You're free to design mobile-first, desktop-first, or use any combination of media queries that you desire.
