@@ -103,11 +103,12 @@ Likewise, if you're feeling adventurous, go ahead and add some fluid methods to 
 
 ## Roadmap
 
-**Future**
+**Desired features**
 
-- Support for grid layouts with helper methods
 - Cover all basic CSS rules.
 - Docs!
+- Support for grid layouts with helper methods
+- Support transitions with helper methods to create animation curves
 
 **0.6**
 
