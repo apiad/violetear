@@ -18,14 +18,54 @@ class Style:
         self._rules[attr] = value
         return self
 
-    def font(self, size: Unit = None, *, weight: str = None) -> "Style":
+    def apply(self, *others: "Style") -> "Style":
+        for other in others:
+            for attr, value in other._rules.items():
+                self.rule(attr, value)
+
+        return self
+
+    # Typography
+
+    def font(
+        self, size: Unit = None, *, weight: str = None, family: str = None
+    ) -> "Style":
         if size:
             self.rule("font-size", Unit.infer(size))
 
         if weight:
             self.rule("font-weight", weight)
 
+        if family:
+            self.rule("font-family", family)
+
         return self
+
+    def text(self, *, align: str = None) -> "Style":
+        if align is not None:
+            self.rule("text-align", align)
+
+        return self
+
+    def center(self) -> "Style":
+        return self.text(align="center")
+
+    def left(self) -> "Style":
+        return self.text(align="left")
+
+    def right(self) -> "Style":
+        return self.text(align="right")
+
+    def justify(self) -> "Style":
+        return self.text(align="justify")
+
+    def rounded(self, radius: Unit = None):
+        if radius is None:
+            radius = 0.25
+
+        return self.rule("border-radius", Unit.infer(radius))
+
+    # Color
 
     def color(
         self, color: Color = None, *, rgb=None, hsv=None, hls=None, alpha: float = None
@@ -59,14 +99,44 @@ class Style:
 
         return self.rule("background-color", color)
 
+    # Visibility
+
+    def visibility(self, visibility: str) -> "Style":
+        return self.rule("visibilty", visibility)
+
+    def visible(self) -> "Style":
+        return self.visibility("visible")
+
+    def hidden(self) -> "Style":
+        return self.visibility("hidden")
+
+    # Geometry
+
     def display(self, display: str) -> "Style":
         self.rule("display", display)
         return self
 
-    def apply(self, *others: "Style") -> "Style":
-        for other in others:
-            for attr, value in other._rules.items():
-                self.rule(attr, value)
+    def width(self, value=None, *, min=None, max=None):
+        if value is not None:
+            self.rule("width", Unit.infer(value, on_float=pc))
+
+        if min is not None:
+            self.rule("min-width", Unit.infer(min, on_float=pc))
+
+        if max is not None:
+            self.rule("max-width", Unit.infer(max, on_float=pc))
+
+        return self
+
+    def height(self, value=None, *, min=None, max=None):
+        if value is not None:
+            self.rule("height", Unit.infer(value, on_float=pc))
+
+        if min is not None:
+            self.rule("min-height", Unit.infer(min, on_float=pc))
+
+        if max is not None:
+            self.rule("max-height", Unit.infer(max, on_float=pc))
 
         return self
 
@@ -97,6 +167,8 @@ class Style:
             self.rule("padding-bottom", Unit.infer(bottom))
 
         return self
+
+    # Layout
 
     def flexbox(
         self,
@@ -163,41 +235,19 @@ class Style:
 
         return self
 
-    def hidden(self) -> "Style":
-        return self.rule("visibility", "hidden")
+    # Sub-styles
 
-    def center(self) -> "Style":
-        return self.rule("text-align", "center")
+    def on(self, state) -> "Style":
+        style = Style(self.selector.on(state))
+        self._children.append(style)
+        return style
 
-    def rounded(self, radius: Unit = None):
-        if radius is None:
-            radius = 0.25
+    def children(self, selector: str = "*", *, nth: int = None) -> "Style":
+        style = Style(self.selector.children(selector, nth=nth))
+        self._children.append(style)
+        return style
 
-        return self.rule("border-radius", Unit.infer(radius))
-
-    def width(self, value=None, *, min=None, max=None):
-        if value is not None:
-            self.rule("width", Unit.infer(value, on_float=pc))
-
-        if min is not None:
-            self.rule("min-width", Unit.infer(min, on_float=pc))
-
-        if max is not None:
-            self.rule("max-width", Unit.infer(max, on_float=pc))
-
-        return self
-
-    def height(self, value=None, *, min=None, max=None):
-        if value is not None:
-            self.rule("height", Unit.infer(value, on_float=pc))
-
-        if min is not None:
-            self.rule("min-height", Unit.infer(min, on_float=pc))
-
-        if max is not None:
-            self.rule("max-height", Unit.infer(max, on_float=pc))
-
-        return self
+    # Rendering methods
 
     def css(self, inline: bool = False) -> str:
         separator = "" if inline else "\n"
@@ -216,16 +266,6 @@ class Style:
 
     def markup(self) -> str:
         return self.selector.markup()
-
-    def on(self, state) -> "Style":
-        style = Style(self.selector.on(state))
-        self._children.append(style)
-        return style
-
-    def children(self, selector: str = "*", *, nth: int = None) -> "Style":
-        style = Style(self.selector.children(selector, nth=nth))
-        self._children.append(style)
-        return style
 
     def __str__(self):
         return self.markup()
