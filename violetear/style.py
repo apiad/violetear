@@ -53,7 +53,10 @@ class Style:
     # These methods allows manipulating rules manually.
 
     # #### `Style.rule`
-    # The `rule` method simply adds a rule to the internal dictionary.
+    # Adds a rule to the internal dictionary. It will be casted to `str` for uniformity.
+    # This implies that simple values like `int` and `float` are represented as is,
+    # but complex values like `Unit` and `Color` will be converted to their string representation
+    # using their corresponding `__str__` methods.
 
     def rule(self, attr: str, value) -> "Style":
         """Define a new CSS rule.
@@ -69,6 +72,15 @@ class Style:
     # #### `Style.apply`
     # The `apply` method enables style composition, by copying all the rules
     # in one or more input styles into this style.
+
+    # At some point we could implement this in a lazy manner, such that rules
+    # are only realyy copied when converting to CSS using the `css` method.
+    # However, at the moment I can't see an interesting use case for that functionality,
+    # since I seldom modify styles after they are created.
+    # Maybe this could be interesting for programmatically-created styles with lots of parameters, or for
+    # some kind of interactive application where the user creates a theme.
+    # However, in favour of YAGNI, I will refrain from implementing that functionality until
+    # proven necessary.
 
     def apply(self, *others: "Style") -> "Style":
         """Copy rules from other styles.

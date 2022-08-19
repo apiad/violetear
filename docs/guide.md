@@ -149,8 +149,9 @@ As a fine tweak, let's soften the colors a little bit. For this purpose, we can 
 
 ```python  title="styles.py"
 from violetear import StyleSheet, Style, Color
+from violetear.color import gray
 
-base_style = Style().color(Color.gray(0.3))
+base_style = Style().color(gray(0.3))
 sheet = StyleSheet(normalize=True, base=base_style)
 
 # ... (1)
@@ -158,7 +159,7 @@ sheet = StyleSheet(normalize=True, base=base_style)
 
 1. Here are all the rules.
 
-`Color.gray(...)` defines a new color using a gray tone with a given luminosity, such that `0` is black and `1` is white. Similarly, you'll find `red`, `green` and `blue` methods to create colors for every luminosity value. More about colors follows [further down](#playing-with-colors) in this guide.
+`gray(...)` defines a new color using a gray tone with a given luminosity, such that `0` is black and `1` is white. Similarly, you'll find `red`, `green` and `blue` methods to create colors for every luminosity value. More about colors follows [further down](#playing-with-colors) in this guide.
 
 ## Creating styles programmatically
 
