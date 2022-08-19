@@ -2,6 +2,8 @@ from typing import List, Tuple, Union
 from .selector import Selector
 from .units import GridSize, GridTemplate, Unit, fr, pc, minmax, repeat
 from .color import Color
+from .helpers import style_method
+
 import textwrap
 
 
@@ -28,6 +30,7 @@ class Style:
 
     # Typography
 
+    @style_method
     def font(
         self, size: Unit = None, *, weight: str = None, family: str = None
     ) -> "Style":
@@ -40,28 +43,30 @@ class Style:
         if family:
             self.rule("font-family", family)
 
-        return self
-
+    @style_method
     def text(self, *, align: str = None) -> "Style":
         if align is not None:
             self.rule("text-align", align)
 
-        return self
-
+    @style_method
     def center(self) -> "Style":
-        return self.text(align="center")
+        self.text(align="center")
 
+    @style_method
     def left(self) -> "Style":
-        return self.text(align="left")
+        self.text(align="left")
 
+    @style_method
     def right(self) -> "Style":
-        return self.text(align="right")
+        self.text(align="right")
 
+    @style_method
     def justify(self) -> "Style":
-        return self.text(align="justify")
+        self.text(align="justify")
 
     # Color
 
+    @style_method
     def color(
         self, color: Color = None, *, rgb=None, hsv=None, hls=None, alpha: float = None
     ) -> "Style":
@@ -76,8 +81,9 @@ class Style:
                 h, l, s = hls
                 color = Color.from_hls(h, l, s, alpha)
 
-        return self.rule("color", color)
+        self.rule("color", color)
 
+    @style_method
     def background(
         self, color: Color = None, *, rgb=None, hsv=None, hls=None, alpha: float = None
     ) -> "Style":
@@ -92,21 +98,25 @@ class Style:
                 h, l, s = hls
                 color = Color.from_hls(h, l, s, alpha)
 
-        return self.rule("background-color", color)
+        self.rule("background-color", color)
 
     # Visibility
 
+    @style_method
     def visibility(self, visibility: str) -> "Style":
-        return self.rule("visibility", visibility)
+        self.rule("visibility", visibility)
 
+    @style_method
     def visible(self) -> "Style":
-        return self.visibility("visible")
+        self.visibility("visible")
 
+    @style_method
     def hidden(self) -> "Style":
-        return self.visibility("hidden")
+        self.visibility("hidden")
 
     # Geometry
 
+    @style_method
     def width(self, value=None, *, min=None, max=None):
         if value is not None:
             self.rule("width", Unit.infer(value, on_float=pc))
@@ -117,8 +127,7 @@ class Style:
         if max is not None:
             self.rule("max-width", Unit.infer(max, on_float=pc))
 
-        return self
-
+    @style_method
     def height(self, value=None, *, min=None, max=None):
         if value is not None:
             self.rule("height", Unit.infer(value, on_float=pc))
@@ -129,8 +138,7 @@ class Style:
         if max is not None:
             self.rule("max-height", Unit.infer(max, on_float=pc))
 
-        return self
-
+    @style_method
     def margin(self, all=None, *, left=None, right=None, top=None, bottom=None):
         if all is not None:
             self.rule("margin", Unit.infer(all))
@@ -143,8 +151,7 @@ class Style:
         if bottom is not None:
             self.rule("margin-bottom", Unit.infer(bottom))
 
-        return self
-
+    @style_method
     def padding(self, all=None, *, left=None, right=None, top=None, bottom=None):
         if all is not None:
             self.rule("padding", Unit.infer(all))
@@ -157,20 +164,20 @@ class Style:
         if bottom is not None:
             self.rule("padding-bottom", Unit.infer(bottom))
 
-        return self
-
+    @style_method
     def rounded(self, radius: Unit = None):
         if radius is None:
             radius = 0.25
 
-        return self.rule("border-radius", Unit.infer(radius))
+        self.rule("border-radius", Unit.infer(radius))
 
     # Layout
 
+    @style_method
     def display(self, display: str) -> "Style":
         self.rule("display", display)
-        return self
 
+    @style_method
     def flexbox(
         self,
         direction: str = "row",
@@ -196,8 +203,7 @@ class Style:
         if justify is not None:
             self.rule("justify-content", justify)
 
-        return self
-
+    @style_method
     def flex(
         self,
         grow: float = None,
@@ -213,8 +219,7 @@ class Style:
         if basis is not None:
             self.rule("flex-basis", Unit.infer(basis, on_float=fr))
 
-        return self
-
+    @style_method
     def grid(
         self,
         *,
@@ -247,8 +252,7 @@ class Style:
 
         self.rule("gap", Unit.infer(gap, on_float=fr))
 
-        return self
-
+    @style_method
     def columns(
         self, count: int, min: GridSize = None, max: GridSize = None, *, gap: Unit = 0
     ):
@@ -258,8 +262,9 @@ class Style:
         if max is None:
             max = fr(1)
 
-        return self.grid(columns=repeat(count, minmax(min, max)), gap=gap)
+        self.grid(columns=repeat(count, minmax(min, max)), gap=gap)
 
+    @style_method
     def rows(
         self, count: int, min: GridSize = None, max: GridSize = None, *, gap: Unit = 0
     ):
@@ -269,8 +274,9 @@ class Style:
         if max is None:
             max = fr(1)
 
-        return self.grid(rows=repeat(count, minmax(min, max)), gap=gap)
+        self.grid(rows=repeat(count, minmax(min, max)), gap=gap)
 
+    @style_method
     def place(
         self,
         columns: Union[int, Tuple[int, int]] = None,
@@ -288,8 +294,7 @@ class Style:
 
             self.rule("grid-row", rows)
 
-        return self
-
+    @style_method
     def position(
         self,
         position: str,
@@ -310,8 +315,7 @@ class Style:
         if bottom is not None:
             self.rule("bottom", Unit.infer(bottom))
 
-        return self
-
+    @style_method
     def absolute(
         self,
         *,
@@ -320,8 +324,9 @@ class Style:
         top: int = None,
         bottom: int = None,
     ) -> "Style":
-        return self.position("absolute", left=left, right=right, top=top, bottom=bottom)
+        self.position("absolute", left=left, right=right, top=top, bottom=bottom)
 
+    @style_method
     def relative(
         self,
         *,
@@ -330,7 +335,7 @@ class Style:
         top: int = None,
         bottom: int = None,
     ) -> "Style":
-        return self.position("relative", left=left, right=right, top=top, bottom=bottom)
+        self.position("relative", left=left, right=right, top=top, bottom=bottom)
 
     # Sub-styles
 
