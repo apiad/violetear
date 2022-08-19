@@ -20,7 +20,7 @@ for i, color in enumerate(palette):
 
 gallery = sheet.select("#gallery").flexbox(wrap=True, justify="space-around")
 gallery.children("div").flex(1).width(min=100, max=200).height(100).background(
-    Color.gray(0.9)
+    gray(0.9)
 ).margin(0.1)
 
 grid = sheet.select("#gallery").grid(columns=3)
