@@ -107,9 +107,12 @@ Likewise, if you're feeling adventurous, go ahead and add some fluid methods to 
 
 - Cover all basic CSS rules.
 - Docs!
-- Support for grid layouts with helper methods
 - Support transitions with helper methods to create animation curves
 - Fully typed method signatures
+
+**0.7.0**
+
+- Support for grid layouts with helper methods
 
 **0.6**
 
