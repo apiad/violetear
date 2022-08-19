@@ -8,7 +8,18 @@ import textwrap
 
 
 class Style:
-    def __init__(self, selector: Selector = None, *, parent: "Style" = None) -> None:
+    def __init__(
+        self, selector: Union[str, Selector] = None, *, parent: "Style" = None
+    ) -> None:
+        """Create a new instance of `Style`.
+
+        **Parameters**:
+
+        - `selector`: The selector to which this style applies. Can be `None`, or a string,
+                      in which case it is parsed with `Selector.from_css`.
+        - `parent`: An optional parent style (e.g., if this is an state or children style) so
+                    that when checking which styles are used, the parent can be referenced.
+        """
         if isinstance(selector, str):
             selector = Selector.from_css(selector)
 
