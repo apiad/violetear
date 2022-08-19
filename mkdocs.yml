@@ -59,8 +59,11 @@ nav:
   - Examples:
     - Color spaces: examples/color-spaces.md
   - API:
-    - Style Sheets: stylesheet.md
-    - Styles: style.md
-    - Selectors: selector.md
-    - Colors: color.md
-    - Units: units.md
+    - violetear: api/violetear.__init__.md
+    - Style Sheets: api/violetear.stylesheet.md
+    - Styles: api/violetear.style.md
+    - Selectors: api/violetear.selector.md
+    - Colors: api/violetear.color.md
+    - Units: api/violetear.units.md
+    - Media: api/violetear.media.md
+    - Helpers: api/violetear.helpers.md

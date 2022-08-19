@@ -1,7 +1,6 @@
 inline: true
 output: docs/api
 sources:
-  index: Readme.md
   violetear.__init__: violetear/__init__.py
   violetear.color: violetear/color.py
   violetear.helpers: violetear/helpers.py

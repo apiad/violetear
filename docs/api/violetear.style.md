@@ -1,46 +1,71 @@
-"""This module defines the `Style` class.
-"""
+!!! note "Docstring"
+    """This module defines the `Style` class.
 
-# ## Top level imports
 
-# These are for typing our methods:
+## Top level imports
+
+These are for typing our methods:
+
+
+
+```python linenums="5"
 from typing import List, Tuple, Union
+```
 
-# These ones are internal to `violetear`:
+These ones are internal to `violetear`:
+
+
+
+```python linenums="7"
 from .selector import Selector
 from .units import GridSize, GridTemplate, Unit, fr, pc, minmax, repeat
 from .color import Color
 from .helpers import style_method
+```
 
-# And this one is for generating CSS:
+And this one is for generating CSS:
+
+
+
+```python linenums="12"
 import textwrap
+```
 
-# ## The `Style` class
+## The `Style` class
 
-# The `Style` class is the main concept in `violetear`.
-# It encapsulates the functionality to generate CSS rules.
-# In summary, a `Style` is defined by a CSS selector
-# (represented in the [`Selector`](ref:violetear.selector:Selector) class)
-# and a set of rules, internally implemented with dictionary that maps attributes to values.
+The `Style` class is the main concept in `violetear`.
+It encapsulates the functionality to generate CSS rules.
+In summary, a `Style` is defined by a CSS selector
+(represented in the [`Selector`](../violetear.selector/#ref:Selector) class)
+and a set of rules, internally implemented with dictionary that maps attributes to values.
 
-# The `Style` class provides a main [`rule`](ref:violetear.style:Style.rule) method to manually set any CSS rule.
-# However, to simplify usage, the most common CSS rules are encapsulated in fluent methods
-# that allow chained invocation to quickly build a complex style.
+The `Style` class provides a main [`rule`](../violetear.style/#ref:Style.rule) method to manually set any CSS rule.
+However, to simplify usage, the most common CSS rules are encapsulated in fluent methods
+that allow chained invocation to quickly build a complex style.
 
+<a name="ref:Style"></a>
 
+```python linenums="22"
 class Style:
     def __init__(
         self, selector: Union[str, Selector] = None, *, parent: "Style" = None
     ) -> None:
-        """Create a new instance of `Style`.
+```
 
-        **Parameters**:
+!!! note "Docstring"
+    """Create a new instance of `Style`.
+    
+    **Parameters**:
+    
+    - `selector`: The selector to which this style applies. Can be `None`, or a string,
+    in which case it is parsed with `Selector.from_css`.
+    - `parent`: An optional parent style (e.g., if this is an state or children style) so
+    that when checking which styles are used, the parent can be referenced.
 
-        - `selector`: The selector to which this style applies. Can be `None`, or a string,
-                      in which case it is parsed with `Selector.from_css`.
-        - `parent`: An optional parent style (e.g., if this is an state or children style) so
-                    that when checking which styles are used, the parent can be referenced.
-        """
+
+
+
+```python linenums="35"
         if isinstance(selector, str):
             selector = Selector.from_css(selector)
 
@@ -48,28 +73,40 @@ class Style:
         self._rules = {}
         self._parent = parent
         self._children = []
+```
 
-    # ### Basic rule manipulation
+### Basic rule manipulation
 
-    # These methods allows manipulating rules manually.
-    # The `rule` method simply adds a rule to the internal dictionary.
+These methods allows manipulating rules manually.
+The `rule` method simply adds a rule to the internal dictionary.
 
+
+
+```python linenums="45"
     def rule(self, attr: str, value) -> "Style":
         self._rules[attr] = str(value)
         return self
+```
 
-    # The `apply` method enables style composition, by copying all the rules
-    # in one or more input styles into this style.
+The `apply` method enables style composition, by copying all the rules
+in one or more input styles into this style.
 
+
+
+```python linenums="50"
     def apply(self, *others: "Style") -> "Style":
         for other in others:
             for attr, value in other._rules.items():
                 self.rule(attr, value)
 
         return self
+```
 
-    # ### Typography styles
+### Typography styles
 
+
+
+```python linenums="57"
     @style_method
     def font(
         self, size: Unit = None, *, weight: str = None, family: str = None
@@ -103,9 +140,13 @@ class Style:
     @style_method
     def justify(self) -> "Style":
         self.text(align="justify")
+```
 
-    # ### Color styles
+### Color styles
 
+
+
+```python linenums="91"
     @style_method
     def color(
         self, color: Color = None, *, rgb=None, hsv=None, hls=None, alpha: float = None
@@ -139,9 +180,13 @@ class Style:
                 color = Color.from_hls(h, l, s, alpha)
 
         self.rule("background-color", color)
+```
 
-    # ### Visibility styles
+### Visibility styles
 
+
+
+```python linenums="125"
     @style_method
     def visibility(self, visibility: str) -> "Style":
         self.rule("visibility", visibility)
@@ -153,9 +198,13 @@ class Style:
     @style_method
     def hidden(self) -> "Style":
         self.visibility("hidden")
+```
 
-    # ### Geometry styles
+### Geometry styles
 
+
+
+```python linenums="137"
     @style_method
     def width(self, value=None, *, min=None, max=None):
         if value is not None:
@@ -210,9 +259,13 @@ class Style:
             radius = 0.25
 
         self.rule("border-radius", Unit.infer(radius))
+```
 
-    # ### Layout styles
+### Layout styles
 
+
+
+```python linenums="192"
     @style_method
     def display(self, display: str) -> "Style":
         self.rule("display", display)
@@ -373,9 +426,13 @@ class Style:
         bottom: int = None,
     ) -> "Style":
         self.position("relative", left=left, right=right, top=top, bottom=bottom)
+```
 
-    # ### Sub-styles
+### Sub-styles
 
+
+
+```python linenums="353"
     def on(self, state) -> "Style":
         style = Style(self.selector.on(state))
         self._children.append(style)
@@ -385,9 +442,13 @@ class Style:
         style = Style(self.selector.children(selector, nth=nth))
         self._children.append(style)
         return style
+```
 
-    # ### Rendering methods
+### Rendering methods
 
+
+
+```python linenums="363"
     def css(self, inline: bool = False) -> str:
         separator = "" if inline else "\n"
 
@@ -408,3 +469,5 @@ class Style:
 
     def __str__(self):
         return self.markup()
+```
+

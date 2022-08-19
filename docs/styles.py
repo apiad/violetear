@@ -1,4 +1,5 @@
-from violetear import StyleSheet, Style, Color, Unit, rem
+from violetear import StyleSheet, Style, Color, Unit
+from violetear.units import rem
 
 base_style = Style().color(Color.gray(0.3))
 sheet = StyleSheet(normalize=True, base=base_style)
