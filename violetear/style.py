@@ -1,7 +1,7 @@
+# # Styles
+
 """This module defines the `Style` class.
 """
-
-# ## Top level imports
 
 # These are for typing our methods:
 from typing import List, Tuple, Union
@@ -50,7 +50,6 @@ class Style:
         self._children = []
 
     # ### Basic rule manipulation
-
     # These methods allows manipulating rules manually.
 
     # #### `Style.rule`
@@ -72,13 +71,25 @@ class Style:
     # in one or more input styles into this style.
 
     def apply(self, *others: "Style") -> "Style":
+        """Copy rules from other styles.
+
+        Rules are defined in order, so later styles will override former ones.
+
+        **Parameters**:
+
+        - `others`: A sequence of `Style` instances to copy their rules.
+        """
         for other in others:
             for attr, value in other._rules.items():
                 self.rule(attr, value)
 
         return self
 
-    # ### Typography styles
+    # ### Typographic styles
+    # These methods allow manipulating font and text properties.
+
+    # #### `Style.font`
+    # The `font` method
 
     @style_method
     def font(
@@ -93,28 +104,40 @@ class Style:
         if family:
             self.rule("font-family", family)
 
+    # #### `Style.text`
+
     @style_method
     def text(self, *, align: str = None) -> "Style":
         if align is not None:
             self.rule("text-align", align)
 
+    # #### `Style.center`
+
     @style_method
     def center(self) -> "Style":
         self.text(align="center")
+
+    # #### `Style.left`
 
     @style_method
     def left(self) -> "Style":
         self.text(align="left")
 
+    # #### `Style.right`
+
     @style_method
     def right(self) -> "Style":
         self.text(align="right")
+
+    # #### `Style.justify`
 
     @style_method
     def justify(self) -> "Style":
         self.text(align="justify")
 
     # ### Color styles
+
+    # #### `Style.color`
 
     @style_method
     def color(
@@ -132,6 +155,8 @@ class Style:
                 color = Color.from_hls(h, l, s, alpha)
 
         self.rule("color", color)
+
+    # #### `Style.background`
 
     @style_method
     def background(
@@ -152,19 +177,27 @@ class Style:
 
     # ### Visibility styles
 
+    # #### `Style.visibility`
+
     @style_method
     def visibility(self, visibility: str) -> "Style":
         self.rule("visibility", visibility)
 
+    # #### `Style.visible`
+
     @style_method
     def visible(self) -> "Style":
         self.visibility("visible")
+
+    # #### `Style.hidden`
 
     @style_method
     def hidden(self) -> "Style":
         self.visibility("hidden")
 
     # ### Geometry styles
+
+    # #### `Style.width`
 
     @style_method
     def width(self, value=None, *, min=None, max=None) -> "Style":
@@ -177,6 +210,8 @@ class Style:
         if max is not None:
             self.rule("max-width", Unit.infer(max, on_float=pc))
 
+    # #### `Style.height`
+
     @style_method
     def height(self, value=None, *, min=None, max=None) -> "Style":
         if value is not None:
@@ -187,6 +222,8 @@ class Style:
 
         if max is not None:
             self.rule("max-height", Unit.infer(max, on_float=pc))
+
+    # #### `Style.margin`
 
     @style_method
     def margin(self, all=None, *, left=None, right=None, top=None, bottom=None) -> "Style":
@@ -201,6 +238,8 @@ class Style:
         if bottom is not None:
             self.rule("margin-bottom", Unit.infer(bottom))
 
+    # #### `Style.padding`
+
     @style_method
     def padding(self, all=None, *, left=None, right=None, top=None, bottom=None) -> "Style":
         if all is not None:
@@ -214,6 +253,8 @@ class Style:
         if bottom is not None:
             self.rule("padding-bottom", Unit.infer(bottom))
 
+    # #### `Style.rounded`
+
     @style_method
     def rounded(self, radius: Unit = None) -> "Style":
         if radius is None:
@@ -223,9 +264,13 @@ class Style:
 
     # ### Layout styles
 
+    # #### `Style.display`
+
     @style_method
     def display(self, display: str) -> "Style":
         self.rule("display", display)
+
+    # #### `Style.flexbox`
 
     @style_method
     def flexbox(
@@ -253,6 +298,8 @@ class Style:
         if justify is not None:
             self.rule("justify-content", justify)
 
+    # #### `Style.flex`
+
     @style_method
     def flex(
         self, grow: float = None, shrink: float = None, basis: int = None,
@@ -265,6 +312,8 @@ class Style:
 
         if basis is not None:
             self.rule("flex-basis", Unit.infer(basis, on_float=fr))
+
+    # #### `Style.grid`
 
     @style_method
     def grid(
@@ -299,6 +348,8 @@ class Style:
 
         self.rule("gap", Unit.infer(gap, on_float=fr))
 
+    # #### `Style.columns`
+
     @style_method
     def columns(
         self, count: int, min: GridSize = None, max: GridSize = None, *, gap: Unit = 0
@@ -311,6 +362,8 @@ class Style:
 
         self.grid(columns=repeat(count, minmax(min, max)), gap=gap)
 
+    # #### `Style.rows`
+
     @style_method
     def rows(
         self, count: int, min: GridSize = None, max: GridSize = None, *, gap: Unit = 0
@@ -322,6 +375,8 @@ class Style:
             max = fr(1)
 
         self.grid(rows=repeat(count, minmax(min, max)), gap=gap)
+
+    # #### `Style.place`
 
     @style_method
     def place(
@@ -340,6 +395,8 @@ class Style:
                 rows = f"{rows[0]} / {rows[1]+1}"
 
             self.rule("grid-row", rows)
+
+    # #### `Style.position`
 
     @style_method
     def position(
@@ -362,6 +419,8 @@ class Style:
         if bottom is not None:
             self.rule("bottom", Unit.infer(bottom))
 
+    # #### `Style.absolute`
+
     @style_method
     def absolute(
         self,
@@ -372,6 +431,8 @@ class Style:
         bottom: int = None,
     ) -> "Style":
         self.position("absolute", left=left, right=right, top=top, bottom=bottom)
+
+    # #### `Style.relative`
 
     @style_method
     def relative(
@@ -386,10 +447,14 @@ class Style:
 
     # ### Sub-styles
 
+    # #### `Style.on`
+
     def on(self, state) -> "Style":
         style = Style(self.selector.on(state))
         self._children.append(style)
         return style
+
+    # #### `Style.children`
 
     def children(self, selector: str = "*", *, nth: int = None) -> "Style":
         style = Style(self.selector.children(selector, nth=nth))
@@ -397,6 +462,8 @@ class Style:
         return style
 
     # ### Rendering methods
+
+    # #### `Style.css`
 
     def css(self, inline: bool = False) -> str:
         separator = "" if inline else "\n"
@@ -410,11 +477,17 @@ class Style:
 
         return f"{self.selector.css()} {{\n{textwrap.indent(rules, 4*' ')}\n}}"
 
+    # #### `Style.inline`
+
     def inline(self) -> str:
         return f'style="{self.css(inline=True)}"'
 
+    # #### `Style.markup`
+
     def markup(self) -> str:
         return self.selector.markup()
+
+    # #### `Style.__str__`
 
     def __str__(self):
         return self.markup()
