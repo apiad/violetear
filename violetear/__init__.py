@@ -5,8 +5,21 @@ Using a fluent API, you can quickly build complex styles programmatically
 and compose them into a fully-fledged design system.
 """
 
-from .style import Style
+# This is the main module of `violetear`.
+# We'll import the main classes so they can be used directly.
+
+# The [`StyleSheet`](ref:violetear.stylesheet.StyleSheet) class
+# represents a collections of styles (think, a CSS file).
 from .stylesheet import StyleSheet
-from .units import Unit
-from .color import Color
+
+# The [`Style`](ref:violetear.style:Style) class represents a single style.
+from .style import Style
+
+# The [`Selector`](ref:violetear.selector:Selector) class representes a CSS selector.
 from .selector import Selector
+
+# The [`Unit`](ref:violetear.units:Unit) class represents a magnitude, whether pixels, points, etc.
+from .units import Unit
+
+# The [`Color`](ref:violetear.color:Color) class represents a CSS color.
+from .color import Color
