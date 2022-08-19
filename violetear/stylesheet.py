@@ -1,3 +1,9 @@
+# # Style Sheets
+
+"""This module defines the `StyleSheet` class, which encapsulates a collection of CSS styles
+and allows rendering stylesheets either as files or as strings to be injected inline.
+"""
+
 import io
 import datetime
 from pathlib import Path
@@ -6,6 +12,8 @@ import textwrap
 from .selector import Selector
 from .style import Style
 from .media import MediaQuery
+
+# ## The `StyleSheet` class
 
 
 class StyleSheet:
@@ -24,6 +32,8 @@ class StyleSheet:
             self._preamble = open(Path(__file__).parent / "normalize.css").read()
         else:
             self._preamble = None
+
+    # ### Rendering methods
 
     def render(self, fp=None, *, dynamic: bool = False):
         opened = False
@@ -60,6 +70,8 @@ class StyleSheet:
 
         return result
 
+    # These are just rendering helpers.
+
     def _write_preamble(self, fp, dynamic):
         fp.write("/* Made with violetear */\n")
 
@@ -81,6 +93,8 @@ class StyleSheet:
         for s in [style] + list(style._children):
             fp.write(textwrap.indent(s.css(), indent * " "))
             fp.write("\n\n")
+
+    # ### Manipulating styles
 
     def select(self, selector: str, *, name: str = None):
         if name is None:
@@ -119,14 +133,20 @@ class StyleSheet:
         self.add(style=style)
         return style
 
+    # ### Accessors
+
+    # These methods allow accesing styles with the `sheet["style"]` and `sheet.style` syntax.
+    # This is mostly relevant when using a template engine to inject the stylesheet into
+    # the template and render the styles inline.
+
     def __getitem__(self, key) -> Style:
         try:
             style = self._by_name[key]
             self._used.add(style)
             return style
-        except KeyError:
-            warn(f"Style {key} not defined")
-            raise
+        except KeyError:                      # This is necessary because template engines will
+            warn(f"Style {key} not defined")  # often silence `KeyError` exceptions and instead
+            raise                             # return `None`, so you at least see a warning.
 
     def __getattr__(self, key) -> Style:
         return self[key]
