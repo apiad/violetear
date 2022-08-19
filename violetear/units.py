@@ -1,3 +1,6 @@
+from typing import List, Union
+
+
 def px(x: int):
     return Unit(x, "px")
 
@@ -12,6 +15,10 @@ def em(x: float):
 
 def rem(x: float):
     return Unit(x, "rem")
+
+
+def fr(x: float):
+    return Unit(x, "fr")
 
 
 def pc(x: float):
@@ -43,3 +50,26 @@ class Unit:
         for _ in range(steps):
             yield unit(current)
             current += delta
+
+
+GridTemplate = Union[Unit, "repeat", "minmax"]
+GridSize = Union[Unit, "minmax"]
+
+
+class repeat:
+    def __init__(self, factor, *template: List[GridTemplate]) -> None:
+        self.factor = factor
+        self.template = template
+
+    def __str__(self) -> str:
+        template = " ".join(str(Unit.infer(u, on_float=fr)) for u in self.template)
+        return f"repeat({self.factor}, {template})"
+
+
+class minmax:
+    def __init__(self, min, max) -> None:
+        self.min = min
+        self.max = max
+
+    def __str__(self) -> str:
+        return f"minmax({self.min}, {self.max})"

@@ -1,5 +1,6 @@
+from typing import List, Tuple, Union
 from .selector import Selector
-from .units import Unit, pc, pt, px, em, rem
+from .units import GridSize, GridTemplate, Unit, fr, pc, minmax, repeat
 from .color import Color
 import textwrap
 
@@ -15,7 +16,7 @@ class Style:
         self._children = []
 
     def rule(self, attr: str, value) -> "Style":
-        self._rules[attr] = value
+        self._rules[attr] = str(value)
         return self
 
     def apply(self, *others: "Style") -> "Style":
@@ -96,7 +97,7 @@ class Style:
     # Visibility
 
     def visibility(self, visibility: str) -> "Style":
-        return self.rule("visibilty", visibility)
+        return self.rule("visibility", visibility)
 
     def visible(self) -> "Style":
         return self.visibility("visible")
@@ -105,10 +106,6 @@ class Style:
         return self.visibility("hidden")
 
     # Geometry
-
-    def display(self, display: str) -> "Style":
-        self.rule("display", display)
-        return self
 
     def width(self, value=None, *, min=None, max=None):
         if value is not None:
@@ -170,6 +167,10 @@ class Style:
 
     # Layout
 
+    def display(self, display: str) -> "Style":
+        self.rule("display", display)
+        return self
+
     def flexbox(
         self,
         direction: str = "row",
@@ -179,7 +180,7 @@ class Style:
         align: str = None,
         justify: str = None,
     ) -> "Style":
-        self.rule("display", "flex")
+        self.display("flex")
 
         if reverse:
             direction += "-reverse"
@@ -210,7 +211,82 @@ class Style:
             self.rule("flex-shrink", float(shrink))
 
         if basis is not None:
-            self.rule("flex-basis", Unit.infer(basis, on_float=pc))
+            self.rule("flex-basis", Unit.infer(basis, on_float=fr))
+
+        return self
+
+    def grid(
+        self,
+        *,
+        columns: Union[int, List[GridTemplate]] = None,
+        rows: Union[int, List[GridTemplate]] = None,
+        auto_columns: GridSize = None,
+        auto_rows: GridSize = None,
+        gap: Unit = 0,
+    ):
+        self.display("grid")
+
+        if columns is None and rows is None:
+            raise ValueError("Either columns or rows must be specified")
+
+        if isinstance(columns, int):
+            columns = repeat(columns, fr(1))
+
+        if isinstance(rows, int):
+            rows = repeat(rows, fr(1))
+
+        if columns is not None:
+            self.rule("grid-template-columns", columns)
+        elif auto_columns is not None:
+            self.rule("grid-auto-columns", auto_columns)
+
+        if rows is not None:
+            self.rule("grid-template-rows", rows)
+        elif auto_rows is not None:
+            self.rule("grid-auto-rows", auto_rows)
+
+        self.rule("gap", Unit.infer(gap, on_float=fr))
+
+        return self
+
+    def columns(
+        self, count: int, min: GridSize = None, max: GridSize = None, *, gap: Unit = 0
+    ):
+        if min is None:
+            min = fr(1)
+
+        if max is None:
+            max = fr(1)
+
+        return self.grid(columns=repeat(count, minmax(min, max)), gap=gap)
+
+    def rows(
+        self, count: int, min: GridSize = None, max: GridSize = None, *, gap: Unit = 0
+    ):
+        if min is None:
+            min = fr(1)
+
+        if max is None:
+            max = fr(1)
+
+        return self.grid(rows=repeat(count, minmax(min, max)), gap=gap)
+
+    def place(
+        self,
+        columns: Union[int, Tuple[int, int]] = None,
+        rows: Union[int, Tuple[int, int]] = None,
+    ):
+        if columns is not None:
+            if isinstance(columns, tuple):
+                columns = f"{columns[0]} / {columns[1]+1}"
+
+            self.rule("grid-column", columns)
+
+        if rows is not None:
+            if isinstance(rows, tuple):
+                rows = f"{rows[0]} / {rows[1]+1}"
+
+            self.rule("grid-row", rows)
 
         return self
 

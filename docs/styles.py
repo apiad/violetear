@@ -21,9 +21,12 @@ gallery.children("div").flex(1).width(min=100, max=200).height(100).background(
     Color.gray(0.9)
 ).margin(0.1)
 
+grid = sheet.select("#gallery").grid(columns=3)
+grid.children("div").width(max=1.0)
+grid.children("div", nth=7).place(columns=(1, 3))
+
 with sheet.media(max_width=600):
     sheet.select("body").width(1.0).padding(left=10, right=10)
     sheet.redefine(root).flexbox("column").children("div").width(max=200)
-    sheet.redefine(gallery).hidden()
 
 sheet.render("styles.css")

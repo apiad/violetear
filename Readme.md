@@ -109,6 +109,7 @@ Likewise, if you're feeling adventurous, go ahead and add some fluid methods to 
 - Docs!
 - Support for grid layouts with helper methods
 - Support transitions with helper methods to create animation curves
+- Fully typed method signatures
 
 **0.6**
 

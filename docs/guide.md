@@ -33,6 +33,8 @@ We'll start by creating a blank HTML file with a basic markup:
 
 Go ahead and paste that into a new file [`example.html`](example.html) and hit the save button!
 
+### Stylesheets
+
 Next, we'll create a new file [`styles.py`](styles.py) where we will define all our styles. Start by importing the `StyleSheet` class and creating an instance. We'll pass `normalize=True` to ask `violetear` to generate an initial set of CSS rules that normalize styles across modern browsers (taken from [modern-normalize](https://github.com/sindresorhus/modern-normalize)).
 
 ```python title="styles.py"
@@ -109,6 +111,8 @@ Let's start by adding some content: a title, a subtitle, and some paragraphs (in
 
 If you open the `example.html` file right you'll see it's just some unstyled text. So let's add some color.
 
+### Geometry
+
 First, let's make those borders narrower by constraining the width of the `body` tag:
 
 ```python title="styles.py"
@@ -126,6 +130,20 @@ Let's break down that one-liner to see what's happening in slow-motion:
 - `sheet.select(...)` defines a new blank style. The `select` method receives a CSS selector, in this case, it's the simplest possible selector (`"body"`) but you can use id (e.g., `"#title"`), classes (e.g., `".btn"`) and states (e.g., `":hover"`). The method returns and instance of the `Style` class which lets you chain methods to add the actual CSS rules.
 - `.width(...)` defines the rules for the width of the element. In this case we're setting the width to 80% of the parent width, but with a maximum of 768 pixels. As a general idea, anytime you have a set of related attributes in CSS (e.g., `width`, `min-width`, and `max-width`), you'll have a single method in `violetear` that let's you set several of those related attributes in a single call.
 - `.margin(...)` defines the overall margin (`auto`) plus a specific value for the top margin of 50 pixels. All methods in `violetear` that take numerical units can receive an instance of the `Unit` class, which can represent pixels, percentages, em, rem, points, etc. For simplicity, plain ints and floats are converted to a sensible unit (e.g., floats are treated as percentages in the case of box geometry, but as rem in the case of font sizes). Later on we'll see how to use `Unit` explicitely.
+
+!!! question "Why the big deal?"
+
+    It may seem that so far there's nothing to be gained from using `violetear` on top of pure CSS.
+    You have to basically write the same rules with the same values.
+    The big deal is (so far) that by using a programming language you already know, you can leverage all the tooling you already have to make your coding more productive.
+
+    I promise in the next few sections you'll see way more powerful features but, for now, even if you only use `violetear` to write all your CSS explicitly, there's something important to be gained.
+    Since related styles are grouped in a single method in `violetear`, and all methods are fully typed and documented, you have automatic CSS intellisense and linting.
+
+    And yes, maybe you can have that for pure CSS too with the right extensions, but for only for individual rules.
+    To understand how different rules play together to define a single styling concept (like borders), you have to read the documentation of all the `border-*` rules.
+
+### Base style
 
 As a fine tweak, let's soften the colors a little bit. For this purpose, we can define custom styles for the tags`<h1>`. `<h2>` and `<p>`, but that would be kinda repetitive. So instead, we'll define a *base style* in the `StyleSheet` constructor that all styles will inherit. We will need to import `Style` and `Color` to create a base style, and rewrite our constructor call:
 
@@ -221,7 +239,6 @@ To apply these styles, we'll need to modify our `example.html` source to put the
 
     Now you can begin to appreciate the power of using something like `violetear` instead of plain CSS, or even CSS supersets like Sass or Less. Combining a few parameters and loops you can imagine how to create complex design systems with dozens of font sizes, styles, colors, etc.
 
-    Furthermore, `violetear` is completely unopinionated. Do you want to style an existing HTML? Do you want to create a complete semantic design system like Bootstrap? Do you prefer a simple utility system like Tailwind? Since `violetear` is just a thin layer on top of CSS, it doesn't force you into any specific design philosophy. You can even mix and match different designs.
 
 ## Playing with colors
 
@@ -303,10 +320,14 @@ sheet.render("styles.css")
 1. The first part of the script is hidden for simplicity.
 
 !!! tip "Choose your own style"
+    As you may have noticed, `violetear` is completely unopinionated. Do you want to style an existing HTML? Do you want to create a complete semantic design system like Bootstrap? Do you prefer a simple utility system like Tailwind? Since `violetear` is just a thin layer on top of CSS, it doesn't force you into any specific design philosophy. You can even mix and match different styles.
+
     This is yet another example of `violetear`'s unopinionated philosophy. Here we are styling children by the `:nth-child()` selector instead of having to explicitely define classes in the HTML.
     Whether you prefer explicit or implicit is up to your design philosophy, `violetear` will help you either way.
 
 ## Layout options
+
+### Flexible layouts
 
 The previous section showed you a glimpse of the `.flexbox()` layout method. Let's explore it's options. Start by adding a bunch of `div`s to play with:
 
@@ -315,6 +336,8 @@ The previous section showed you a glimpse of the `.flexbox()` layout method. Let
 <body>
     <!-- (2) -->
     <div id="gallery">
+        <div></div>
+        <div></div>
         <div></div>
         <div></div>
         <div></div>
@@ -359,6 +382,49 @@ sheet.render("styles.css")
 
 Try resizing the browser window to check the effect.
 
+### Grid layouts
+
+Now let's instead apply a grid layout. Start by selecting the same `#gallery` element and applying `.grid()`. This method configures the grid layout, and it is very expressive. You can set a fixed number of columns and/or rows with different sizes or fractions, configure the automatically created columns or rows, and you can use the `repeat` and `minmax` patterns from the CSS grid specification. However, in its simplest form, you can just pass a number and it will create a fixed set of `1fr` columns or rows.
+
+```python title="styles.py" hl_lines="3"
+# ... (1)
+
+grid = sheet.select("#gallery").grid(columns=3)
+grid.children("div").width(max=1.0)
+grid.children("div", nth=7).place(columns=(1, 3))
+
+sheet.render("styles.css")
+```
+
+1. The first part of the script is hidden for simplicity.
+
+Next, we reset the children width to a maximum of `100%` to make them cover the whole columns.
+
+```python title="styles.py" hl_lines="4"
+# ... (1)
+
+grid = sheet.select("#gallery").grid(columns=3)
+grid.children("div").width(max=1.0)
+grid.children("div", nth=7).place(columns=(1, 3))
+
+sheet.render("styles.css")
+```
+
+1. The first part of the script is hidden for simplicity.
+
+And finally, we'll make the last child take up all three columns (contrary to the CSS specification, the end value is inclusive, which I find much more intuitive).
+
+```python title="styles.py" hl_lines="5"
+# ... (1)
+
+grid = sheet.select("#gallery").grid(columns=3)
+grid.children("div").width(max=1.0)
+grid.children("div", nth=7).place(columns=(1, 3))
+
+sheet.render("styles.css")
+```
+
+1. The first part of the script is hidden for simplicity.
 ## Media queries
 
 Even with flexible and responsive layouts, sometimes you just need to do things differently in different screens. This is when media queries come in handy.
@@ -370,7 +436,6 @@ To define styles conditioned on media queries, `violetear` provides a context ma
 with sheet.media(max_width=600):
     sheet.select("body").width(1.0).padding(left=10, right=10)
     sheet.redefine(root).flexbox("column").children("div").width(max=200)
-    sheet.redefine(gallery).hidden()
 
 sheet.render("styles.css")
 ```
@@ -388,7 +453,6 @@ In this case, we want the body to extend to the full width (minus some padding) 
 with sheet.media(max_width=600):
     sheet.select("body").width(1.0).padding(left=10, right=10)
     sheet.redefine(root).flexbox("column").children("div").width(max=200)
-    sheet.redefine(gallery).hidden()
 
 sheet.render("styles.css")
 ```
@@ -397,15 +461,14 @@ sheet.render("styles.css")
 
 However, since writing the same selectors isn't very DRY, you can use the `.redefine()` method to copy the selector from an existing style. This way, if your markup changes, and thus the selectors, you only need to change them in one place, the first time you define them.
 
-Here we change the palette flexbox direction to column-wise instead of row-wise, and immediately reset the children width. Afterwards, we hide the `#gallery` element altogether. Try resizing the browser to less than 600 pixels wide to see the effect.
+Here we change the palette flexbox direction to column-wise instead of row-wise, and immediately reset the children width. Try resizing the browser to less than 600 pixels wide to see the effect.
 
-```python title="example.py" hl_lines="5 6"
+```python title="example.py" hl_lines="5"
 # ... (1)
 
 with sheet.media(max_width=600):
     sheet.select("body").width(1.0).padding(left=10, right=10)
     sheet.redefine(root).flexbox("column").children("div").width(max=200)
-    sheet.redefine(gallery).hidden()
 
 sheet.render("styles.css")
 ```
