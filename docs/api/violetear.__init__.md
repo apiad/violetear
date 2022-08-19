@@ -1,5 +1,5 @@
-!!! note "Docstring"
-    """`violetear` is a minimalist CSS generator.
+??? note "Docstring"
+    `violetear` is a minimalist CSS generator.
     
     You use Python to define CSS styles and automatically obtain a CSS stylesheet.
     Using a fluent API, you can quickly build complex styles programmatically

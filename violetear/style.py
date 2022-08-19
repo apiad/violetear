@@ -52,12 +52,22 @@ class Style:
     # ### Basic rule manipulation
 
     # These methods allows manipulating rules manually.
+
+    # #### `Style.rule`
     # The `rule` method simply adds a rule to the internal dictionary.
 
     def rule(self, attr: str, value) -> "Style":
+        """Define a new CSS rule.
+
+        **Parameters**:
+
+        - `attr`: a CSS attribute (e.g., `'font-size'`)
+        - `value`: a value for the attribute. It will be converted to `str` internally.
+        """
         self._rules[attr] = str(value)
         return self
 
+    # #### `Style.apply`
     # The `apply` method enables style composition, by copying all the rules
     # in one or more input styles into this style.
 
@@ -157,7 +167,7 @@ class Style:
     # ### Geometry styles
 
     @style_method
-    def width(self, value=None, *, min=None, max=None):
+    def width(self, value=None, *, min=None, max=None) -> "Style":
         if value is not None:
             self.rule("width", Unit.infer(value, on_float=pc))
 
@@ -168,7 +178,7 @@ class Style:
             self.rule("max-width", Unit.infer(max, on_float=pc))
 
     @style_method
-    def height(self, value=None, *, min=None, max=None):
+    def height(self, value=None, *, min=None, max=None) -> "Style":
         if value is not None:
             self.rule("height", Unit.infer(value, on_float=pc))
 
@@ -179,7 +189,7 @@ class Style:
             self.rule("max-height", Unit.infer(max, on_float=pc))
 
     @style_method
-    def margin(self, all=None, *, left=None, right=None, top=None, bottom=None):
+    def margin(self, all=None, *, left=None, right=None, top=None, bottom=None) -> "Style":
         if all is not None:
             self.rule("margin", Unit.infer(all))
         if left is not None:
@@ -192,7 +202,7 @@ class Style:
             self.rule("margin-bottom", Unit.infer(bottom))
 
     @style_method
-    def padding(self, all=None, *, left=None, right=None, top=None, bottom=None):
+    def padding(self, all=None, *, left=None, right=None, top=None, bottom=None) -> "Style":
         if all is not None:
             self.rule("padding", Unit.infer(all))
         if left is not None:
@@ -205,7 +215,7 @@ class Style:
             self.rule("padding-bottom", Unit.infer(bottom))
 
     @style_method
-    def rounded(self, radius: Unit = None):
+    def rounded(self, radius: Unit = None) -> "Style":
         if radius is None:
             radius = 0.25
 
@@ -246,7 +256,7 @@ class Style:
     @style_method
     def flex(
         self, grow: float = None, shrink: float = None, basis: int = None,
-    ):
+    ) -> "Style":
         if grow is not None:
             self.rule("flex-grow", float(grow))
 
@@ -265,7 +275,7 @@ class Style:
         auto_columns: GridSize = None,
         auto_rows: GridSize = None,
         gap: Unit = 0,
-    ):
+    ) -> "Style":
         self.display("grid")
 
         if columns is None and rows is None:
@@ -292,7 +302,7 @@ class Style:
     @style_method
     def columns(
         self, count: int, min: GridSize = None, max: GridSize = None, *, gap: Unit = 0
-    ):
+    ) -> "Style":
         if min is None:
             min = fr(1)
 
@@ -304,7 +314,7 @@ class Style:
     @style_method
     def rows(
         self, count: int, min: GridSize = None, max: GridSize = None, *, gap: Unit = 0
-    ):
+    ) -> "Style":
         if min is None:
             min = fr(1)
 
@@ -318,7 +328,7 @@ class Style:
         self,
         columns: Union[int, Tuple[int, int]] = None,
         rows: Union[int, Tuple[int, int]] = None,
-    ):
+    ) -> "Style":
         if columns is not None:
             if isinstance(columns, tuple):
                 columns = f"{columns[0]} / {columns[1]+1}"

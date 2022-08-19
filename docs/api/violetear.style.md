@@ -1,5 +1,5 @@
-!!! note "Docstring"
-    """This module defines the `Style` class.
+??? note "Docstring"
+    This module defines the `Style` class.
 
 
 ## Top level imports
@@ -52,8 +52,8 @@ class Style:
     ) -> None:
 ```
 
-!!! note "Docstring"
-    """Create a new instance of `Style`.
+??? note "Docstring"
+    Create a new instance of `Style`.
     
     **Parameters**:
     
@@ -78,22 +78,39 @@ class Style:
 ### Basic rule manipulation
 
 These methods allows manipulating rules manually.
+
+#### `Style.rule`
 The `rule` method simply adds a rule to the internal dictionary.
 
 
 
-```python linenums="45"
+```python linenums="46"
     def rule(self, attr: str, value) -> "Style":
+```
+
+??? note "Docstring"
+    Define a new CSS rule.
+    
+    **Parameters**:
+    
+    - `attr`: a CSS attribute (e.g., `'font-size'`)
+    - `value`: a value for the attribute. It will be converted to `str` internally.
+
+
+
+
+```python linenums="54"
         self._rules[attr] = str(value)
         return self
 ```
 
+#### `Style.apply`
 The `apply` method enables style composition, by copying all the rules
 in one or more input styles into this style.
 
 
 
-```python linenums="50"
+```python linenums="59"
     def apply(self, *others: "Style") -> "Style":
         for other in others:
             for attr, value in other._rules.items():
@@ -106,7 +123,7 @@ in one or more input styles into this style.
 
 
 
-```python linenums="57"
+```python linenums="66"
     @style_method
     def font(
         self, size: Unit = None, *, weight: str = None, family: str = None
@@ -146,7 +163,7 @@ in one or more input styles into this style.
 
 
 
-```python linenums="91"
+```python linenums="100"
     @style_method
     def color(
         self, color: Color = None, *, rgb=None, hsv=None, hls=None, alpha: float = None
@@ -186,7 +203,7 @@ in one or more input styles into this style.
 
 
 
-```python linenums="125"
+```python linenums="134"
     @style_method
     def visibility(self, visibility: str) -> "Style":
         self.rule("visibility", visibility)
@@ -204,9 +221,9 @@ in one or more input styles into this style.
 
 
 
-```python linenums="137"
+```python linenums="146"
     @style_method
-    def width(self, value=None, *, min=None, max=None):
+    def width(self, value=None, *, min=None, max=None) -> "Style":
         if value is not None:
             self.rule("width", Unit.infer(value, on_float=pc))
 
@@ -217,7 +234,7 @@ in one or more input styles into this style.
             self.rule("max-width", Unit.infer(max, on_float=pc))
 
     @style_method
-    def height(self, value=None, *, min=None, max=None):
+    def height(self, value=None, *, min=None, max=None) -> "Style":
         if value is not None:
             self.rule("height", Unit.infer(value, on_float=pc))
 
@@ -228,7 +245,7 @@ in one or more input styles into this style.
             self.rule("max-height", Unit.infer(max, on_float=pc))
 
     @style_method
-    def margin(self, all=None, *, left=None, right=None, top=None, bottom=None):
+    def margin(self, all=None, *, left=None, right=None, top=None, bottom=None) -> "Style":
         if all is not None:
             self.rule("margin", Unit.infer(all))
         if left is not None:
@@ -241,7 +258,7 @@ in one or more input styles into this style.
             self.rule("margin-bottom", Unit.infer(bottom))
 
     @style_method
-    def padding(self, all=None, *, left=None, right=None, top=None, bottom=None):
+    def padding(self, all=None, *, left=None, right=None, top=None, bottom=None) -> "Style":
         if all is not None:
             self.rule("padding", Unit.infer(all))
         if left is not None:
@@ -254,7 +271,7 @@ in one or more input styles into this style.
             self.rule("padding-bottom", Unit.infer(bottom))
 
     @style_method
-    def rounded(self, radius: Unit = None):
+    def rounded(self, radius: Unit = None) -> "Style":
         if radius is None:
             radius = 0.25
 
@@ -265,7 +282,7 @@ in one or more input styles into this style.
 
 
 
-```python linenums="192"
+```python linenums="201"
     @style_method
     def display(self, display: str) -> "Style":
         self.rule("display", display)
@@ -299,7 +316,7 @@ in one or more input styles into this style.
     @style_method
     def flex(
         self, grow: float = None, shrink: float = None, basis: int = None,
-    ):
+    ) -> "Style":
         if grow is not None:
             self.rule("flex-grow", float(grow))
 
@@ -318,7 +335,7 @@ in one or more input styles into this style.
         auto_columns: GridSize = None,
         auto_rows: GridSize = None,
         gap: Unit = 0,
-    ):
+    ) -> "Style":
         self.display("grid")
 
         if columns is None and rows is None:
@@ -345,7 +362,7 @@ in one or more input styles into this style.
     @style_method
     def columns(
         self, count: int, min: GridSize = None, max: GridSize = None, *, gap: Unit = 0
-    ):
+    ) -> "Style":
         if min is None:
             min = fr(1)
 
@@ -357,7 +374,7 @@ in one or more input styles into this style.
     @style_method
     def rows(
         self, count: int, min: GridSize = None, max: GridSize = None, *, gap: Unit = 0
-    ):
+    ) -> "Style":
         if min is None:
             min = fr(1)
 
@@ -371,7 +388,7 @@ in one or more input styles into this style.
         self,
         columns: Union[int, Tuple[int, int]] = None,
         rows: Union[int, Tuple[int, int]] = None,
-    ):
+    ) -> "Style":
         if columns is not None:
             if isinstance(columns, tuple):
                 columns = f"{columns[0]} / {columns[1]+1}"
@@ -432,7 +449,7 @@ in one or more input styles into this style.
 
 
 
-```python linenums="353"
+```python linenums="362"
     def on(self, state) -> "Style":
         style = Style(self.selector.on(state))
         self._children.append(style)
@@ -448,7 +465,7 @@ in one or more input styles into this style.
 
 
 
-```python linenums="363"
+```python linenums="372"
     def css(self, inline: bool = False) -> str:
         separator = "" if inline else "\n"
 
