@@ -56,6 +56,8 @@ markdown_extensions:
 nav:
   - Home: index.md
   - User Guide: guide.md
+  - Examples:
+    - Color spaces: examples/color-spaces.md
   - API:
     - Style Sheets: stylesheet.md
     - Styles: style.md

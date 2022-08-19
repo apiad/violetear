@@ -13,7 +13,7 @@
 
 For fun, mostly... but also, because CSS is boring and repetitive. As a style language, CSS is great at describing the most varied designs. However, in terms of productivity, CSS lacks three core features that make programming languages useful: abstraction, encapsulation, and reusability.
 
-Using a general-purpose programming language to generate CSS we can obtain the best of both worlds: the expresivity of a declarative with the productivity of an imperative language.
+Using a general-purpose programming language to generate CSS we can obtain the best of both worlds: the expresivity of a declarative language like CSS with the productivity of an imperative language like Python.
 
 ## What?
 

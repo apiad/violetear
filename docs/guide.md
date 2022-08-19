@@ -1,6 +1,6 @@
 # User Guide
 
-This is a step-by-step guide to using `violetear`. In this guide, we will build a sample website. You can see the sample website alive [here](example.html) and the final source code [here](https://github.com/apiad/violetear/tree/main/docs/example.html).
+This is a step-by-step guide to using `violetear`. In this guide, we will build a sample website. You can see the sample website alive [here](guide.html) and the final source code [here](https://github.com/apiad/violetear/tree/main/docs/guide.html).
 
 Before starting, make sure to have `violetear` installed:
 
@@ -16,7 +16,7 @@ pip install violetear # (1)
 
 We'll start by creating a blank HTML file with a basic markup:
 
-```html title="example.html"
+```html title="guide.html"
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -31,7 +31,7 @@ We'll start by creating a blank HTML file with a basic markup:
 </html>
 ```
 
-Go ahead and paste that into a new file [`example.html`](example.html) and hit the save button!
+Go ahead and paste that into a new file [`guide.html`](guide.html) and hit the save button!
 
 ### Stylesheets
 
@@ -64,7 +64,7 @@ Run the file `styles.py` and verify that it creates a [`styles.css`](styles.css)
 
 Now go ahead and add the style link to your HTML:
 
-```html title="example.html" hl_lines="4"
+```html title="guide.html" hl_lines="4"
 ...
 <head>
    <!-- (1) -->
@@ -81,7 +81,7 @@ Now we're ready to start adding some markup and styles.
 
 Let's start by adding some content: a title, a subtitle, and some paragraphs (in latin!):
 
-```html title="example.html"
+```html title="guide.html"
 ...
 <body>
     <h1>An important lesson</h1>
@@ -109,7 +109,7 @@ Let's start by adding some content: a title, a subtitle, and some paragraphs (in
 </body>
 ```
 
-If you open the `example.html` file right you'll see it's just some unstyled text. So let's add some color.
+If you open the `guide.html` file right you'll see it's just some unstyled text. So let's add some color.
 
 ### Geometry
 
@@ -211,9 +211,9 @@ As you can see, we have quickly defined three very similar styles with different
 - In the body of the `for` loop we create one style for each size, selecting a class `.size-{i}`, hence we'll end with `.size-0`, `.size-1` and `.size-2`.
 - Each style also inherited the `base_style` we defined previously.
 
-To apply these styles, we'll need to modify our `example.html` source to put the right classes in place:
+To apply these styles, we'll need to modify our `guide.html` source to put the right classes in place:
 
-```html title="example.html" hl_lines="3 4 5 8 11"
+```html title="guide.html" hl_lines="3 4 5 8 11"
 <!-- (1) -->
 <body>
     <h1 class="size-2">An important lesson</h1>
@@ -247,7 +247,7 @@ We will create a color palette and use it to style a row of `div`s.
 
 Firs the markup, add the following at the end of your `body` tag:
 
-```html title="example.html"
+```html title="guide.html"
 <!-- (1) -->
 <body>
     <!-- (2) -->
@@ -331,7 +331,7 @@ sheet.render("styles.css")
 
 The previous section showed you a glimpse of the `.flexbox()` layout method. Let's explore it's options. Start by adding a bunch of `div`s to play with:
 
-```html title="example.html"
+```html title="guide.html"
 <!-- (1) -->
 <body>
     <!-- (2) -->
@@ -514,3 +514,12 @@ After running the script, check out the `style.css` file to confirm that our med
     Alternatively, in a desktop-first design, your main layout is optimized for a normal screen and then you add media queries for smaller screens (with increasingly smaller values for `max_width`).
 
     Like in all previous design decisions, `violetear` will not force you to choose either approach. You're free to design mobile-first, desktop-first, or use any combination of media queries that you desire.
+
+## Where to go from here
+
+This covers all the basic concepts in `violetear`, but of course there is much more you can learn.
+
+- You can [browse the examples](./examples) to see concrete, much more detailed use cases.
+- You can [read the annotated API](./api) to see how everything works under the hood.
+
+If you need any additional help, or find something that's not quite as you'd expect, don't hesitate to ask by [opening an issue](https://github.com/apiad/violetear/issues).

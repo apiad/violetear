@@ -13,15 +13,15 @@
 
 For fun, mostly... but also, because CSS is boring and repetitive. As a style language, CSS is great at describing the most varied designs. However, in terms of productivity, CSS lacks three core features that make programming languages useful: abstraction, encapsulation, and reusability.
 
-Using a general-purpose programming language to generate CSS we can obtain the best of both worlds: the expresivity of a declarative with the productivity of an imperative language.
+Using a general-purpose programming language to generate CSS we can obtain the best of both worlds: the expresivity of a declarative language like CSS with the productivity of an imperative language like Python.
 
 ## What?
 
-`violetear` is a bridge between Python and CSS. The simplest use case is a fluid API for generating CSS, full with code completion, documentation, and shorthand methods for the most common CSS rule sets.
+`violetear` is a bridge between Python and CSS. The simplest use case is a fluid API for generating CSS, full with code completion, documentation, and shorthand methods for the most common CSS rule sets, including [flexbox and grid layouts](https://apiad.net/violetear/guide/#layout-options).
 
-But it gets better quickly. Using `violetear` you can compose simpler styles into more complex ones, reusing common rules to reduce repetition to a minimum. This way you can build up complex layouts via composition.
+But it gets better quickly. Using `violetear` you can [compose simpler styles into more complex ones](https://apiad.net/violetear/guide/#simple-styling), reusing common rules to reduce repetition to a minimum. This way you can build up complex layouts via composition.
 
-You can manipulate magnitudes, such as colors and font-sizes, making it much easier to generate a specific color palette, for instance. Since you have a full-featured programming language, you can leverage variables and methods to, for example, generate dynamic themes on-the-fly based on user-defined preferences.
+You can manipulate magnitudes, such as colors and font-sizes, making it much easier to [generate a specific color palette](https://apiad.net/violetear/guide/#playing-with-colors), for instance. Since you have a full-featured programming language, you can leverage variables and methods to, for example, generate dynamic themes on-the-fly based on user-defined preferences.
 
 Finally, `violetear` can generate only the subset of styles used in any given template from a single Pyhon source. This means you can happily define all your styles globally and then deliver the minimum CSS subset necessary for each view.
 
@@ -91,6 +91,8 @@ Or you can automatically add the corresponding selector attributes to a given ta
 <h2 class="subtitle">Subtitle</h2>
 ```
 
+See the full user guide at <https://apiad.net/violetear/guide/>.
+
 ## Contribution
 
 License is MIT, so all contributions are welcome!
@@ -101,33 +103,51 @@ Likewise, if you're feeling adventurous, go ahead and add some fluid methods to 
 
 ## Roadmap
 
-### Future
+**Desired features**
 
-- Support for flexbox and grid layouts with helper methods
-- Color palettes
 - Cover all basic CSS rules.
 - Docs!
+- Support transitions with helper methods to create animation curves
+- Fully typed method signatures
 
-### v0.4.1
+**0.7.0**
+
+- Support for grid layouts with helper methods
+
+**0.6**
+
+- Changed `Color.palette` method name
+- Support for `visibility: hidden`
+
+**0.5.1**
+
+- Improved support for flexbox
+
+**v0.5**
+
+- Support for color palettes
+- Basic flexbox layout
+
+**v0.4.1**
 
 - Add min/max width and height
 - Create scales of a given unit (e.g., font sizes)
 - Better support for sub-styles (e.g, `:hover`)
 - Support for `text-align: center`
 
-### v0.4
+**v0.4**
 
 - Support for custom states with the `on` method.
 
-### v0.3
+**v0.3**
 
 - Support for media queries via context managers
 
-### v0.2
+**v0.2**
 
 - Refactored style API
 - Added support for basic CSS selectors
 
-### v0.1
+**v0.1**
 
 - Basic API
