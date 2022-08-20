@@ -29,4 +29,5 @@ for palette in Colors.palettes():
 # Custom palette
 sheet.select(".custom").palette(Color.palette(Colors.SandyBrown, Colors.SteelBlue, 10))
 
-sheet.render("color-spaces.css")
+if __name__ == "__main__":
+    sheet.render("color-spaces.css")
