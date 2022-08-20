@@ -110,6 +110,13 @@ Likewise, if you're feeling adventurous, go ahead and add some fluid methods to 
 - Support transitions with helper methods to create animation curves
 - Fully typed method signatures
 
+**0.8.0**
+
+- Improved color space conversion in the `Color` class
+- Refactor a bunch of color methods
+- Added methods to tweak colors
+- Added all CSS colors to `violetear.color.Colors`.
+
 **0.7.0**
 
 - Support for grid layouts with helper methods
