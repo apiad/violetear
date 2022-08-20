@@ -39,11 +39,10 @@ jobs:
           poetry config virtualenvs.create false
           poetry install
       - name: Build docs
-        run: make docs-ga
+        run: make docs
       - name: Upload artifacts
         uses: actions/upload-pages-artifact@v1
         with:
-          # Upload entire repository
           path: './site'
       - name: Deploy to GitHub Pages
         id: deployment

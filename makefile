@@ -1,18 +1,13 @@
 .PHONY: format
 format:
-	poetry run black .
+	black .
 
 .PHONY: format
 test:
-	poetry run black --check .
-	poetry run pytest
+	black --check .
+	pytest
 
 .PHONY: docs
 docs:
-	cp Readme.md docs/index.md
-	poetry run mkdocs build
-
-.PHONY: docs-ga
-docs-ga:
 	cp Readme.md docs/index.md
 	mkdocs build
