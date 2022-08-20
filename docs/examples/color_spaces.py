@@ -13,9 +13,11 @@ for cls, color in zip([".red", ".green", ".blue", ".gray"], [red, green, blue, g
     for i in range(11):
         palette.children(f".shade-{i}").background(color(i / 10)).border(0.1, gray(0.4))
 
-def palette(style: Style, colors:Sequence[Color]) -> Style:
+
+def palette(style: Style, colors: Sequence[Color]) -> Style:
     for i, color in enumerate(colors):
-        style.children('div', nth=i+1).background(color).border(0.1, gray(0.4))
+        style.children("div", nth=i + 1).background(color).border(0.1, gray(0.4))
+
 
 Style.palette = palette
 
@@ -24,7 +26,7 @@ sheet.select(".basic").palette(Colors.basic_palette())
 
 # All CSS colors by palette
 for palette in Colors.palettes():
-    sheet.select(f'.{palette}-colors').palette(Colors.palette(palette))
+    sheet.select(f".{palette}-colors").palette(Colors.palette(palette))
 
 # Custom palette
 sheet.select(".custom").palette(Color.palette(Colors.SandyBrown, Colors.SteelBlue, 10))

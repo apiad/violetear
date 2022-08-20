@@ -155,9 +155,11 @@ class StyleSheet:
             style = self._by_name[key]
             self._used.add(style)
             return style
-        except KeyError:                      # This is necessary because template engines will
-            warn(f"Style {key} not defined")  # often silence `KeyError` exceptions and instead
-            raise                             # return `None`, so you at least see a warning.
+        except KeyError:  # This is necessary because template engines will
+            warn(
+                f"Style {key} not defined"
+            )  # often silence `KeyError` exceptions and instead
+            raise  # return `None`, so you at least see a warning.
 
     def __getattr__(self, key) -> Style:
         return self[key]

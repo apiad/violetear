@@ -83,9 +83,7 @@ class Color:
     # #### `Color.palette`
 
     @staticmethod
-    def palette(
-        start: "Color", end: "Color", steps: int, space="hls"
-    ) -> List["Color"]:
+    def palette(start: "Color", end: "Color", steps: int, space="hls") -> List["Color"]:
         percents = Unit.scale(float, 0, 1, steps)
         return [start.towards(end, p, space=space) for p in percents]
 
@@ -687,7 +685,7 @@ class Colors:
     # #### `Colors.palette`
 
     @classmethod
-    def palette(cls, palette:str) -> Generator[Color, Any, Any]:
+    def palette(cls, palette: str) -> Generator[Color, Any, Any]:
         try:
             return getattr(cls, f"{palette}_palette")()
         except:
@@ -697,4 +695,17 @@ class Colors:
 
     @staticmethod
     def palettes():
-        return ['pink', 'red', 'orange', 'yellow', 'brown', 'green', 'cyan', 'blue', 'purple', 'white', 'black', 'extra']
+        return [
+            "pink",
+            "red",
+            "orange",
+            "yellow",
+            "brown",
+            "green",
+            "cyan",
+            "blue",
+            "purple",
+            "white",
+            "black",
+            "extra",
+        ]

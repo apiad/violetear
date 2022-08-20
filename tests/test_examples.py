@@ -13,13 +13,13 @@ def get_example_params():
     return results
 
 
-@pytest.mark.parametrize("script,css",get_example_params())
+@pytest.mark.parametrize("script,css", get_example_params())
 def test_example(script, css):
     ns = runpy.run_path(script)
 
     assert "sheet" in ns
 
-    sheet = ns['sheet']
+    sheet = ns["sheet"]
     result = sheet.render().split("\n")
     result.pop(2)
 
