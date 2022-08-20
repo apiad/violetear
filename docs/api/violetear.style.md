@@ -18,8 +18,8 @@ These ones are internal to `violetear`:
 
 ```python linenums="7"
 from .selector import Selector
-from .units import GridSize, GridTemplate, Unit, fr, pc, minmax, repeat
-from .color import Color
+from .units import GridSize, GridTemplate, Unit, fr, pc, minmax, rem, repeat
+from .color import Color, gray
 from .helpers import style_method
 ```
 
@@ -267,13 +267,32 @@ The `font` method
         self.rule("background-color", color)
 ```
 
+#### `Style.border`
+
+
+
+```python linenums="157"
+    @style_method
+    def border(
+        self, width: Unit = None, color: Color = None, *, radius: Unit = None
+    ) -> "Style":
+        if width is not None:
+            self.rule("border-width", Unit.infer(width))
+
+        if color is not None:
+            self.rule("border-color", color)
+
+        if radius is not None:
+            self.rule("border-color", Unit.infer(radius))
+```
+
 ### Visibility styles
 
 #### `Style.visibility`
 
 
 
-```python linenums="158"
+```python linenums="171"
     @style_method
     def visibility(self, visibility: str) -> "Style":
         self.rule("visibility", visibility)
@@ -283,7 +302,7 @@ The `font` method
 
 
 
-```python linenums="162"
+```python linenums="175"
     @style_method
     def visible(self) -> "Style":
         self.visibility("visible")
@@ -293,7 +312,7 @@ The `font` method
 
 
 
-```python linenums="166"
+```python linenums="179"
     @style_method
     def hidden(self) -> "Style":
         self.visibility("hidden")
@@ -305,7 +324,7 @@ The `font` method
 
 
 
-```python linenums="171"
+```python linenums="184"
     @style_method
     def width(self, value=None, *, min=None, max=None) -> "Style":
         if value is not None:
@@ -322,7 +341,7 @@ The `font` method
 
 
 
-```python linenums="182"
+```python linenums="195"
     @style_method
     def height(self, value=None, *, min=None, max=None) -> "Style":
         if value is not None:
@@ -339,9 +358,11 @@ The `font` method
 
 
 
-```python linenums="193"
+```python linenums="206"
     @style_method
-    def margin(self, all=None, *, left=None, right=None, top=None, bottom=None) -> "Style":
+    def margin(
+        self, all=None, *, left=None, right=None, top=None, bottom=None
+    ) -> "Style":
         if all is not None:
             self.rule("margin", Unit.infer(all))
         if left is not None:
@@ -358,9 +379,11 @@ The `font` method
 
 
 
-```python linenums="206"
+```python linenums="221"
     @style_method
-    def padding(self, all=None, *, left=None, right=None, top=None, bottom=None) -> "Style":
+    def padding(
+        self, all=None, *, left=None, right=None, top=None, bottom=None
+    ) -> "Style":
         if all is not None:
             self.rule("padding", Unit.infer(all))
         if left is not None:
@@ -377,7 +400,7 @@ The `font` method
 
 
 
-```python linenums="219"
+```python linenums="236"
     @style_method
     def rounded(self, radius: Unit = None) -> "Style":
         if radius is None:
@@ -392,7 +415,7 @@ The `font` method
 
 
 
-```python linenums="227"
+```python linenums="244"
     @style_method
     def display(self, display: str) -> "Style":
         self.rule("display", display)
@@ -402,7 +425,7 @@ The `font` method
 
 
 
-```python linenums="231"
+```python linenums="248"
     @style_method
     def flexbox(
         self,
@@ -434,10 +457,13 @@ The `font` method
 
 
 
-```python linenums="257"
+```python linenums="274"
     @style_method
     def flex(
-        self, grow: float = None, shrink: float = None, basis: int = None,
+        self,
+        grow: float = None,
+        shrink: float = None,
+        basis: int = None,
     ) -> "Style":
         if grow is not None:
             self.rule("flex-grow", float(grow))
@@ -453,7 +479,7 @@ The `font` method
 
 
 
-```python linenums="270"
+```python linenums="290"
     @style_method
     def grid(
         self,
@@ -492,7 +518,7 @@ The `font` method
 
 
 
-```python linenums="303"
+```python linenums="323"
     @style_method
     def columns(
         self, count: int, min: GridSize = None, max: GridSize = None, *, gap: Unit = 0
@@ -510,7 +536,7 @@ The `font` method
 
 
 
-```python linenums="315"
+```python linenums="335"
     @style_method
     def rows(
         self, count: int, min: GridSize = None, max: GridSize = None, *, gap: Unit = 0
@@ -528,7 +554,7 @@ The `font` method
 
 
 
-```python linenums="327"
+```python linenums="347"
     @style_method
     def place(
         self,
@@ -552,7 +578,7 @@ The `font` method
 
 
 
-```python linenums="345"
+```python linenums="365"
     @style_method
     def position(
         self,
@@ -579,7 +605,7 @@ The `font` method
 
 
 
-```python linenums="366"
+```python linenums="386"
     @style_method
     def absolute(
         self,
@@ -596,7 +622,7 @@ The `font` method
 
 
 
-```python linenums="377"
+```python linenums="397"
     @style_method
     def relative(
         self,
@@ -615,7 +641,7 @@ The `font` method
 
 
 
-```python linenums="389"
+```python linenums="409"
     def on(self, state) -> "Style":
         style = Style(self.selector.on(state))
         self._children.append(style)
@@ -626,7 +652,7 @@ The `font` method
 
 
 
-```python linenums="394"
+```python linenums="414"
     def children(self, selector: str = "*", *, nth: int = None) -> "Style":
         style = Style(self.selector.children(selector, nth=nth))
         self._children.append(style)
@@ -639,7 +665,7 @@ The `font` method
 
 
 
-```python linenums="400"
+```python linenums="420"
     def css(self, inline: bool = False) -> str:
         separator = "" if inline else "\n"
 
@@ -657,7 +683,7 @@ The `font` method
 
 
 
-```python linenums="412"
+```python linenums="432"
     def inline(self) -> str:
         return f'style="{self.css(inline=True)}"'
 ```
@@ -666,7 +692,7 @@ The `font` method
 
 
 
-```python linenums="415"
+```python linenums="435"
     def markup(self) -> str:
         return self.selector.markup()
 ```
@@ -675,7 +701,7 @@ The `font` method
 
 
 
-```python linenums="418"
+```python linenums="438"
     def __str__(self):
         return self.markup()
 ```

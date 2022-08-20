@@ -110,6 +110,11 @@ Likewise, if you're feeling adventurous, go ahead and add some fluid methods to 
 - Support transitions with helper methods to create animation curves
 - Fully typed method signatures
 
+**0.8.1**
+
+- Add color palettes with generator methods to `Colors`.
+- Add example with color functionality.
+
 **0.8.0**
 
 - Improved color space conversion in the `Color` class
