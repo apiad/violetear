@@ -24,6 +24,7 @@ class StyleSheet:
         self.medias = []
 
         self._by_name = {}
+        self._by_selector = {}
         self._used = set()
         self._media = None
         self._base = base
@@ -91,12 +92,16 @@ class StyleSheet:
 
     def _render(self, style: Style, fp, indent=0):
         for s in [style] + list(style._children):
+            if not s._rules:
+                continue
+
             fp.write(textwrap.indent(s.css(), indent * " "))
             fp.write("\n\n")
 
     # ### Manipulating styles
 
     def select(self, selector: str, *, name: str = None):
+
         if name is None:
             name = (
                 selector.replace("#", "_")
@@ -104,6 +109,12 @@ class StyleSheet:
                 .replace("-", "_")
                 .strip("_")
             )
+
+        style = self._by_selector.get(selector)
+
+        if style is not None:
+            self._by_name[name] = style
+            return style
 
         style = Style(Selector.from_css(selector))
 

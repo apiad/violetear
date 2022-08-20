@@ -8,8 +8,8 @@ from typing import List, Tuple, Union
 
 # These ones are internal to `violetear`:
 from .selector import Selector
-from .units import GridSize, GridTemplate, Unit, fr, pc, minmax, repeat
-from .color import Color
+from .units import GridSize, GridTemplate, Unit, fr, pc, minmax, rem, repeat
+from .color import Color, gray
 from .helpers import style_method
 
 # And this one is for generating CSS:
@@ -187,6 +187,21 @@ class Style:
 
         self.rule("background-color", color)
 
+    # #### `Style.border`
+
+    @style_method
+    def border(
+        self, width: Unit = None, color: Color = None, *, radius: Unit = None
+    ) -> "Style":
+        if width is not None:
+            self.rule("border-width", Unit.infer(width))
+
+        if color is not None:
+            self.rule("border-color", color)
+
+        if radius is not None:
+            self.rule("border-color", Unit.infer(radius))
+
     # ### Visibility styles
 
     # #### `Style.visibility`
@@ -238,7 +253,9 @@ class Style:
     # #### `Style.margin`
 
     @style_method
-    def margin(self, all=None, *, left=None, right=None, top=None, bottom=None) -> "Style":
+    def margin(
+        self, all=None, *, left=None, right=None, top=None, bottom=None
+    ) -> "Style":
         if all is not None:
             self.rule("margin", Unit.infer(all))
         if left is not None:
@@ -253,7 +270,9 @@ class Style:
     # #### `Style.padding`
 
     @style_method
-    def padding(self, all=None, *, left=None, right=None, top=None, bottom=None) -> "Style":
+    def padding(
+        self, all=None, *, left=None, right=None, top=None, bottom=None
+    ) -> "Style":
         if all is not None:
             self.rule("padding", Unit.infer(all))
         if left is not None:
@@ -314,7 +333,10 @@ class Style:
 
     @style_method
     def flex(
-        self, grow: float = None, shrink: float = None, basis: int = None,
+        self,
+        grow: float = None,
+        shrink: float = None,
+        basis: int = None,
     ) -> "Style":
         if grow is not None:
             self.rule("flex-grow", float(grow))

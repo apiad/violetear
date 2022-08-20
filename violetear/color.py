@@ -10,7 +10,7 @@ to combine them.
 import colorsys  # for changing color spaces
 import sys  # for current byte-order
 from binascii import hexlify  # for converting to hexadecimal
-from typing import List, Tuple, overload
+from typing import Any, Generator, List, Tuple, overload
 
 from .units import Unit
 
@@ -84,9 +84,9 @@ class Color:
 
     @staticmethod
     def palette(
-        start: "Color", end: "Color", percents: int, space="hls"
+        start: "Color", end: "Color", steps: int, space="hls"
     ) -> List["Color"]:
-        percents = Unit.scale(float, 0, 1, percents)
+        percents = Unit.scale(float, 0, 1, steps)
         return [start.towards(end, p, space=space) for p in percents]
 
 
@@ -215,28 +215,28 @@ def hex(*args, **kwargs):
 # ### `red`
 
 
-def r(lightness: float = 1.0) -> Color:
+def red(lightness: float = 1.0) -> Color:
     return Colors.Red.lit(lightness)
 
 
 # ### `green`
 
 
-def g(lightness: float = 1.0) -> Color:
+def green(lightness: float = 1.0) -> Color:
     return Colors.Green.lit(lightness)
 
 
 # ### `blue`
 
 
-def b(lightness: float = 1.0) -> Color:
+def blue(lightness: float = 1.0) -> Color:
     return Colors.Blue.lit(lightness)
 
 
 # ### `gray`
 
 
-def gray(lightness: float = 1.0) -> Color:
+def gray(lightness: float = 0.5) -> Color:
     return Colors.Gray.lit(lightness)
 
 
@@ -278,6 +278,25 @@ class Colors:
     Fuchsia = hex("#ff00ff")
     Purple = hex("#800080")
 
+    @staticmethod
+    def basic_palette():
+        yield Colors.White
+        yield Colors.Silver
+        yield Colors.Gray
+        yield Colors.Black
+        yield Colors.Red
+        yield Colors.Maroon
+        yield Colors.Yellow
+        yield Colors.Olive
+        yield Colors.Lime
+        yield Colors.Green
+        yield Colors.Aqua
+        yield Colors.Teal
+        yield Colors.Blue
+        yield Colors.Navy
+        yield Colors.Fuchsia
+        yield Colors.Purple
+
     # ### Pink shades
     MediumVioletRed = hex("#c71585")
     DeepPink = hex("#ff1493")
@@ -285,6 +304,15 @@ class Colors:
     HotPink = hex("#ff69b4")
     LightPink = hex("#ffb6c1")
     Pink = hex("#ffc0cb")
+
+    @staticmethod
+    def pink_palette():
+        yield Colors.MediumVioletRed
+        yield Colors.DeepPink
+        yield Colors.PaleVioletRed
+        yield Colors.HotPink
+        yield Colors.LightPink
+        yield Colors.Pink
 
     # ### Red shades
     DarkRed = hex("#8b0000")
@@ -297,12 +325,32 @@ class Colors:
     DarkSalmon = hex("#e9967a")
     LightSalmon = hex("#ffa07a")
 
+    @staticmethod
+    def red_palette():
+        yield Colors.DarkRed
+        yield Colors.Red
+        yield Colors.Firebrick
+        yield Colors.Crimson
+        yield Colors.IndianRed
+        yield Colors.LightCoral
+        yield Colors.Salmon
+        yield Colors.DarkSalmon
+        yield Colors.LightSalmon
+
     # ### Orange shades
     OrangeRed = hex("#ff4500")
     Tomato = hex("#ff6347")
     DarkOrange = hex("#ff8c00")
     Coral = hex("#ff7f50")
     Orange = hex("#ffa500")
+
+    @staticmethod
+    def orange_palette():
+        yield Colors.OrangeRed
+        yield Colors.Tomato
+        yield Colors.DarkOrange
+        yield Colors.Coral
+        yield Colors.Orange
 
     # ### Yellow shades
     DarkKhaki = hex("#bdb76b")
@@ -316,6 +364,20 @@ class Colors:
     LightGoldenrodYellow = hex("#fafad2")
     LemonChiffon = hex("#fffacd")
     LightYellow = hex("#ffffe0")
+
+    @staticmethod
+    def yellow_palette():
+        yield Colors.DarkKhaki
+        yield Colors.Gold
+        yield Colors.Khaki
+        yield Colors.PeachPuff
+        yield Colors.Yellow
+        yield Colors.PaleGoldenrod
+        yield Colors.Moccasin
+        yield Colors.PapayaWhip
+        yield Colors.LightGoldenrodYellow
+        yield Colors.LemonChiffon
+        yield Colors.LightYellow
 
     # ### Brown shades
     Maroon = hex("#800000")
@@ -335,6 +397,26 @@ class Colors:
     Bisque = hex("#ffe4c4")
     BlanchedAlmond = hex("#ffebcd")
     Cornsilk = hex("#fff8dc")
+
+    @staticmethod
+    def brown_palette():
+        yield Colors.Maroon
+        yield Colors.Brown
+        yield Colors.SaddleBrown
+        yield Colors.Sienna
+        yield Colors.Chocolate
+        yield Colors.DarkGoldenrod
+        yield Colors.Peru
+        yield Colors.RosyBrown
+        yield Colors.Goldenrod
+        yield Colors.SandyBrown
+        yield Colors.Tan
+        yield Colors.Burlywood
+        yield Colors.Wheat
+        yield Colors.NavajoWhite
+        yield Colors.Bisque
+        yield Colors.BlanchedAlmond
+        yield Colors.Cornsilk
 
     # ### Green shades
     DarkGreen = hex("#006400")
@@ -358,6 +440,29 @@ class Colors:
     GreenYellow = hex("#adff2f")
     PaleGreen = hex("#98fb98")
 
+    @staticmethod
+    def green_palette():
+        yield Colors.DarkGreen
+        yield Colors.Green
+        yield Colors.DarkOliveGreen
+        yield Colors.ForestGreen
+        yield Colors.SeaGreen
+        yield Colors.Olive
+        yield Colors.OliveDrab
+        yield Colors.MediumSeaGreen
+        yield Colors.LimeGreen
+        yield Colors.Lime
+        yield Colors.SpringGreen
+        yield Colors.MediumSpringGreen
+        yield Colors.DarkSeaGreen
+        yield Colors.MediumAquamarine
+        yield Colors.YellowGreen
+        yield Colors.LawnGreen
+        yield Colors.Chartreuse
+        yield Colors.LightGreen
+        yield Colors.GreenYellow
+        yield Colors.PaleGreen
+
     # ### Cyan shades
     Teal = hex("#008080")
     DarkCyan = hex("#008b8b")
@@ -371,6 +476,21 @@ class Colors:
     Aquamarine = hex("#7fffd4")
     PaleTurquoise = hex("#afeeee")
     LightCyan = hex("#e0ffff")
+
+    @staticmethod
+    def cyan_palette():
+        yield Colors.Teal
+        yield Colors.DarkCyan
+        yield Colors.LightSeaGreen
+        yield Colors.CadetBlue
+        yield Colors.DarkTurquoise
+        yield Colors.MediumTurquoise
+        yield Colors.Turquoise
+        yield Colors.Aqua
+        yield Colors.Cyan
+        yield Colors.Aquamarine
+        yield Colors.PaleTurquoise
+        yield Colors.LightCyan
 
     # ### Blue shades
     MidnightBlue = hex("#191970")
@@ -388,6 +508,25 @@ class Colors:
     LightSteelBlue = hex("#b0c4de")
     LightBlue = hex("#add8e6")
     PowderBlue = hex("#b0e0e6")
+
+    @staticmethod
+    def blue_palette():
+        yield Colors.MidnightBlue
+        yield Colors.Navy
+        yield Colors.DarkBlue
+        yield Colors.MediumBlue
+        yield Colors.Blue
+        yield Colors.RoyalBlue
+        yield Colors.SteelBlue
+        yield Colors.DodgerBlue
+        yield Colors.DeepSkyBlue
+        yield Colors.CornflowerBlue
+        yield Colors.SkyBlue
+        yield Colors.LightSkyBlue
+        yield Colors.LightSteelBlue
+        yield Colors.LightBlue
+        yield Colors.PowderBlue
+
 
     # ### Purple shades
     Indigo = hex("#4b0082")
@@ -409,6 +548,27 @@ class Colors:
     Thistle = hex("#d8bfd8")
     Lavender = hex("#e6e6fa")
 
+    @staticmethod
+    def purple_palette():
+        yield Colors.Indigo
+        yield Colors.Purple
+        yield Colors.DarkMagenta
+        yield Colors.DarkViolet
+        yield Colors.DarkSlateBlue
+        yield Colors.BlueViolet
+        yield Colors.DarkOrchid
+        yield Colors.Fuchsia
+        yield Colors.Magenta
+        yield Colors.SlateBlue
+        yield Colors.MediumSlateBlue
+        yield Colors.MediumOrchid
+        yield Colors.MediumPurple
+        yield Colors.Orchid
+        yield Colors.Violet
+        yield Colors.Plum
+        yield Colors.Thistle
+        yield Colors.Lavender
+
     # ### White shades
     MistyRose = hex("#ffe4e1")
     AntiqueWhite = hex("#faebd7")
@@ -428,6 +588,26 @@ class Colors:
     Ivory = hex("#fffff0")
     White = hex("#ffffff")
 
+    @staticmethod
+    def white_palette():
+        yield Colors.MistyRose
+        yield Colors.AntiqueWhite
+        yield Colors.Linen
+        yield Colors.Beige
+        yield Colors.WhiteSmoke
+        yield Colors.LavenderBlush
+        yield Colors.OldLace
+        yield Colors.AliceBlue
+        yield Colors.Seashell
+        yield Colors.GhostWhite
+        yield Colors.Honeydew
+        yield Colors.FloralWhite
+        yield Colors.Azure
+        yield Colors.MintCream
+        yield Colors.Snow
+        yield Colors.Ivory
+        yield Colors.White
+
     # ### Black shades
     Black = hex("#000000")
     DarkSlateGray = hex("#2f4f4f")
@@ -440,5 +620,44 @@ class Colors:
     LightGray = hex("#d3d3d3")
     Gainsboro = hex("#dcdcdc")
 
+    @staticmethod
+    def black_palette():
+        yield Colors.Black
+        yield Colors.DarkSlateGray
+        yield Colors.DimGray
+        yield Colors.SlateGray
+        yield Colors.Gray
+        yield Colors.LightSlateGray
+        yield Colors.DarkGray
+        yield Colors.Silver
+        yield Colors.LightGray
+        yield Colors.Gainsboro
+
     # ### Extra
     RebeccaPurple = hex("#663399")
+
+    @staticmethod
+    def extra_palette():
+        yield Colors.RebeccaPurple
+
+    @staticmethod
+    def all():
+        yield from Colors.pink_palette()
+        yield from Colors.red_palette()
+        yield from Colors.orange_palette()
+        yield from Colors.yellow_palette()
+        yield from Colors.brown_palette()
+        yield from Colors.green_palette()
+        yield from Colors.cyan_palette()
+        yield from Colors.blue_palette()
+        yield from Colors.purple_palette()
+        yield from Colors.white_palette()
+        yield from Colors.black_palette()
+        yield from Colors.extra_palette()
+
+    @classmethod
+    def palette(cls, palette:str) -> Generator[Color, Any, Any]:
+        try:
+            return getattr(cls, f"{palette}_palette")()
+        except:
+            raise ValueError(f"Palette {palette} doesn't exist.")
