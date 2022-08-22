@@ -17,13 +17,15 @@ Using a general-purpose programming language to generate CSS we can obtain the b
 
 ## What?
 
-`violetear` is a bridge between Python and CSS. The simplest use case is a fluid API for generating CSS, full with code completion, documentation, and shorthand methods for the most common CSS rule sets, including [flexbox and grid layouts](https://apiad.net/violetear/guide/#layout-options).
+`violetear` is a bridge between Python and CSS. It gives you a fluent API to generate CSS styles, full with code completion, documentation, and shorthand methods for the most common CSS rule sets. Some of the things you can do with `violetear` easily are:
 
-But it gets better quickly. Using `violetear` you can [compose simpler styles into more complex ones](https://apiad.net/violetear/guide/#simple-styling), reusing common rules to reduce repetition to a minimum. This way you can build up complex layouts via composition.
+- [Create CSS styles from Python code](https://apiad.net/violetear/guide/#simple-styling) using a fluent, fully documented API that covers the most common rules.
+- [Generate CSS stylesheets programatically](https://apiad.net/violetear/guide/#creating-styles-programatically), which means you can create several related styles with ease using loops and parameters. 
+- [Manipulate magnitudes and colors](https://apiad.net/violetear/examples/color-spaces) to easily create custom color palettes.
+- [Generate minimal CSS files](#) including only the subset of rules that are used in a given template.
+- [Create complex layouts using flexbox and grid](https://apiad.net/violetear/examples/fluid-grid) programatically with very few lines of code.
 
-You can manipulate magnitudes, such as colors and font-sizes, making it much easier to [generate a specific color palette](https://apiad.net/violetear/guide/#playing-with-colors), for instance. Since you have a full-featured programming language, you can leverage variables and methods to, for example, generate dynamic themes on-the-fly based on user-defined preferences.
-
-Finally, `violetear` can generate only the subset of styles used in any given template from a single Pyhon source. This means you can happily define all your styles globally and then deliver the minimum CSS subset necessary for each view.
+And much more... When you combine a full-flegded programming language with powerful abstractions and carefully designed APIs, your imagination is the only limit.
 
 ## How?
 
@@ -91,7 +93,12 @@ Or you can automatically add the corresponding selector attributes to a given ta
 <h2 class="subtitle">Subtitle</h2>
 ```
 
-See the full user guide at <https://apiad.net/violetear/guide/>.
+### Documentation
+
+To learn more, you can:
+- Read the introductory [user guide](https://apiad.net/violetear/guide) that showcases the main functionalities of the library. 
+- Browse the [examples](https://apiad.net/violetear/examples) to see concrete and detailed use cases.
+- Read the [fully annotated API](https://apiad.net/violetear/api) to understand the inner workings of the library.
 
 ## Contribution
 
@@ -103,35 +110,41 @@ Likewise, if you're feeling adventurous, go ahead and add some fluid methods to 
 
 ## Roadmap
 
-**Desired features**
+Right now `violetear` is in pre-release mode, which means the API is completely unstable. When it reaches a reasonable level of maturity, we will release a `v1.0` and stabilize the API.
 
-- Cover all basic CSS rules.
-- Docs!
-- Support transitions with helper methods to create animation curves
+**Features planned for the v1.0 milestone**
+
+- Fluent methods for most relevant CSS rules
+- Fully documented API
+- Examples for all relevant use cases
 - Fully typed method signatures
+- Full check of argument values and rule attributes
+- Dynamic generation of CSS based on HTML parsing 
+- Support for transitions and animations with helper methods to create timing curves
+- Parameterized presets for relevant design systems
 
-**0.8.1**
+**v0.8.1**
 
 - Add color palettes with generator methods to `Colors`.
 - Add example with color functionality.
 
-**0.8.0**
+**v0.8.0**
 
 - Improved color space conversion in the `Color` class
 - Refactor a bunch of color methods
 - Added methods to tweak colors
 - Added all CSS colors to `violetear.color.Colors`.
 
-**0.7.0**
+**v0.7.0**
 
 - Support for grid layouts with helper methods
 
-**0.6**
+**v0.6**
 
 - Changed `Color.palette` method name
 - Support for `visibility: hidden`
 
-**0.5.1**
+**v0.5.1**
 
 - Improved support for flexbox
 
