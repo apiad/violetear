@@ -223,3 +223,53 @@ Extending this idea into all grid breakpoints, what we want now is to have `sm-1
     </div>
 </body>
 ```
+
+The key idea with these conditional classes is that they only apply within a certain media query.
+For example, `sm-*` only applies when the screen is smaller than 800px.
+Hence, when you style your code this way, taking advantage of CSS scoping rules, first the `span-*` class will be evaluated, and you element will get the appropriate width according to the browser width. However, then the corresponding `lg-*` or `md-*` or `sm-*` will kick (if used) and override that width.
+
+For example, say you have a `.span-4.lg-6`. This means that on extra large screens (above 1600px), this element will have 4/12 = 33.33% percent width.
+However, when the screen becomes 1600px or smaller, it should snap into 4/8 = 50% width, but instead it will snap to 6/8 = 75% width.
+
+This sounds pretty complex but in reality it only requires a few tweaks to our code.
+First, we will update our `make_grid_styles` method to accept an additional `custom` parameter which we will use to define a new set of styles.
+For example, when `custom="lg"`, we will create all the corresponding `lg-1` to `lg-8` classes with the right width:
+
+```python title="fluid-grid.py" hl_lines="10 17 18 19"
+sheet = StyleSheet(normalize=True)
+
+sheet.select(".main").padding(50)
+sheet.select(".container").background(gray(0.9)).padding(10).margin(bottom=10)
+sheet.select(".col").background(gray(0.95)).border(0.1, gray(1)).height(100)
+
+sheet.select(".row").flexbox(wrap=True)
+
+
+def make_grid_styles(columns, custom=None):
+    for size in range(1, columns):
+        sheet.select(f".span-{size}").width(size / columns)
+
+    for size in range(columns, 13):
+        sheet.select(f".span-{size}").width(1.0)
+
+    if custom:
+        for size in range(1, columns + 1):
+            sheet.select(f".{custom}-{size}").width(size / columns)
+
+
+make_grid_styles(12)
+
+with sheet.media(max_width=1600):
+    make_grid_styles(8, "lg")
+
+with sheet.media(max_width=1200):
+    make_grid_styles(6, "md")
+
+with sheet.media(max_width=800):
+    make_grid_styles(4, "sm")
+
+with sheet.media(max_width=600):
+    make_grid_styles(1)
+
+sheet.render("fluid-grid.css")
+```
