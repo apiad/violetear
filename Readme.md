@@ -141,6 +141,11 @@ Right now `violetear` is in pre-release mode, which means the API is completely 
 - Support for transitions and animations with helper methods to create timing curves
 - Parameterized presets for relevant design systems
 
+**v0.9.0**
+
+- Add `StyleSheet.extend` to extend stylesheets with presets
+- Add `FlexGrid` to create flexbox grids easily
+
 **v0.8.1**
 
 - Add color palettes with generator methods to `Colors`.
