@@ -223,10 +223,10 @@ animation = (
     .end(top=px(-500))
 )
 
-text.animation(animation, duration=sec(10), iterations='infinite')
+text.animate(animation, duration=sec(10), iterations='infinite')
 ```
 
-The methods `start` and `end` define the initial and final keyframes. They are equivalent to calling [`Animation.at`](/violetear/api/violetear.animation#Animation.at) with `0`  and `1` respectively. Like `Style.rules`, these methods can receive keyword-based attributes in the case where you just need to animate a few simple attributes.
+The methods `start` and `end` define the initial and final keyframes. They are equivalent to calling [`Animation.at`](/violetear/api/violetear.animate#Animation.at) with `0`  and `1` respectively. Like `Style.rules`, these methods can receive keyword-based attributes in the case where you just need to animate a few simple attributes.
 
 However, when you want to create a somewhat complex animation, it is convenient to use the `Style` fluent API. In this case, the `at`, `start` and `end` methods also accept a `Style` instance. Let's add a couple more keyframes to illustrate this:
 
@@ -246,10 +246,10 @@ animation = (
     .end(top=px(-500))
 )
 
-text.animation(animation, duration=sec(10), iterations='infinite')
+text.animate(animation, duration=sec(10), iterations='infinite')
 ```
 
-Finally, we configure the animation using the `Style.animation` method, which references an existing animation, and sets the duration, number of iterations, and other parameters.
+Finally, we configure the animation using the `Style.animate` method, which references an existing animation, and sets the duration, number of iterations, and other parameters.
 
 ```python title="animations.py" hl_lines="15"
 # ...
@@ -266,7 +266,7 @@ animation = (
     .end(top=px(-500))
 )
 
-text.animation(animation, duration=sec(10), iterations='infinite')
+text.animate(animation, duration=sec(10), iterations='infinite')
 ```
 
 Looking at the generated CSS, you'll notice the `@keyframes` declaration that corresponds to our animation:
@@ -308,3 +308,55 @@ p {
 
 }
 ```
+
+## Composing animations
+
+While the animation API we've covered is already reasonably powerfull, you can craft much richer animations using additional utility methods to merge, resize, concat, resample, reverse, and otherwise manipulate animations.
+
+Let's go through the most basic operations. We will use a simple markup for this purpose:
+
+```html title="animations.html"
+<body>
+    <!-- ... -->
+    <div class="playground">
+        <div class="ball">B</div>
+    </div>
+</body>
+```
+
+We'll make the `.playground` a fixed size and style the `.ball` as a circle:
+
+```python title="animations.py"
+playground = (
+    sheet.select(".playground")
+    .width(1.0)
+    .height(300)
+    .rules(overflow="hidden")
+    .margin(top=20)
+    .background(gray(0.95))
+)
+
+ball = (
+    sheet.select(".ball")
+    .size(50, 50)
+    .border(radius=50)
+    .background(red(0.8))
+    .relative()
+    .center()
+    .font(size=40)
+)
+```
+
+The simplest way to compose animations is to run them in parallel. We achieve this by calling `animate` individually with each animation:
+
+```python title="animations.py"
+# ...
+
+bounce_x = Animation().start(left=pc(0)).end(left=pc(1))
+bounce_y = Animation().start(top=pc(0)).end(top=pc(1))
+
+ball.animate(bounce_x, sec(5), iter='infinite', direction='alternate')
+ball.animate(bounce_y, sec(2), iter='infinite', direction='alternate')
+```
+
+Just like with the `transform` property, all animations for the same element in CSS must be declared in a single property. Here, `violetear` helps you again by keeping track of all the different animations you declared and generating the appropiate combined CSS rule.

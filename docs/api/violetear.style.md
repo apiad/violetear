@@ -94,6 +94,7 @@ class Style:
         self._transitions = []
         self._transforms = {}
         self._animations = set()
+        self._animation_configs = []
 ```
 
 ### Basic rule manipulation
@@ -107,7 +108,7 @@ using their corresponding `__str__` methods.
 
 
 
-```python linenums="59"
+```python linenums="60"
     def rule(self, attr: str, value) -> Style:
 ```
 
@@ -122,7 +123,7 @@ using their corresponding `__str__` methods.
 
 
 
-```python linenums="67"
+```python linenums="68"
         self._rules[attr] = str(value)
         return self
 ```
@@ -131,7 +132,7 @@ using their corresponding `__str__` methods.
 
 
 
-```python linenums="70"
+```python linenums="71"
     def rules(self, **rules) -> Style:
 ```
 
@@ -143,7 +144,7 @@ using their corresponding `__str__` methods.
 
 
 
-```python linenums="75"
+```python linenums="76"
         for rule, value in rules.items():
             self.rule(rule.replace("_", "-"), value)
 
@@ -165,7 +166,7 @@ proven necessary.
 
 
 
-```python linenums="90"
+```python linenums="91"
     def apply(self, *others: Style) -> Style:
 ```
 
@@ -181,7 +182,7 @@ proven necessary.
 
 
 
-```python linenums="99"
+```python linenums="100"
         for other in others:
             for attr, value in other._rules.items():
                 self.rule(attr, value)
@@ -197,7 +198,7 @@ Configure font attributes.
 
 
 
-```python linenums="108"
+```python linenums="109"
     @style_method
     def font(
         self,
@@ -221,7 +222,7 @@ Configure text styling attributes.
 
 
 
-```python linenums="126"
+```python linenums="127"
     @style_method
     def text(self, *, align: str = None, decoration: str = None) -> Style:
         if align is not None:
@@ -237,7 +238,7 @@ Shorthand method for center align.
 
 
 
-```python linenums="136"
+```python linenums="137"
     @style_method
     def center(self) -> Style:
         self.text(align="center")
@@ -248,7 +249,7 @@ Shorthand method for left align.
 
 
 
-```python linenums="141"
+```python linenums="142"
     @style_method
     def left(self) -> Style:
         self.text(align="left")
@@ -259,7 +260,7 @@ Shorthand method for right align.
 
 
 
-```python linenums="146"
+```python linenums="147"
     @style_method
     def right(self) -> Style:
         self.text(align="right")
@@ -270,7 +271,7 @@ Shorthand method for justified align.
 
 
 
-```python linenums="151"
+```python linenums="152"
     @style_method
     def justify(self) -> Style:
         self.text(align="justify")
@@ -282,7 +283,7 @@ Shorthand method for justified align.
 
 
 
-```python linenums="156"
+```python linenums="157"
     @style_method
     def color(self, color: Color) -> Style:
         self.rule("color", color)
@@ -292,7 +293,7 @@ Shorthand method for justified align.
 
 
 
-```python linenums="160"
+```python linenums="161"
     @style_method
     def background(self, color: Color) -> Style:
         self.rule("background-color", color)
@@ -302,7 +303,7 @@ Shorthand method for justified align.
 
 
 
-```python linenums="164"
+```python linenums="165"
     @style_method
     def border(
         self, width: Unit = None, color: Color = None, *, radius: Unit = None
@@ -314,7 +315,7 @@ Shorthand method for justified align.
             self.rule("border-color", color)
 
         if radius is not None:
-            self.rule("border-color", Unit.infer(radius))
+            self.rule("border-radius", Unit.infer(radius))
 ```
 
 ### Visibility styles
@@ -323,7 +324,7 @@ Shorthand method for justified align.
 
 
 
-```python linenums="178"
+```python linenums="179"
     @style_method
     def visibility(self, visibility: str) -> Style:
         self.rule("visibility", visibility)
@@ -333,7 +334,7 @@ Shorthand method for justified align.
 
 
 
-```python linenums="182"
+```python linenums="183"
     @style_method
     def visible(self) -> Style:
         self.visibility("visible")
@@ -343,7 +344,7 @@ Shorthand method for justified align.
 
 
 
-```python linenums="186"
+```python linenums="187"
     @style_method
     def hidden(self) -> Style:
         self.visibility("hidden")
@@ -355,7 +356,7 @@ Shorthand method for justified align.
 
 
 
-```python linenums="191"
+```python linenums="192"
     @style_method
     def width(self, value=None, *, min=None, max=None) -> Style:
         if value is not None:
@@ -372,7 +373,7 @@ Shorthand method for justified align.
 
 
 
-```python linenums="202"
+```python linenums="203"
     @style_method
     def height(self, value=None, *, min=None, max=None) -> Style:
         if value is not None:
@@ -385,11 +386,22 @@ Shorthand method for justified align.
             self.rule("max-height", Unit.infer(max, on_float=pc))
 ```
 
+#### `Style.size`
+
+
+
+```python linenums="214"
+    @style_method
+    def size(self, width:Unit, height:Unit) -> Style:
+        self.width(width)
+        self.height(height)
+```
+
 #### `Style.margin`
 
 
 
-```python linenums="213"
+```python linenums="219"
     @style_method
     def margin(
         self,
@@ -416,7 +428,7 @@ Shorthand method for justified align.
 
 
 
-```python linenums="234"
+```python linenums="240"
     @style_method
     def padding(
         self,
@@ -443,7 +455,7 @@ Shorthand method for justified align.
 
 
 
-```python linenums="255"
+```python linenums="261"
     @style_method
     def rounded(self, radius: Unit = None) -> Style:
         if radius is None:
@@ -458,7 +470,7 @@ Shorthand method for justified align.
 
 
 
-```python linenums="263"
+```python linenums="269"
     @style_method
     def display(self, display: str) -> Style:
         self.rule("display", display)
@@ -468,7 +480,7 @@ Shorthand method for justified align.
 
 
 
-```python linenums="267"
+```python linenums="273"
     @style_method
     def flexbox(
         self,
@@ -503,7 +515,7 @@ Shorthand method for justified align.
 
 
 
-```python linenums="296"
+```python linenums="302"
     @style_method
     def flex(
         self,
@@ -525,7 +537,7 @@ Shorthand method for justified align.
 
 
 
-```python linenums="312"
+```python linenums="318"
     @style_method
     def grid(
         self,
@@ -564,7 +576,7 @@ Shorthand method for justified align.
 
 
 
-```python linenums="345"
+```python linenums="351"
     @style_method
     def columns(
         self,
@@ -587,7 +599,7 @@ Shorthand method for justified align.
 
 
 
-```python linenums="362"
+```python linenums="368"
     @style_method
     def rows(
         self,
@@ -610,7 +622,7 @@ Shorthand method for justified align.
 
 
 
-```python linenums="379"
+```python linenums="385"
     @style_method
     def place(
         self,
@@ -634,7 +646,7 @@ Shorthand method for justified align.
 
 
 
-```python linenums="397"
+```python linenums="403"
     @style_method
     def position(
         self,
@@ -661,7 +673,7 @@ Shorthand method for justified align.
 
 
 
-```python linenums="418"
+```python linenums="424"
     @style_method
     def absolute(
         self,
@@ -678,7 +690,7 @@ Shorthand method for justified align.
 
 
 
-```python linenums="429"
+```python linenums="435"
     @style_method
     def relative(
         self,
@@ -697,7 +709,7 @@ Shorthand method for justified align.
 
 
 
-```python linenums="441"
+```python linenums="447"
     @style_method
     def transition(
         self,
@@ -736,7 +748,7 @@ Shorthand method for justified align.
 
 
 
-```python linenums="474"
+```python linenums="480"
     @style_method
     def transform(
         self,
@@ -785,21 +797,40 @@ Shorthand method for justified align.
 
 
 
-```python linenums="517"
+```python linenums="523"
     @style_method
-    def animation(
+    def animate(
         self,
         animation: Animation,
         duration: Unit = sec(1),
-        iterations: int = 1,
+        iter: int = 1,
         timing: str = "linear",
+        direction: str = "normal",
     ) -> Style:
-        self.rule("animation-name", animation.name)
-        self.rule("animation-duration", Unit.infer(duration, sec, ms))
-        self.rule("animation-timing-function", timing)
-        self.rule("animation-iteration-count", iterations)
+        self._animation_configs.append((
+            animation.name, Unit.infer(duration, sec, ms), timing, iter, direction
+        ))
 
         self._animations.add(animation)
+
+        names = []
+        durations = []
+        timings = []
+        iterations = []
+        directions = []
+
+        for name, duration, timing, iter, direction in self._animation_configs:
+            names.append(name)
+            durations.append(str(duration))
+            timings.append(timing)
+            iterations.append(iter)
+            directions.append(direction)
+
+        self.rule("animation-name", ", ".join(names))
+        self.rule("animation-duration", ", ".join(durations))
+        self.rule("animation-timing-function", ", ".join(timings))
+        self.rule("animation-iteration-count", ", ".join(iterations))
+        self.rule("animation-direction", ", ".join(directions))
 ```
 
 ### Sub-styles
@@ -808,7 +839,7 @@ Shorthand method for justified align.
 
 
 
-```python linenums="533"
+```python linenums="558"
     def on(self, state) -> Style:
         selector = self.selector.on(state)
         style = self._children.get(selector.css(), Style(selector))
@@ -820,7 +851,7 @@ Shorthand method for justified align.
 
 
 
-```python linenums="539"
+```python linenums="564"
     def children(self, selector: str = "*", *, nth: int = None) -> Style:
         selector = self.selector.children(selector, nth=nth)
         style = self._children.get(selector.css(), Style(selector))
@@ -834,7 +865,7 @@ Shorthand method for justified align.
 
 
 
-```python linenums="546"
+```python linenums="571"
     def css(self, inline: bool = False) -> str:
         separator = "" if inline else "\n"
 
@@ -853,7 +884,7 @@ Shorthand method for justified align.
 
 
 
-```python linenums="559"
+```python linenums="584"
     def inline(self) -> str:
         return f'style="{self.css(inline=True)}"'
 ```
@@ -862,7 +893,7 @@ Shorthand method for justified align.
 
 
 
-```python linenums="562"
+```python linenums="587"
     def markup(self) -> str:
         return self.selector.markup()
 ```
@@ -871,7 +902,7 @@ Shorthand method for justified align.
 
 
 
-```python linenums="565"
+```python linenums="590"
     def __str__(self):
         return self.markup()
 ```

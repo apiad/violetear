@@ -16,7 +16,13 @@ from violetear.style import Style
 
 ```python linenums="9"
 class Animation:
-    def __init__(self, name: str) -> None:
+    __counter = 0
+
+    def __init__(self, name: str = None) -> None:
+        if name is None:
+            name = f"_a{Animation.__counter}"
+            Animation.__counter += 1
+
         self.name = name
         self._keyframes: Dict[Unit, Style] = {}
 ```
@@ -25,7 +31,7 @@ class Animation:
 
 
 
-```python linenums="14"
+```python linenums="20"
     def at(self, percent: float, style: Style = None, **kwargs) -> Animation:
         rules = Style()
 
@@ -44,7 +50,7 @@ class Animation:
 
 
 
-```python linenums="27"
+```python linenums="33"
     def start(self, style: Style = None, **kwargs) -> Animation:
         return self.at(0.0, style, **kwargs)
 ```
@@ -53,7 +59,7 @@ class Animation:
 
 
 
-```python linenums="30"
+```python linenums="36"
     def end(self, style: Style = None, **kwargs) -> Animation:
         return self.at(1.0, style, **kwargs)
 ```
@@ -62,7 +68,7 @@ class Animation:
 
 
 
-```python linenums="33"
+```python linenums="39"
     def css(self) -> str:
         lines = [f"@keyframes {self.name} {{"]
 
@@ -78,7 +84,7 @@ class Animation:
 
 
 
-```python linenums="43"
+```python linenums="49"
     def __str__(self) -> str:
         return self.name
 ```

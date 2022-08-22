@@ -2,7 +2,7 @@ from violetear import StyleSheet
 from violetear.color import blue, gray, green, red
 from violetear.animation import Animation
 from violetear.style import Style
-from violetear.units import px, sec
+from violetear.units import pc, px, sec
 
 sheet = StyleSheet(normalize=True)
 
@@ -38,7 +38,32 @@ animation = (
     .end(top=px(-500))
 )
 
-text.animation(animation, duration=sec(10), iterations="infinite")
+text.animate(animation, duration=sec(10), iter="infinite")
+
+playground = (
+    sheet.select(".playground")
+    .width(1.0)
+    .height(300)
+    .rules(overflow="hidden")
+    .margin(top=20)
+    .background(gray(0.95))
+)
+
+ball = (
+    sheet.select(".ball")
+    .size(50, 50)
+    .border(radius=50)
+    .background(red(0.8))
+    .relative()
+    .center()
+    .font(size=40)
+)
+
+bounce_x = Animation().start(left=pc(0)).end(left=pc(1))
+bounce_y = Animation().start(top=pc(0)).end(top=pc(1))
+
+ball.animate(bounce_x, sec(5), iter='infinite', direction='alternate')
+ball.animate(bounce_y, sec(2), iter='infinite', direction='alternate')
 
 if __name__ == "__main__":
     sheet.render("animations.css")

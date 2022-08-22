@@ -62,6 +62,7 @@ class Style:
         self._transitions = []
         self._transforms = {}
         self._animations = set()
+        self._animation_configs = []
 
     # ### Basic rule manipulation
     # These methods allows manipulating rules manually.
@@ -214,7 +215,7 @@ class Style:
             self.rule("border-color", color)
 
         if radius is not None:
-            self.rule("border-color", Unit.infer(radius))
+            self.rule("border-radius", Unit.infer(radius))
 
     # ### Visibility styles
 
@@ -263,6 +264,13 @@ class Style:
 
         if max is not None:
             self.rule("max-height", Unit.infer(max, on_float=pc))
+
+    # #### `Style.size`
+
+    @style_method
+    def size(self, width:Unit, height:Unit) -> Style:
+        self.width(width)
+        self.height(height)
 
     # #### `Style.margin`
 
@@ -603,19 +611,38 @@ class Style:
     # #### `Style.animation`
 
     @style_method
-    def animation(
+    def animate(
         self,
         animation: Animation,
         duration: Unit = sec(1),
-        iterations: int = 1,
+        iter: int = 1,
         timing: str = "linear",
+        direction: str = "normal",
     ) -> Style:
-        self.rule("animation-name", animation.name)
-        self.rule("animation-duration", Unit.infer(duration, sec, ms))
-        self.rule("animation-timing-function", timing)
-        self.rule("animation-iteration-count", iterations)
+        self._animation_configs.append((
+            animation.name, Unit.infer(duration, sec, ms), timing, iter, direction
+        ))
 
         self._animations.add(animation)
+
+        names = []
+        durations = []
+        timings = []
+        iterations = []
+        directions = []
+
+        for name, duration, timing, iter, direction in self._animation_configs:
+            names.append(name)
+            durations.append(str(duration))
+            timings.append(timing)
+            iterations.append(iter)
+            directions.append(direction)
+
+        self.rule("animation-name", ", ".join(names))
+        self.rule("animation-duration", ", ".join(durations))
+        self.rule("animation-timing-function", ", ".join(timings))
+        self.rule("animation-iteration-count", ", ".join(iterations))
+        self.rule("animation-direction", ", ".join(directions))
 
     # ### Sub-styles
 

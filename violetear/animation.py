@@ -10,7 +10,13 @@ from violetear.style import Style
 
 
 class Animation:
-    def __init__(self, name: str) -> None:
+    __counter = 0
+
+    def __init__(self, name: str = None) -> None:
+        if name is None:
+            name = f"_a{Animation.__counter}"
+            Animation.__counter += 1
+
         self.name = name
         self._keyframes: Dict[Unit, Style] = {}
 
