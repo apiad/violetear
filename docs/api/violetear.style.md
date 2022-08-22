@@ -392,7 +392,7 @@ Shorthand method for justified align.
 
 ```python linenums="214"
     @style_method
-    def size(self, width:Unit, height:Unit) -> Style:
+    def size(self, width: Unit, height: Unit) -> Style:
         self.width(width)
         self.height(height)
 ```
@@ -807,9 +807,9 @@ Shorthand method for justified align.
         timing: str = "linear",
         direction: str = "normal",
     ) -> Style:
-        self._animation_configs.append((
-            animation.name, Unit.infer(duration, sec, ms), timing, iter, direction
-        ))
+        self._animation_configs.append(
+            (animation.name, Unit.infer(duration, sec, ms), timing, iter, direction)
+        )
 
         self._animations.add(animation)
 

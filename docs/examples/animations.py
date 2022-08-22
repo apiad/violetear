@@ -62,8 +62,8 @@ ball = (
 bounce_x = Animation().start(left=pc(0)).end(left=pc(1))
 bounce_y = Animation().start(top=pc(0)).end(top=pc(1))
 
-ball.animate(bounce_x, sec(5), iter='infinite', direction='alternate')
-ball.animate(bounce_y, sec(2), iter='infinite', direction='alternate')
+ball.animate(bounce_x, sec(5), iter="infinite", direction="alternate")
+ball.animate(bounce_y, sec(2), iter="infinite", direction="alternate")
 
 if __name__ == "__main__":
     sheet.render("animations.css")
