@@ -132,7 +132,7 @@ To learn more, you can:
 
 - Read the introductory [user guide](https://apiad.net/violetear/guide) that showcases the main functionalities of the library.
 - Browse the [examples](https://apiad.net/violetear/examples) to see concrete and detailed use cases.
-- Read the [fully annotated API](https://apiad.net/violetear/api) to understand the inner workings of the library.
+- Read the [fully annotated API](https://apiad.net/violetear/api/violetear) to understand the inner workings of the library.
 
 ## Contribution
 
