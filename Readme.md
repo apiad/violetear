@@ -146,16 +146,26 @@ Likewise, if you're feeling adventurous, go ahead and add some fluid methods to 
 
 Right now `violetear` is in pre-release mode, which means the API is completely unstable. When it reaches a reasonable level of maturity, we will release a `v1.0` and stabilize the API.
 
-**Features planned for the v1.0 milestone**
+**v1.0 milestone checklist**
 
-- Fluent methods for most relevant CSS rules
-- Fully documented API
-- Examples for all relevant use cases
-- Fully typed method signatures
-- Full check of argument values and rule attributes
-- Dynamic generation of CSS based on HTML parsing
-- Support for transitions and animations with helper methods to create timing curves
-- Parameterized presets for relevant design systems
+- [ ] Fluent methods for most relevant CSS rules
+- [ ] Fully documented API
+- [ ] Examples for all relevant use cases
+- [ ] Fully typed method signatures
+- [ ] Full check of argument values and rule attributes
+- [ ] Dynamic generation of CSS based on HTML parsing as well as attribute lookup
+- [ ] Parameterized presets for relevant design systems
+- [ ] Transitions and animations with helper methods to create timing curves
+- [x] Grid and flexbox styles
+- [x] Definitions for all CSS colors
+- [x] Creating and manipulating color palettes
+- [x] Creating scales in any unit
+- [x] States
+- [x] Media queries
+
+**v0.10.1**
+
+- Add support for CSS animations.
 
 **v0.10.0**
 

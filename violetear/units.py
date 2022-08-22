@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import math
-from typing import List, Union
+from typing import List
+
+from violetear.types import GridTemplate
 
 
 def px(x: int):
@@ -80,7 +82,3 @@ class minmax:
 
     def __str__(self) -> str:
         return f"minmax({self.min}, {self.max})"
-
-
-GridTemplate = Union[Unit, repeat, minmax]
-GridSize = Union[Unit, minmax]

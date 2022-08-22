@@ -48,6 +48,8 @@ markdown_extensions:
   - admonition
   - pymdownx.details
   - pymdownx.superfences
+  - pymdownx.tasklist:
+      custom_checkbox: true
   - toc:
       permalink: True
   - pymdownx.emoji:
@@ -63,9 +65,10 @@ nav:
     - Fluid grid: examples/fluid-grid.md
     - Animations: examples/animations.md
   - API:
-    - violetear: api/violetear.__init__.md
+    - violetear: api/violetear.md
     - violetear.stylesheet: api/violetear.stylesheet.md
     - violetear.style: api/violetear.style.md
+    - violetear.animation: api/violetear.animation.md
     - violetear.selector: api/violetear.selector.md
     - violetear.color: api/violetear.color.md
     - violetear.units: api/violetear.units.md

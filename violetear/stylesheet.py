@@ -101,7 +101,7 @@ class StyleSheet:
 
         self._write_preamble(fp)
         total = 0
-        animations: Set[Animation] = set() # To collect all defined animations
+        animations: Set[Animation] = set()  # To collect all defined animations
 
         for style in self.styles:
             total += self._render(style, fp, 0, animations)
@@ -119,7 +119,7 @@ class StyleSheet:
 
         for animation in animations:
             fp.write(animation.css())
-            fp.write("\n")
+            fp.write("\n\n")
 
         # And now we can close the file if we opened it,
         # and decide whether to return a string or not depending on the

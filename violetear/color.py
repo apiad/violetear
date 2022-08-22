@@ -92,7 +92,7 @@ class Color:
 
 # ## Color spaces
 
-# ### `rgb`
+# #### `rgb`
 
 
 @overload
@@ -116,7 +116,7 @@ def rgb(*args, **kwargs):
         return Color(int(r * 255), int(g * 255), int(b * 255), alpha=alpha)
 
 
-# ### `hsv`
+# #### `hsv`
 
 
 @overload
@@ -141,7 +141,7 @@ def hsv(*args, **kwargs):
         return rgb(r, g, b, alpha=alpha)
 
 
-# ### `hls`
+# #### `hls`
 
 
 @overload
@@ -168,7 +168,7 @@ def hls(*args, **kwargs):
         return rgb(r, g, b, alpha=alpha)
 
 
-# ### `hex`
+# #### `hex`
 
 
 @overload
@@ -210,28 +210,28 @@ def hex(*args, **kwargs):
 
 # ## Basic color shorthands
 
-# ### `red`
+# #### `red`
 
 
 def red(lightness: float = 1.0) -> Color:
     return Colors.Red.lit(lightness)
 
 
-# ### `green`
+# #### `green`
 
 
 def green(lightness: float = 1.0) -> Color:
     return Colors.Green.lit(lightness)
 
 
-# ### `blue`
+# #### `blue`
 
 
 def blue(lightness: float = 1.0) -> Color:
     return Colors.Blue.lit(lightness)
 
 
-# ### `gray`
+# #### `gray`
 
 
 def gray(lightness: float = 0.5) -> Color:

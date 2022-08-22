@@ -38,7 +38,7 @@ animation = (
     .end(top=px(-500))
 )
 
-text.animation(animation, duration=sec(10), iterations='infinite')
+text.animation(animation, duration=sec(10), iterations="infinite")
 
 if __name__ == "__main__":
     sheet.render("animations.css")

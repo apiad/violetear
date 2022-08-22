@@ -145,3 +145,166 @@ items.transition(
 Both the `transition` and `transform` properties are somewhat especial in the sense that they can refer to an array of configurations. So, to write the previous code calling `rule()` explicitely, you would have needed to define all the properties, durations, timings, and delays together. Likewise with the transform scale, rotation and traslation.
 
 Instead, when you call `transition` or `transform` to define individual states, `violetear` will keep track of the whole set of definitions and output the correct combined property values. It's a small piece of bookkeeping we do for you that is cumbersome to do on your own over and over.
+
+## Using custom animations
+
+And finally, just because we're into this vintage frenzy, let's add a good old scrolling text with animating color change.
+
+First, let's add some seemingly profound text.
+
+```html title="animations.html"
+<!-- ... -->
+<body>
+    <!-- ... -->
+    <div class="marquee">
+        <p>
+            Sint nesciunt architecto ipsam quia. <br>
+            Deleniti explicabo fuga velit. <br>
+            Iste occaecati sunt veniam veniam quas ratione nihil. <br>
+            Velit nam eum in a nam ratione. <br> <br>
+            Aut quo culpa alias voluptates voluptatem debitis et aperiam. <br>
+            Et illo qui quae. <br>
+            Alias aut repellat quidem et cum aut. <br>
+            Repudiandae doloribus vero quibusdam veniam nam in. <br> <br>
+            Voluptas ut rerum aut harum libero. <br>
+            Qui sint et sapiente non fugiat soluta commodi. <br>
+            Deserunt ipsum quo autem. <br>
+            Inventore in et dolorem. <br>
+            Enim nobis in quia quisquam dolorem similique eos. <br>
+            Repellat eum consequatur sunt velit eum earum hic tenetur. <br>
+        </p>
+    </div>
+</body>
+```
+
+Next, we'll style the container div with hidden overflow to avoid changing the viewport size when the text scrolls. We'll also style the text with some basic rules, including relative positioning so that it flows freely within its container.
+
+```python title="annotations.py"
+# ...
+
+sheet.select(".marquee").height(500).rules(overflow="hidden").padding(20)
+text = sheet.select("p").font(size=22, weight=100).relative()
+
+# ...
+```
+
+??? note "Adding custom rules"
+
+    You should have notice the use of `.rules(overflow="hidden")`. In general, when
+    there's no shorthand method in the `Style` class, you can always use either
+    `Style.rule` to define a single CSS rule, or `Style.rules` which takes keyword arguments
+    as attribute names, so you can define several rules at a time.
+
+    This method also automatically converts `_` to `-` in attribute names so you can use it like:
+
+    ```python
+    sheet.select(...).rules(text_decoration_color=red(0.8))
+    ```
+
+    Which is equivalent to:
+
+    ```python
+    sheet.select(...).rule('text-decoration-color', red(0.8))
+    ```
+
+    Feel free to choose the method that is more convenient for yourself. In the meantime, as `violetear` grows, we will keep adding shorthand methods for the most common CSS attributes, but we will probably never achieve 100% coverage, nor we aim to, so these methods will remain an alternative for setting very niche attributes.
+
+Now it's time to let our imagination fly and add some animations! In `violetear` you can use the `Animation` class to quickly create complex animations. Let's start with the simplest case, creating an animation that moves the text upwards:
+
+```python title="animations.py" hl_lines="6 7 8 9 10"
+# ...
+
+sheet.select(".marquee").height(500).rules(overflow="hidden").padding(20)
+text = sheet.select("p").font(size=22, weight=100).relative()
+
+animation = (
+    Animation("text-up")
+    .start(top=px(500))
+    .end(top=px(-500))
+)
+
+text.animation(animation, duration=sec(10), iterations='infinite')
+```
+
+The methods `start` and `end` define the initial and final keyframes. They are equivalent to calling [`Animation.at`](/violetear/api/violetear.animation#Animation.at) with `0`  and `1` respectively. Like `Style.rules`, these methods can receive keyword-based attributes in the case where you just need to animate a few simple attributes.
+
+However, when you want to create a somewhat complex animation, it is convenient to use the `Style` fluent API. In this case, the `at`, `start` and `end` methods also accept a `Style` instance. Let's add a couple more keyframes to illustrate this:
+
+
+```python title="animations.py" hl_lines="9 10 11"
+# ...
+
+sheet.select(".marquee").height(500).rules(overflow="hidden").padding(20)
+text = sheet.select("p").font(size=22, weight=100).relative()
+
+animation = (
+    Animation("text-up")
+    .start(top=px(500))
+    .at(0.25, Style().color(green(0.3)))
+    .at(0.50, Style().color(blue(0.3)).font(weight=900))
+    .at(0.75, Style().color(red(0.3)))
+    .end(top=px(-500))
+)
+
+text.animation(animation, duration=sec(10), iterations='infinite')
+```
+
+Finally, we configure the animation using the `Style.animation` method, which references an existing animation, and sets the duration, number of iterations, and other parameters.
+
+```python title="animations.py" hl_lines="15"
+# ...
+
+sheet.select(".marquee").height(500).rules(overflow="hidden").padding(20)
+text = sheet.select("p").font(size=22, weight=100).relative()
+
+animation = (
+    Animation("text-up")
+    .start(top=px(500))
+    .at(0.25, Style().color(green(0.3)))
+    .at(0.50, Style().color(blue(0.3)).font(weight=900))
+    .at(0.75, Style().color(red(0.3)))
+    .end(top=px(-500))
+)
+
+text.animation(animation, duration=sec(10), iterations='infinite')
+```
+
+Looking at the generated CSS, you'll notice the `@keyframes` declaration that corresponds to our animation:
+
+```css title="animations.css"
+/* ... */
+
+p {
+    font-size: 22px;
+    font-weight: 100;
+    position: relative;
+    animation-name: text-up;
+    animation-duration: 10s;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+}
+
+@keyframes text-up {
+    0.0%  {
+        top: 500px;
+    }
+
+    25.0%  {
+        color: rgba(0,153,0,1.0);
+    }
+
+    50.0%  {
+        color: rgba(0,0,153,1.0);
+        font-weight: 900;
+    }
+
+    75.0%  {
+        color: rgba(153,0,0,1.0);
+    }
+
+    100.0%  {
+        top: -500px;
+    }
+
+}
+```

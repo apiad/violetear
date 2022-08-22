@@ -11,9 +11,14 @@ from typing import List, Tuple, Union, TYPE_CHECKING
 
 # These ones are internal to `violetear`:
 from .selector import Selector
-from .units import GridSize, GridTemplate, Unit, fr, ms, pc, minmax, rem, repeat, sec
+from .units import Unit, fr, ms, pc, minmax, rem, repeat, sec
+from .types import GridSize, GridTemplate, FontWeight
 from .color import Color, gray
 from .helpers import style_method
+
+# This trick is necessary to annotate the `Style.animation` method
+# without incurring in cyclic import errors,
+# because the `Animation` class does need to import `Style` in runtime.
 
 if TYPE_CHECKING:
     from .animation import Animation
@@ -81,7 +86,10 @@ class Style:
     # #### `Style.rules`
 
     def rules(self, **rules) -> Style:
-        """Define a bunch of CSS rules at once with kwargs."""
+        """Define a bunch of CSS rules at once with kwargs.
+
+        Attribute names are automatically converted from `snake_case` to `kebab-case`.
+        """
 
         for rule, value in rules.items():
             self.rule(rule.replace("_", "-"), value)
@@ -120,11 +128,15 @@ class Style:
     # These methods allow manipulating font and text properties.
 
     # #### `Style.font`
-    # The `font` method
+    # Configure font attributes.
 
     @style_method
     def font(
-        self, size: Unit = None, *, weight: str = None, family: str = None
+        self,
+        size: Unit = None,
+        *,
+        weight: FontWeight = None,
+        family: str = None,
     ) -> Style:
         if size:
             self.rule("font-size", Unit.infer(size))
@@ -136,6 +148,7 @@ class Style:
             self.rule("font-family", family)
 
     # #### `Style.text`
+    # Configure text styling attributes.
 
     @style_method
     def text(self, *, align: str = None, decoration: str = None) -> Style:
@@ -147,24 +160,28 @@ class Style:
             self.rule("text-decoration", decoration)
 
     # #### `Style.center`
+    # Shorthand method for center align.
 
     @style_method
     def center(self) -> Style:
         self.text(align="center")
 
     # #### `Style.left`
+    # Shorthand method for left align.
 
     @style_method
     def left(self) -> Style:
         self.text(align="left")
 
     # #### `Style.right`
+    # Shorthand method for right align.
 
     @style_method
     def right(self) -> Style:
         self.text(align="right")
 
     # #### `Style.justify`
+    # Shorthand method for justified align.
 
     @style_method
     def justify(self) -> Style:

@@ -133,7 +133,7 @@ Finally, all media-conditioned styles are rendered, wrapped appropiately.
 ```python linenums="85"
         self._write_preamble(fp)
         total = 0
-        animations: Set[Animation] = set() # To collect all defined animations
+        animations: Set[Animation] = set()  # To collect all defined animations
 
         for style in self.styles:
             total += self._render(style, fp, 0, animations)
@@ -155,7 +155,7 @@ Generate all animations, but each one only once.
 ```python linenums="101"
         for animation in animations:
             fp.write(animation.css())
-            fp.write("\n")
+            fp.write("\n\n")
 ```
 
 And now we can close the file if we opened it,

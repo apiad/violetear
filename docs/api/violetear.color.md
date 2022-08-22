@@ -135,7 +135,7 @@ class Color:
 
 ## Color spaces
 
-### `rgb`
+#### `rgb`
 
 <a name="ref:rgb"></a>
 <a name="ref:rgb"></a>
@@ -163,7 +163,7 @@ def rgb(*args, **kwargs):
         return Color(int(r * 255), int(g * 255), int(b * 255), alpha=alpha)
 ```
 
-### `hsv`
+#### `hsv`
 
 <a name="ref:hsv"></a>
 <a name="ref:hsv"></a>
@@ -192,7 +192,7 @@ def hsv(*args, **kwargs):
         return rgb(r, g, b, alpha=alpha)
 ```
 
-### `hls`
+#### `hls`
 
 <a name="ref:hls"></a>
 <a name="ref:hls"></a>
@@ -223,7 +223,7 @@ def hls(*args, **kwargs):
         return rgb(r, g, b, alpha=alpha)
 ```
 
-### `hex`
+#### `hex`
 
 <a name="ref:hex"></a>
 <a name="ref:hex"></a>
@@ -269,7 +269,7 @@ def hex(*args, **kwargs):
 
 ## Basic color shorthands
 
-### `red`
+#### `red`
 
 <a name="ref:red"></a>
 
@@ -278,7 +278,7 @@ def red(lightness: float = 1.0) -> Color:
     return Colors.Red.lit(lightness)
 ```
 
-### `green`
+#### `green`
 
 <a name="ref:green"></a>
 
@@ -287,7 +287,7 @@ def green(lightness: float = 1.0) -> Color:
     return Colors.Green.lit(lightness)
 ```
 
-### `blue`
+#### `blue`
 
 <a name="ref:blue"></a>
 
@@ -296,7 +296,7 @@ def blue(lightness: float = 1.0) -> Color:
     return Colors.Blue.lit(lightness)
 ```
 
-### `gray`
+#### `gray`
 
 <a name="ref:gray"></a>
 
