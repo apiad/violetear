@@ -273,3 +273,106 @@ with sheet.media(max_width=600):
 
 sheet.render("fluid-grid.css")
 ```
+
+Finally, we just need to update our calls to `make_grid_styles` with the corresponding class prefixes `lg`, `md` and `sm`.
+Go ahead and play with the [HTML file](fluid-grid-3.html) we have right now to see how the elements now snap to their desired size leaving no gaps. 
+
+```python title="fluid-grid.py" hl_lines="25 28 31"
+sheet = StyleSheet(normalize=True)
+
+sheet.select(".main").padding(50)
+sheet.select(".container").background(gray(0.9)).padding(10).margin(bottom=10)
+sheet.select(".col").background(gray(0.95)).border(0.1, gray(1)).height(100)
+
+sheet.select(".row").flexbox(wrap=True)
+
+
+def make_grid_styles(columns, custom=None):
+    for size in range(1, columns):
+        sheet.select(f".span-{size}").width(size / columns)
+
+    for size in range(columns, 13):
+        sheet.select(f".span-{size}").width(1.0)
+
+    if custom:
+        for size in range(1, columns + 1):
+            sheet.select(f".{custom}-{size}").width(size / columns)
+
+
+make_grid_styles(12)
+
+with sheet.media(max_width=1600):
+    make_grid_styles(8, "lg")
+
+with sheet.media(max_width=1200):
+    make_grid_styles(6, "md")
+
+with sheet.media(max_width=800):
+    make_grid_styles(4, "sm")
+
+with sheet.media(max_width=600):
+    make_grid_styles(1)
+
+sheet.render("fluid-grid.css")
+```
+
+## Making a fixed grid
+
+Finally, we will add a `fixed` class to `container`s when we want them to have a fixed size instead of flowing with the browser width. This is by far the simplest change, we just to define `.fixed` conveniently at all screen sizes, taking into account to substract the padding from the `.main` element:
+
+```python title="fluid_grid.py" hl_lines="4 8 12 16"
+# ... 
+
+make_grid_styles(12)
+sheet.select(".fixed").width(max=1500).margin("auto")
+
+with sheet.media(max_width=1600):
+    make_grid_styles(8, "lg")
+    sheet.select(".fixed").width(max=1100)
+
+with sheet.media(max_width=1200):
+    make_grid_styles(6, "md")
+    sheet.select(".fixed").width(max=700)
+
+with sheet.media(max_width=800):
+    make_grid_styles(4, "sm")
+    sheet.select(".fixed").width(max=500)
+
+with sheet.media(max_width=600):
+    make_grid_styles(1)
+
+# ...
+```
+
+And now we're done. Check the [final HTML file](fluid-grid.html) to see how the lower grid remains fixed while the upper one flows. Beautiful!
+
+We just created a fully fledged grid system with over 170 classes spanning four different screen sizes in little less than 30 lines of Python code!
+
+## Using the preset `FlexGrid`
+
+Flexible grids are everywhere, and since it is so easy to create one with `violetear`, it shouldn't come as a surprise that we already ship a preset flexible grid system that you can fully customize.
+
+A preset in `violetear` is just a class that extends `StyleSheet` and pre-generates a bunch of styles all at once given a few parameters. They are all located in the `violetear.presets` namespace. The one we want now is called `FlexGrid` and it can be configured to mimic what we just coded pretty easily:
+
+```python
+from violetear import StyleSheet
+from violetear.presets import FlexGrid
+
+sheet = StyleSheet(normalize=True).extend(FlexGrid(
+    columns=12,
+    breakpoints=dict(
+        lg=(1600, 8),
+        md=(1200, 6),
+        sm=(800, 4),
+        xs=(400, 1)
+    )
+))
+# ... rest of your styles
+```
+
+The method `StyleSheet.extend(...)` receives another stylesheet and copies all its styles. A preset, like `FlexGrid`, is really just a class that inherits `StyleSheet` and creates a lot of predefined styles in its constructor. The `FlexGrid` class generates styles just like the ones we designed here, with a base number of columns, and a set of optional breakpoints. It also allows customizing all class names, but by default it uses just the ones we defined in this example.
+
+??? note "To be honest..."
+
+    To be honest, the `FlexGrid` preset doesn't include the `.fixed` class (although it might in the future), and of course our first couple of aesthetic styles to make containers and cols visible won't be there either, so techincally you'd still have to add a few rules manually, but the bulk of the work is already done for you!
+ 

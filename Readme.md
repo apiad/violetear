@@ -57,10 +57,27 @@ with sheet.media(min_width=768):
     sheet.redefine(title).display("inline")
 ```
 
-And you can style specific states:
+You can style specific states:
 
 ```python
 title.on("hover").font(weight="bolder")
+```
+
+And finally `violetear` has a few ready-made collection of styles for some of the most common design patterns. Here's a [12-column grid system made with flexbox](https://apiad.net/violetear/examples/fluid-grid) with varying screen sizes that is completely customizable in just 5 lines of code:
+
+
+```python
+from violetear.presets import FlexGrid
+
+sheet.extend(FlexGrid(
+    columns=12,        # 12 columns by default
+    breakpoints=dict(
+        lg=(1600, 8),  # Add several breakpoints at differente
+        md=(1200, 6),  # screen sizes changing the 
+        sm=(800, 4),   # number of columns and adding custom
+        xs=(400, 1)    # classes for extra responsiveness
+    )
+))
 ```
 
 Once your stylesheet is complete, you have a few options to deliver the styles to your frontend.

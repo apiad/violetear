@@ -25,6 +25,14 @@ class MediaQuery:
 
         return f"\n@media {' and '.join(query)}"
 
+    def clone(self, sheet) -> "MediaQuery":
+        media = MediaQuery(sheet, self.min_width, self.max_width)
+
+        for style in self.styles:
+            media.add(style)
+
+        return media
+
     def __enter__(self):
         self._sheet._media = self
 

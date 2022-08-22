@@ -21,10 +21,10 @@ def test_example(script, css):
 
     sheet = ns["sheet"]
     result = sheet.render().split("\n")
-    result.pop(2)
+    result.pop(1)
 
     with open(Path(__file__).parent / "expected_outputs" / css.name) as fp:
         expected = fp.readlines()
-        expected.pop(2)
+        expected.pop(1)
 
     assert "\n".join(result) == "".join(expected)
