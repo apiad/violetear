@@ -100,7 +100,7 @@ class StyleSheet:
 
     # ### Manipulating styles
 
-    def select(self, selector: str, *, name: str = None):
+    def select(self, selector: str, *, name: str = None) -> Style:
 
         if name is None:
             name = (

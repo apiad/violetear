@@ -59,6 +59,7 @@ nav:
   - User Guide: guide.md
   - Examples:
     - Color spaces: examples/color-spaces.md
+    - Fluid grid: examples/fluid-grid.md
   - API:
     - violetear: api/violetear.__init__.md
     - Style Sheets: api/violetear.stylesheet.md

@@ -1,3 +1,4 @@
+import math
 from typing import List, Union
 
 
@@ -22,7 +23,7 @@ def fr(x: float):
 
 
 def pc(x: float):
-    return Unit(round(x * 100, 2), "%")
+    return Unit(math.trunc(x * 10000) / 100, "%")
 
 
 class Unit:

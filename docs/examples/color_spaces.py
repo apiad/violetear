@@ -8,10 +8,10 @@ sheet.select(".palette").flexbox().children("div").flex(1).height(50).margin(5)
 
 # Basic colors
 for cls, color in zip([".red", ".green", ".blue", ".gray"], [red, green, blue, gray]):
-    palette = sheet.select(cls)
-
     for i in range(11):
-        palette.children(f".shade-{i}").background(color(i / 10)).border(0.1, gray(0.4))
+        sheet.select(cls).children(f".shade-{i}").background(color(i / 10)).border(
+            0.1, gray(0.4)
+        )
 
 
 def palette(style: Style, colors: Sequence[Color]) -> Style:

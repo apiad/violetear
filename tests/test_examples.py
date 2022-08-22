@@ -6,8 +6,8 @@ from pathlib import Path
 def get_example_params():
     results = []
 
-    for css_file in (Path(__file__).parent.parent / "docs").rglob("*.css"):
-        py_file = css_file.with_name(css_file.stem.replace("-", "_") + ".py")
+    for py_file in (Path(__file__).parent.parent / "docs").rglob("*.py"):
+        css_file = py_file.with_name(py_file.stem.replace("_", "-") + ".css")
         results.append((py_file, css_file))
 
     return results
@@ -23,7 +23,7 @@ def test_example(script, css):
     result = sheet.render().split("\n")
     result.pop(2)
 
-    with open(css) as fp:
+    with open(Path(__file__).parent / "expected_outputs" / css.name) as fp:
         expected = fp.readlines()
         expected.pop(2)
 
