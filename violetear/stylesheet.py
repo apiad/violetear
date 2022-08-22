@@ -9,8 +9,11 @@ and allows rendering stylesheets either as files or as strings to be injected in
 import io
 import datetime
 from pathlib import Path
+from typing import Set
 from warnings import warn
 import textwrap
+
+from violetear.animation import Animation
 
 # Internal imports:
 
@@ -98,18 +101,25 @@ class StyleSheet:
 
         self._write_preamble(fp)
         total = 0
+        animations: Set[Animation] = set() # To collect all defined animations
 
         for style in self.styles:
-            total += self._render(style, fp, 0)
+            total += self._render(style, fp, 0, animations)
 
         for media in self.medias:
             fp.write(media.css())
             fp.write("{\n")
 
             for style in media.styles:
-                total += self._render(style, fp, 4)
+                total += self._render(style, fp, 4, animations)
 
             fp.write("}\n\n")
+
+        # Generate all animations, but each one only once.
+
+        for animation in animations:
+            fp.write(animation.css())
+            fp.write("\n")
 
         # And now we can close the file if we opened it,
         # and decide whether to return a string or not depending on the
@@ -138,7 +148,7 @@ class StyleSheet:
         if self._preamble:
             fp.write("\n")
 
-    def _render(self, style: Style, fp, indent=0):
+    def _render(self, style: Style, fp, indent, animations):
         total = 0
 
         for s in [style] + list(style._children.values()):
@@ -148,6 +158,9 @@ class StyleSheet:
             fp.write(textwrap.indent(s.css(), indent * " "))
             fp.write("\n\n")
             total += 1
+
+            for animation in s._animations:
+                animations.add(animation)
 
         return total
 

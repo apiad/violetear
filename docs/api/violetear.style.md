@@ -4,30 +4,39 @@
     This module defines the `Style` class.
 
 
+
+
+```python linenums="4"
+from __future__ import annotations
+```
+
 These are for typing our methods:
 
 
 
-```python linenums="5"
-from typing import List, Tuple, Union
+```python linenums="6"
+from typing import List, Tuple, Union, TYPE_CHECKING
 ```
 
 These ones are internal to `violetear`:
 
 
 
-```python linenums="7"
+```python linenums="8"
 from .selector import Selector
 from .units import GridSize, GridTemplate, Unit, fr, ms, pc, minmax, rem, repeat, sec
 from .color import Color, gray
 from .helpers import style_method
+
+if TYPE_CHECKING:
+    from .animation import Animation
 ```
 
 And this one is for generating CSS:
 
 
 
-```python linenums="12"
+```python linenums="16"
 import textwrap
 ```
 
@@ -45,10 +54,10 @@ that allow chained invocation to quickly build a complex style.
 
 <a name="ref:Style"></a>
 
-```python linenums="22"
+```python linenums="26"
 class Style:
     def __init__(
-        self, selector: Union[str, Selector] = None, *, parent: "Style" = None
+        self, selector: Union[str, Selector] = None, *, parent: Style = None
     ) -> None:
 ```
 
@@ -65,7 +74,7 @@ class Style:
 
 
 
-```python linenums="35"
+```python linenums="39"
         if isinstance(selector, str):
             selector = Selector.from_css(selector)
 
@@ -75,6 +84,7 @@ class Style:
         self._children = {}
         self._transitions = []
         self._transforms = {}
+        self._animations = set()
 ```
 
 ### Basic rule manipulation
@@ -88,8 +98,8 @@ using their corresponding `__str__` methods.
 
 
 
-```python linenums="51"
-    def rule(self, attr: str, value) -> "Style":
+```python linenums="56"
+    def rule(self, attr: str, value) -> Style:
 ```
 
 ??? note "Docstring"
@@ -103,7 +113,7 @@ using their corresponding `__str__` methods.
 
 
 
-```python linenums="59"
+```python linenums="64"
         self._rules[attr] = str(value)
         return self
 ```
@@ -112,8 +122,8 @@ using their corresponding `__str__` methods.
 
 
 
-```python linenums="62"
-    def rules(self, **rules) -> "Style":
+```python linenums="67"
+    def rules(self, **rules) -> Style:
 ```
 
 ??? note "Docstring"
@@ -137,12 +147,12 @@ using their corresponding `__str__` methods.
     # However, in favour of YAGNI, I will refrain from implementing that functionality until
     # proven necessary.
     
-    def apply(self, *others: "Style") -> "Style":
+    def apply(self, *others: Style) -> Style:
 
 
 
 
-```python linenums="85"
+```python linenums="90"
         Rules are defined in order, so later styles will override former ones.
 
         **Parameters**:
@@ -167,7 +177,7 @@ using their corresponding `__str__` methods.
     @style_method
     def font(
     self, size: Unit = None, *, weight: str = None, family: str = None
-    ) -> "Style":
+    ) -> Style:
     if size:
     self.rule("font-size", Unit.infer(size))
     
@@ -180,7 +190,7 @@ using their corresponding `__str__` methods.
     # #### `Style.text`
     
     @style_method
-    def text(self, *, align: str = None, decoration: str = None) -> "Style":
+    def text(self, *, align: str = None, decoration: str = None) -> Style:
     if align is not None:
     self.rule("text-align", align)
     if decoration is not None:
@@ -191,25 +201,25 @@ using their corresponding `__str__` methods.
     # #### `Style.center`
     
     @style_method
-    def center(self) -> "Style":
+    def center(self) -> Style:
     self.text(align="center")
     
     # #### `Style.left`
     
     @style_method
-    def left(self) -> "Style":
+    def left(self) -> Style:
     self.text(align="left")
     
     # #### `Style.right`
     
     @style_method
-    def right(self) -> "Style":
+    def right(self) -> Style:
     self.text(align="right")
     
     # #### `Style.justify`
     
     @style_method
-    def justify(self) -> "Style":
+    def justify(self) -> Style:
     self.text(align="justify")
     
     # ### Color styles
@@ -217,39 +227,13 @@ using their corresponding `__str__` methods.
     # #### `Style.color`
     
     @style_method
-    def color(
-    self, color: Color = None, *, rgb=None, hsv=None, hls=None, alpha: float = None
-    ) -> "Style":
-    if color is None:
-    if rgb is not None:
-    r, g, b = rgb
-    color = Color(r, g, b, alpha)
-    elif hsv is not None:
-    h, s, v = hsv
-    color = Color.from_hsv(h, s, v, alpha)
-    elif hls is not None:
-    h, l, s = hls
-    color = Color.from_hls(h, l, s, alpha)
-    
+    def color(self, color: Color) -> Style:
     self.rule("color", color)
     
     # #### `Style.background`
     
     @style_method
-    def background(
-    self, color: Color = None, *, rgb=None, hsv=None, hls=None, alpha: float = None
-    ) -> "Style":
-    if color is None:
-    if rgb is not None:
-    r, g, b = rgb
-    color = Color(r, g, b, alpha)
-    elif hsv is not None:
-    h, s, v = hsv
-    color = Color.from_hsv(h, s, v, alpha)
-    elif hls is not None:
-    h, l, s = hls
-    color = Color.from_hls(h, l, s, alpha)
-    
+    def background(self, color: Color) -> Style:
     self.rule("background-color", color)
     
     # #### `Style.border`
@@ -257,7 +241,7 @@ using their corresponding `__str__` methods.
     @style_method
     def border(
     self, width: Unit = None, color: Color = None, *, radius: Unit = None
-    ) -> "Style":
+    ) -> Style:
     if width is not None:
     self.rule("border-width", Unit.infer(width))
     
@@ -272,19 +256,19 @@ using their corresponding `__str__` methods.
     # #### `Style.visibility`
     
     @style_method
-    def visibility(self, visibility: str) -> "Style":
+    def visibility(self, visibility: str) -> Style:
     self.rule("visibility", visibility)
     
     # #### `Style.visible`
     
     @style_method
-    def visible(self) -> "Style":
+    def visible(self) -> Style:
     self.visibility("visible")
     
     # #### `Style.hidden`
     
     @style_method
-    def hidden(self) -> "Style":
+    def hidden(self) -> Style:
     self.visibility("hidden")
     
     # ### Geometry styles
@@ -292,7 +276,7 @@ using their corresponding `__str__` methods.
     # #### `Style.width`
     
     @style_method
-    def width(self, value=None, *, min=None, max=None) -> "Style":
+    def width(self, value=None, *, min=None, max=None) -> Style:
     if value is not None:
     self.rule("width", Unit.infer(value, on_float=pc))
     
@@ -305,7 +289,7 @@ using their corresponding `__str__` methods.
     # #### `Style.height`
     
     @style_method
-    def height(self, value=None, *, min=None, max=None) -> "Style":
+    def height(self, value=None, *, min=None, max=None) -> Style:
     if value is not None:
     self.rule("height", Unit.infer(value, on_float=pc))
     
@@ -319,8 +303,14 @@ using their corresponding `__str__` methods.
     
     @style_method
     def margin(
-    self, all=None, *, left=None, right=None, top=None, bottom=None
-    ) -> "Style":
+    self,
+    all=None,
+    *,
+    left=None,
+    right=None,
+    top=None,
+    bottom=None,
+    ) -> Style:
     if all is not None:
     self.rule("margin", Unit.infer(all))
     if left is not None:
@@ -336,8 +326,14 @@ using their corresponding `__str__` methods.
     
     @style_method
     def padding(
-    self, all=None, *, left=None, right=None, top=None, bottom=None
-    ) -> "Style":
+    self,
+    all=None,
+    *,
+    left=None,
+    right=None,
+    top=None,
+    bottom=None,
+    ) -> Style:
     if all is not None:
     self.rule("padding", Unit.infer(all))
     if left is not None:
@@ -352,7 +348,7 @@ using their corresponding `__str__` methods.
     # #### `Style.rounded`
     
     @style_method
-    def rounded(self, radius: Unit = None) -> "Style":
+    def rounded(self, radius: Unit = None) -> Style:
     if radius is None:
     radius = 0.25
     
@@ -363,7 +359,7 @@ using their corresponding `__str__` methods.
     # #### `Style.display`
     
     @style_method
-    def display(self, display: str) -> "Style":
+    def display(self, display: str) -> Style:
     self.rule("display", display)
     
     # #### `Style.flexbox`
@@ -373,12 +369,12 @@ using their corresponding `__str__` methods.
     self,
     direction: str = "row",
     *,
-    gap: Unit = None,
+    gap: Unit = 0,
     wrap: bool = False,
     reverse: bool = False,
     align: str = None,
     justify: str = None,
-    ) -> "Style":
+    ) -> Style:
     self.display("flex")
     
     if reverse:
@@ -395,7 +391,6 @@ using their corresponding `__str__` methods.
     if justify is not None:
     self.rule("justify-content", justify)
     
-    if gap is not None:
     self.rule("gap", Unit.infer(gap))
     
     # #### `Style.flex`
@@ -406,7 +401,7 @@ using their corresponding `__str__` methods.
     grow: float = None,
     shrink: float = None,
     basis: int = None,
-    ) -> "Style":
+    ) -> Style:
     if grow is not None:
     self.rule("flex-grow", float(grow))
     
@@ -427,7 +422,7 @@ using their corresponding `__str__` methods.
     auto_columns: GridSize = None,
     auto_rows: GridSize = None,
     gap: Unit = 0,
-    ) -> "Style":
+    ) -> Style:
     self.display("grid")
     
     if columns is None and rows is None:
@@ -455,8 +450,13 @@ using their corresponding `__str__` methods.
     
     @style_method
     def columns(
-    self, count: int, min: GridSize = None, max: GridSize = None, *, gap: Unit = 0
-    ) -> "Style":
+    self,
+    count: int,
+    min: GridSize = None,
+    max: GridSize = None,
+    *,
+    gap: Unit = 0,
+    ) -> Style:
     if min is None:
     min = fr(1)
     
@@ -469,8 +469,13 @@ using their corresponding `__str__` methods.
     
     @style_method
     def rows(
-    self, count: int, min: GridSize = None, max: GridSize = None, *, gap: Unit = 0
-    ) -> "Style":
+    self,
+    count: int,
+    min: GridSize = None,
+    max: GridSize = None,
+    *,
+    gap: Unit = 0,
+    ) -> Style:
     if min is None:
     min = fr(1)
     
@@ -486,7 +491,7 @@ using their corresponding `__str__` methods.
     self,
     columns: Union[int, Tuple[int, int]] = None,
     rows: Union[int, Tuple[int, int]] = None,
-    ) -> "Style":
+    ) -> Style:
     if columns is not None:
     if isinstance(columns, tuple):
     columns = f"{columns[0]} / {columns[1]+1}"
@@ -510,7 +515,7 @@ using their corresponding `__str__` methods.
     right: int = None,
     top: int = None,
     bottom: int = None,
-    ) -> "Style":
+    ) -> Style:
     self.rule("position", position)
     
     if left is not None:
@@ -532,7 +537,7 @@ using their corresponding `__str__` methods.
     right: int = None,
     top: int = None,
     bottom: int = None,
-    ) -> "Style":
+    ) -> Style:
     self.position("absolute", left=left, right=right, top=top, bottom=bottom)
     
     # #### `Style.relative`
@@ -545,7 +550,7 @@ using their corresponding `__str__` methods.
     right: int = None,
     top: int = None,
     bottom: int = None,
-    ) -> "Style":
+    ) -> Style:
     self.position("relative", left=left, right=right, top=top, bottom=bottom)
     
     # ### Animations
@@ -559,7 +564,7 @@ using their corresponding `__str__` methods.
     duration: Unit = ms(150),
     timing: str = "linear",
     delay: Unit = ms(0),
-    ) -> "Style":
+    ) -> Style:
     self._transitions.append(
     (
     property,
@@ -595,7 +600,7 @@ using their corresponding `__str__` methods.
     scale_x: float = None,
     scale_y: float = None,
     rotate: Unit = None,
-    ) -> "Style":
+    ) -> Style:
     if translate_x is not None:
     self._transforms["translateX"] = Unit.infer(translate_x)
     if translate_y is not None:
@@ -615,13 +620,11 @@ using their corresponding `__str__` methods.
     self.rule("transform", " ".join(transforms))
     
     @style_method
-    def translate(self, x: Unit = None, y: Unit = None) -> "Style":
+    def translate(self, x: Unit = None, y: Unit = None) -> Style:
     self.transform(translate_x=x, translate_y=y)
     
     @style_method
-    def scale(
-    self, scale: float = None, *, x: float = None, y: float = None
-    ) -> "Style":
+    def scale(self, scale: float = None, *, x: float = None, y: float = None) -> Style:
     if scale is not None:
     x = scale
     y = scale
@@ -629,14 +632,31 @@ using their corresponding `__str__` methods.
     self.transform(scale_x=x, scale_y=y)
     
     @style_method
-    def rotate(self, rotation: float) -> "Style":
+    def rotate(self, rotation: float) -> Style:
     self.transform(rotate=rotation)
+    
+    # #### `Style.animation`
+    
+    @style_method
+    def animation(
+    self,
+    animation: Animation,
+    duration: Unit = sec(1),
+    iterations: int = 1,
+    timing: str = "linear",
+    ) -> Style:
+    self.rule("animation-name", animation.name)
+    self.rule("animation-duration", Unit.infer(duration, sec, ms))
+    self.rule("animation-timing-function", timing)
+    self.rule("animation-iteration-count", iterations)
+    
+    self._animations.add(animation)
     
     # ### Sub-styles
     
     # #### `Style.on`
     
-    def on(self, state) -> "Style":
+    def on(self, state) -> Style:
     selector = self.selector.on(state)
     style = self._children.get(selector.css(), Style(selector))
     self._children[selector.css()] = style
@@ -644,7 +664,7 @@ using their corresponding `__str__` methods.
     
     # #### `Style.children`
     
-    def children(self, selector: str = "*", *, nth: int = None) -> "Style":
+    def children(self, selector: str = "*", *, nth: int = None) -> Style:
     selector = self.selector.children(selector, nth=nth)
     style = self._children.get(selector.css(), Style(selector))
     self._children[selector.css()] = style
@@ -664,7 +684,8 @@ using their corresponding `__str__` methods.
     if inline:
     return rules
     
-    return f"{self.selector.css()} {{\n{textwrap.indent(rules, 4*' ')}\n}}"
+    selector = self.selector.css() if self.selector is not None else ""
+    return f"{selector} {{\n{textwrap.indent(rules, 4*' ')}\n}}"
     
     # #### `Style.inline`
     

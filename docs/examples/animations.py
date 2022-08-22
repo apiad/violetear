@@ -1,5 +1,8 @@
 from violetear import StyleSheet
-from violetear.color import gray, red
+from violetear.color import blue, gray, green, red
+from violetear.animation import Animation
+from violetear.style import Style
+from violetear.units import px, sec
 
 sheet = StyleSheet(normalize=True)
 
@@ -22,6 +25,20 @@ items.transition(
     timing="ease-in-out",
     delay=150,
 ).on("hover").scale(1.1).translate(y=5)
+
+sheet.select(".marquee").height(500).rules(overflow="hidden").padding(20)
+text = sheet.select("p").font(size=22, weight=100).relative()
+
+animation = (
+    Animation("text-up")
+    .start(top=px(500))
+    .at(0.25, Style().color(green(0.3)))
+    .at(0.50, Style().color(blue(0.3)).font(weight=900))
+    .at(0.75, Style().color(red(0.3)))
+    .end(top=px(-500))
+)
+
+text.animation(animation, duration=sec(10), iterations='infinite')
 
 if __name__ == "__main__":
     sheet.render("animations.css")

@@ -6,11 +6,17 @@
     to combine them.
 
 
+
+
+```python linenums="6"
+from __future__ import annotations
+```
+
 Basic imports
 
 
 
-```python linenums="7"
+```python linenums="8"
 import colorsys  # for changing color spaces
 import sys  # for current byte-order
 from binascii import hexlify  # for converting to hexadecimal
@@ -23,15 +29,15 @@ from .units import Unit
 
 <a name="ref:Color"></a>
 
-```python linenums="14"
+```python linenums="15"
 class Color:
     def __init__(
         self, red: int = 0, green: int = 0, blue: int = 0, *, alpha: float = 1.0
     ) -> None:
-        self.r = red
-        self.g = green
-        self.b = blue
-        self.a = 1.0 if alpha is None else alpha
+        self.r: int = red
+        self.g: int = green
+        self.b: int = blue
+        self.a: float = 1.0 if alpha is None else alpha
 
     def __str__(self):
         return f"rgba({self.r},{self.g},{self.b},{self.a})"
@@ -44,8 +50,8 @@ class Color:
 
 
 
-```python linenums="29"
-    def saturated(self, saturation: float) -> "Color":
+```python linenums="30"
+    def saturated(self, saturation: float) -> Color:
         h, _, v = self.hsv()
         return hsv(h, saturation, v, alpha=self.a)
 ```
@@ -54,8 +60,8 @@ class Color:
 
 
 
-```python linenums="33"
-    def lit(self, lightness: float) -> "Color":
+```python linenums="34"
+    def lit(self, lightness: float) -> Color:
         h, _, s = hls(self)
         return hls(h, lightness, s, alpha=self.a)
 ```
@@ -64,8 +70,8 @@ class Color:
 
 
 
-```python linenums="37"
-    def shifted(self, hue: float) -> "Color":
+```python linenums="38"
+    def shifted(self, hue: float) -> Color:
         _, l, s = hls(self)
         return hls(hue, l, s, alpha=self.a)
 ```
@@ -74,8 +80,8 @@ class Color:
 
 
 
-```python linenums="41"
-    def transparent(self, alpha: float) -> "Color":
+```python linenums="42"
+    def transparent(self, alpha: float) -> Color:
         return Color(self.r, self.g, self.b, alpha=alpha)
 ```
 
@@ -83,8 +89,8 @@ class Color:
 
 
 
-```python linenums="44"
-    def redshift(self, percent: float, *, space="hls") -> "Color":
+```python linenums="45"
+    def redshift(self, percent: float, *, space="hls") -> Color:
         _, l, s = hls(self)
         target = hls(0, l, s)
         return self.towards(target, percent, space=space)
@@ -94,8 +100,8 @@ class Color:
 
 
 
-```python linenums="49"
-    def blueshift(self, percent: float, *, space="hls") -> "Color":
+```python linenums="50"
+    def blueshift(self, percent: float, *, space="hls") -> Color:
         _, l, s = hls(self)
         target = hls(1, l, s)
         return self.towards(target, percent, space=space)
@@ -105,8 +111,8 @@ class Color:
 
 
 
-```python linenums="54"
-    def towards(self, other: "Color", percent: float, *, space="hls") -> "Color":
+```python linenums="55"
+    def towards(self, other: Color, percent: float, *, space="hls") -> Color:
         space = dict(rgb=rgb, hls=hls, hsv=hsv)[space]
 
         start_values = space(self)
@@ -120,9 +126,9 @@ class Color:
 
 
 
-```python linenums="63"
+```python linenums="64"
     @staticmethod
-    def palette(start: "Color", end: "Color", steps: int, space="hls") -> List["Color"]:
+    def palette(start: Color, end: Color, steps: int, space="hls") -> List[Color]:
         percents = Unit.scale(float, 0, 1, steps)
         return [start.towards(end, p, space=space) for p in percents]
 ```
@@ -135,7 +141,7 @@ class Color:
 <a name="ref:rgb"></a>
 <a name="ref:rgb"></a>
 
-```python linenums="69"
+```python linenums="70"
 @overload
 def rgb(red: float, green: float, blue: float, /, *, alpha: float = 1.0) -> Color:
     ...
@@ -163,11 +169,9 @@ def rgb(*args, **kwargs):
 <a name="ref:hsv"></a>
 <a name="ref:hsv"></a>
 
-```python linenums="89"
+```python linenums="90"
 @overload
-def hsv(
-    hue: float, saturation: float, value: float, /, *, alpha: float = 1.0
-) -> "Color":
+def hsv(hue: float, saturation: float, value: float, /, *, alpha: float = 1.0) -> Color:
     ...
 
 
@@ -194,11 +198,11 @@ def hsv(*args, **kwargs):
 <a name="ref:hls"></a>
 <a name="ref:hls"></a>
 
-```python linenums="112"
+```python linenums="111"
 @overload
 def hls(
     hue: float, lightness: float, saturation: float, /, *, alpha: float = 1.0
-) -> "Color":
+) -> Color:
     ...
 
 
@@ -225,7 +229,7 @@ def hls(*args, **kwargs):
 <a name="ref:hex"></a>
 <a name="ref:hex"></a>
 
-```python linenums="135"
+```python linenums="134"
 @overload
 def hex(code: str, /, *, alpha: float = 1.0) -> Color:
     ...
@@ -269,7 +273,7 @@ def hex(*args, **kwargs):
 
 <a name="ref:red"></a>
 
-```python linenums="172"
+```python linenums="171"
 def red(lightness: float = 1.0) -> Color:
     return Colors.Red.lit(lightness)
 ```
@@ -278,7 +282,7 @@ def red(lightness: float = 1.0) -> Color:
 
 <a name="ref:green"></a>
 
-```python linenums="175"
+```python linenums="174"
 def green(lightness: float = 1.0) -> Color:
     return Colors.Green.lit(lightness)
 ```
@@ -287,7 +291,7 @@ def green(lightness: float = 1.0) -> Color:
 
 <a name="ref:blue"></a>
 
-```python linenums="178"
+```python linenums="177"
 def blue(lightness: float = 1.0) -> Color:
     return Colors.Blue.lit(lightness)
 ```
@@ -296,7 +300,7 @@ def blue(lightness: float = 1.0) -> Color:
 
 <a name="ref:gray"></a>
 
-```python linenums="181"
+```python linenums="180"
 def gray(lightness: float = 0.5) -> Color:
     return Colors.Gray.lit(lightness)
 ```
@@ -312,7 +316,7 @@ to access colors by name.
 
 <a name="ref:Colors"></a>
 
-```python linenums="189"
+```python linenums="188"
 class Colors:
 ```
 
@@ -325,16 +329,16 @@ class Colors:
 
 
 
-```python linenums="195"
+```python linenums="194"
     def __getitem__(self, key):
-        return getattr(Color, key)
+        return getattr(Colors, key)
 ```
 
 ### Basic web colors
 
 
 
-```python linenums="198"
+```python linenums="197"
     White = hex("#ffffff")
     Silver = hex("#c0c0c0")
     Gray = hex("#808080")
@@ -357,7 +361,7 @@ class Colors:
 
 
 
-```python linenums="215"
+```python linenums="214"
     MediumVioletRed = hex("#c71585")
     DeepPink = hex("#ff1493")
     PaleVioletRed = hex("#db7093")
@@ -370,7 +374,7 @@ class Colors:
 
 
 
-```python linenums="222"
+```python linenums="221"
     DarkRed = hex("#8b0000")
     Red = hex("#ff0000")
     Firebrick = hex("#b22222")
@@ -386,7 +390,7 @@ class Colors:
 
 
 
-```python linenums="232"
+```python linenums="231"
     OrangeRed = hex("#ff4500")
     Tomato = hex("#ff6347")
     DarkOrange = hex("#ff8c00")
@@ -398,7 +402,7 @@ class Colors:
 
 
 
-```python linenums="238"
+```python linenums="237"
     DarkKhaki = hex("#bdb76b")
     Gold = hex("#ffd700")
     Khaki = hex("#f0e68c")
@@ -416,7 +420,7 @@ class Colors:
 
 
 
-```python linenums="250"
+```python linenums="249"
     Maroon = hex("#800000")
     Brown = hex("#a52a2a")
     SaddleBrown = hex("#8b4513")
@@ -440,7 +444,7 @@ class Colors:
 
 
 
-```python linenums="268"
+```python linenums="267"
     DarkGreen = hex("#006400")
     Green = hex("#008000")
     DarkOliveGreen = hex("#556b2f")
@@ -467,7 +471,7 @@ class Colors:
 
 
 
-```python linenums="289"
+```python linenums="288"
     Teal = hex("#008080")
     DarkCyan = hex("#008b8b")
     LightSeaGreen = hex("#20b2aa")
@@ -486,7 +490,7 @@ class Colors:
 
 
 
-```python linenums="302"
+```python linenums="301"
     MidnightBlue = hex("#191970")
     Navy = hex("#000080")
     DarkBlue = hex("#00008b")
@@ -508,7 +512,7 @@ class Colors:
 
 
 
-```python linenums="318"
+```python linenums="317"
     Indigo = hex("#4b0082")
     Purple = hex("#800080")
     DarkMagenta = hex("#8b008b")
@@ -533,7 +537,7 @@ class Colors:
 
 
 
-```python linenums="337"
+```python linenums="336"
     MistyRose = hex("#ffe4e1")
     AntiqueWhite = hex("#faebd7")
     Linen = hex("#faf0e6")
@@ -557,7 +561,7 @@ class Colors:
 
 
 
-```python linenums="355"
+```python linenums="354"
     Black = hex("#000000")
     DarkSlateGray = hex("#2f4f4f")
     DimGray = hex("#696969")
@@ -574,7 +578,7 @@ class Colors:
 
 
 
-```python linenums="366"
+```python linenums="365"
     RebeccaPurple = hex("#663399")
 ```
 
@@ -584,7 +588,7 @@ class Colors:
 
 
 
-```python linenums="369"
+```python linenums="368"
     @staticmethod
     def basic_palette():
         yield Colors.White
@@ -609,7 +613,7 @@ class Colors:
 
 
 
-```python linenums="388"
+```python linenums="387"
     @staticmethod
     def pink_palette():
         yield Colors.MediumVioletRed
@@ -624,7 +628,7 @@ class Colors:
 
 
 
-```python linenums="397"
+```python linenums="396"
     @staticmethod
     def red_palette():
         yield Colors.DarkRed
@@ -642,7 +646,7 @@ class Colors:
 
 
 
-```python linenums="409"
+```python linenums="408"
     @staticmethod
     def orange_palette():
         yield Colors.OrangeRed
@@ -656,7 +660,7 @@ class Colors:
 
 
 
-```python linenums="417"
+```python linenums="416"
     @staticmethod
     def yellow_palette():
         yield Colors.DarkKhaki
@@ -676,7 +680,7 @@ class Colors:
 
 
 
-```python linenums="431"
+```python linenums="430"
     @staticmethod
     def brown_palette():
         yield Colors.Maroon
@@ -702,7 +706,7 @@ class Colors:
 
 
 
-```python linenums="451"
+```python linenums="450"
     @staticmethod
     def green_palette():
         yield Colors.DarkGreen
@@ -731,7 +735,7 @@ class Colors:
 
 
 
-```python linenums="474"
+```python linenums="473"
     @staticmethod
     def cyan_palette():
         yield Colors.Teal
@@ -752,7 +756,7 @@ class Colors:
 
 
 
-```python linenums="489"
+```python linenums="488"
     @staticmethod
     def blue_palette():
         yield Colors.MidnightBlue
@@ -776,7 +780,7 @@ class Colors:
 
 
 
-```python linenums="507"
+```python linenums="506"
     @staticmethod
     def purple_palette():
         yield Colors.Indigo
@@ -803,7 +807,7 @@ class Colors:
 
 
 
-```python linenums="528"
+```python linenums="527"
     @staticmethod
     def white_palette():
         yield Colors.MistyRose
@@ -829,7 +833,7 @@ class Colors:
 
 
 
-```python linenums="548"
+```python linenums="547"
     @staticmethod
     def black_palette():
         yield Colors.Black
@@ -848,7 +852,7 @@ class Colors:
 
 
 
-```python linenums="561"
+```python linenums="560"
     @staticmethod
     def extra_palette():
         yield Colors.RebeccaPurple
@@ -858,7 +862,7 @@ class Colors:
 
 
 
-```python linenums="565"
+```python linenums="564"
     @staticmethod
     def all():
         yield from Colors.pink_palette()
@@ -879,7 +883,7 @@ class Colors:
 
 
 
-```python linenums="580"
+```python linenums="579"
     @classmethod
     def palette(cls, palette: str) -> Generator[Color, Any, Any]:
         try:
@@ -892,7 +896,7 @@ class Colors:
 
 
 
-```python linenums="587"
+```python linenums="586"
     @staticmethod
     def palettes():
         return [

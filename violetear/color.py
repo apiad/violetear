@@ -5,6 +5,8 @@ colors in different spaces. It also defines all common CSS colors, and utilities
 to combine them.
 """
 
+from __future__ import annotations
+
 # Basic imports
 
 import colorsys  # for changing color spaces
@@ -21,10 +23,10 @@ class Color:
     def __init__(
         self, red: int = 0, green: int = 0, blue: int = 0, *, alpha: float = 1.0
     ) -> None:
-        self.r = red
-        self.g = green
-        self.b = blue
-        self.a = 1.0 if alpha is None else alpha
+        self.r: int = red
+        self.g: int = green
+        self.b: int = blue
+        self.a: float = 1.0 if alpha is None else alpha
 
     def __str__(self):
         return f"rgba({self.r},{self.g},{self.b},{self.a})"
@@ -34,44 +36,44 @@ class Color:
 
     # #### `Color.saturated`
 
-    def saturated(self, saturation: float) -> "Color":
+    def saturated(self, saturation: float) -> Color:
         h, _, v = self.hsv()
         return hsv(h, saturation, v, alpha=self.a)
 
     # #### `Color.lit`
 
-    def lit(self, lightness: float) -> "Color":
+    def lit(self, lightness: float) -> Color:
         h, _, s = hls(self)
         return hls(h, lightness, s, alpha=self.a)
 
     # #### `Color.shifted`
 
-    def shifted(self, hue: float) -> "Color":
+    def shifted(self, hue: float) -> Color:
         _, l, s = hls(self)
         return hls(hue, l, s, alpha=self.a)
 
     # #### `Color.transparent`
 
-    def transparent(self, alpha: float) -> "Color":
+    def transparent(self, alpha: float) -> Color:
         return Color(self.r, self.g, self.b, alpha=alpha)
 
     # #### `Color.redshift`
 
-    def redshift(self, percent: float, *, space="hls") -> "Color":
+    def redshift(self, percent: float, *, space="hls") -> Color:
         _, l, s = hls(self)
         target = hls(0, l, s)
         return self.towards(target, percent, space=space)
 
     # #### `Color.blueshift`
 
-    def blueshift(self, percent: float, *, space="hls") -> "Color":
+    def blueshift(self, percent: float, *, space="hls") -> Color:
         _, l, s = hls(self)
         target = hls(1, l, s)
         return self.towards(target, percent, space=space)
 
     # #### `Color.towards`
 
-    def towards(self, other: "Color", percent: float, *, space="hls") -> "Color":
+    def towards(self, other: Color, percent: float, *, space="hls") -> Color:
         space = dict(rgb=rgb, hls=hls, hsv=hsv)[space]
 
         start_values = space(self)
@@ -83,7 +85,7 @@ class Color:
     # #### `Color.palette`
 
     @staticmethod
-    def palette(start: "Color", end: "Color", steps: int, space="hls") -> List["Color"]:
+    def palette(start: Color, end: Color, steps: int, space="hls") -> List[Color]:
         percents = Unit.scale(float, 0, 1, steps)
         return [start.towards(end, p, space=space) for p in percents]
 
@@ -118,9 +120,7 @@ def rgb(*args, **kwargs):
 
 
 @overload
-def hsv(
-    hue: float, saturation: float, value: float, /, *, alpha: float = 1.0
-) -> "Color":
+def hsv(hue: float, saturation: float, value: float, /, *, alpha: float = 1.0) -> Color:
     ...
 
 
@@ -147,7 +147,7 @@ def hsv(*args, **kwargs):
 @overload
 def hls(
     hue: float, lightness: float, saturation: float, /, *, alpha: float = 1.0
-) -> "Color":
+) -> Color:
     ...
 
 
@@ -256,7 +256,7 @@ class Colors:
     """
 
     def __getitem__(self, key):
-        return getattr(Color, key)
+        return getattr(Colors, key)
 
     # ### Basic web colors
     White = hex("#ffffff")

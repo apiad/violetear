@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import re
 
 TOKEN_PART = r"[a-zA-Z0-9]+"
@@ -17,7 +19,7 @@ class Selector:
         classes: str = (),
         state: str = None,
         *,
-        parent: "Selector" = None,
+        parent: Selector = None,
     ) -> None:
         self._id = id
         self._tag = tag
@@ -46,10 +48,10 @@ class Selector:
 
         return "".join(parts)
 
-    def on(self, state) -> "Selector":
+    def on(self, state) -> Selector:
         return Selector(self._tag, self._id, self._classes, state, parent=self._parent)
 
-    def children(self, selector: str, *, nth: int = None) -> "Selector":
+    def children(self, selector: str, *, nth: int = None) -> Selector:
         s = Selector.from_css(selector, parent=self)
 
         if nth is not None:
@@ -76,7 +78,7 @@ class Selector:
         return " ".join(parts)
 
     @classmethod
-    def from_css(cls, selector: str = "*", *, parent: "Selector" = None) -> "Selector":
+    def from_css(cls, selector: str = "*", *, parent: Selector = None) -> Selector:
         match = re.match(SELECTOR, selector)
 
         if not match:

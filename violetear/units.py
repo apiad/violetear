@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import math
 from typing import List, Union
 
@@ -61,10 +63,6 @@ class Unit:
             current += delta
 
 
-GridTemplate = Union[Unit, "repeat", "minmax"]
-GridSize = Union[Unit, "minmax"]
-
-
 class repeat:
     def __init__(self, factor, *template: List[GridTemplate]) -> None:
         self.factor = factor
@@ -82,3 +80,7 @@ class minmax:
 
     def __str__(self) -> str:
         return f"minmax({self.min}, {self.max})"
+
+
+GridTemplate = Union[Unit, repeat, minmax]
+GridSize = Union[Unit, minmax]
