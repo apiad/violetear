@@ -10,8 +10,11 @@ test:
 .PHONY: docs
 docs:
 	cp Readme.md docs/index.md
-	illiterate preset build
 	mkdocs build
+
+.PHONY: illiterate
+illiterate:
+	illiterate preset build
 
 .PHONY: examples
 examples:
