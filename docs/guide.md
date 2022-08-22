@@ -520,7 +520,7 @@ After running the script, check out the `style.css` file to confirm that our med
 
 This covers all the basic concepts in `violetear`, but of course there is much more you can learn.
 
-- You can [browse the examples](./examples) to see concrete, much more detailed use cases.
-- You can [read the annotated API](./api) to see how everything works under the hood.
+- You can [browse the examples](../examples) to see concrete, much more detailed use cases.
+- You can [read the annotated API](../api) to see how everything works under the hood.
 
 If you need any additional help, or find something that's not quite as you'd expect, don't hesitate to ask by [opening an issue](https://github.com/apiad/violetear/issues).

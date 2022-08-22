@@ -275,7 +275,7 @@ sheet.render("fluid-grid.css")
 ```
 
 Finally, we just need to update our calls to `make_grid_styles` with the corresponding class prefixes `lg`, `md` and `sm`.
-Go ahead and play with the [HTML file](fluid-grid-3.html) we have right now to see how the elements now snap to their desired size leaving no gaps. 
+Go ahead and play with the [HTML file](fluid-grid-3.html) we have right now to see how the elements now snap to their desired size leaving no gaps.
 
 ```python title="fluid-grid.py" hl_lines="25 28 31"
 sheet = StyleSheet(normalize=True)
@@ -321,7 +321,7 @@ sheet.render("fluid-grid.css")
 Finally, we will add a `fixed` class to `container`s when we want them to have a fixed size instead of flowing with the browser width. This is by far the simplest change, we just to define `.fixed` conveniently at all screen sizes, taking into account to substract the padding from the `.main` element:
 
 ```python title="fluid_grid.py" hl_lines="4 8 12 16"
-# ... 
+# ...
 
 make_grid_styles(12)
 sheet.select(".fixed").width(max=1500).margin("auto")
@@ -346,7 +346,7 @@ with sheet.media(max_width=600):
 
 And now we're done. Check the [final HTML file](fluid-grid.html) to see how the lower grid remains fixed while the upper one flows. Beautiful!
 
-We just created a fully fledged grid system with over 170 classes spanning four different screen sizes in little less than 30 lines of Python code!
+We just created a fully fledged grid system with over 80 styles spanning four different screen sizes in little less than 30 lines of Python code!
 
 ## Using the preset `FlexGrid`
 
@@ -367,12 +367,12 @@ sheet = StyleSheet(normalize=True).extend(FlexGrid(
         xs=(400, 1)
     )
 ))
+
 # ... rest of your styles
 ```
 
-The method `StyleSheet.extend(...)` receives another stylesheet and copies all its styles. A preset, like `FlexGrid`, is really just a class that inherits `StyleSheet` and creates a lot of predefined styles in its constructor. The `FlexGrid` class generates styles just like the ones we designed here, with a base number of columns, and a set of optional breakpoints. It also allows customizing all class names, but by default it uses just the ones we defined in this example.
+The method `StyleSheet.extend(...)` receives another stylesheet and copies all its styles. A preset, like `FlexGrid`, is really just a class that inherits from `StyleSheet` and creates a lot of predefined styles in its constructor. The `FlexGrid` class generates styles just like the ones we designed here, with a base number of columns, and a set of optional breakpoints. It also allows customizing all class names, but by default it uses just the ones we defined in this example.
 
 ??? note "To be honest..."
 
     To be honest, the `FlexGrid` preset doesn't include the `.fixed` class (although it might in the future), and of course our first couple of aesthetic styles to make containers and cols visible won't be there either, so techincally you'd still have to add a few rules manually, but the bulk of the work is already done for you!
- 

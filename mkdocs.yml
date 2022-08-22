@@ -61,12 +61,14 @@ nav:
     - Welcome: examples/index.md
     - Color spaces: examples/color-spaces.md
     - Fluid grid: examples/fluid-grid.md
+    - Animations: examples/animations.md
   - API:
     - violetear: api/violetear.__init__.md
-    - Style Sheets: api/violetear.stylesheet.md
-    - Styles: api/violetear.style.md
-    - Selectors: api/violetear.selector.md
-    - Colors: api/violetear.color.md
-    - Units: api/violetear.units.md
-    - Media: api/violetear.media.md
-    - Helpers: api/violetear.helpers.md
+    - violetear.stylesheet: api/violetear.stylesheet.md
+    - violetear.style: api/violetear.style.md
+    - violetear.selector: api/violetear.selector.md
+    - violetear.color: api/violetear.color.md
+    - violetear.units: api/violetear.units.md
+    - violetear.media: api/violetear.media.md
+    - violetear.presets: api/violetear.presets.md
+    - violetear.helpers: api/violetear.helpers.md

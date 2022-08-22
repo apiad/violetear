@@ -26,6 +26,14 @@ def pc(x: float):
     return Unit(math.trunc(x * 10000) / 100, "%")
 
 
+def sec(x: float):
+    return Unit(round(x, 2), "s")
+
+
+def ms(x: int):
+    return Unit(x, "ms")
+
+
 class Unit:
     def __init__(self, value, unit) -> None:
         self.value = value

@@ -9,3 +9,4 @@ sources:
   violetear.style: violetear/style.py
   violetear.stylesheet: violetear/stylesheet.py
   violetear.units: violetear/units.py
+  violetear.presets: violetear/presets.py

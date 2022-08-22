@@ -20,10 +20,11 @@ Using a general-purpose programming language to generate CSS we can obtain the b
 `violetear` is a bridge between Python and CSS. It gives you a fluent API to generate CSS styles, full with code completion, documentation, and shorthand methods for the most common CSS rule sets. Some of the things you can do with `violetear` easily are:
 
 - [Create CSS styles from Python code](https://apiad.net/violetear/guide/#simple-styling) using a fluent, fully documented API that covers the most common rules.
-- [Generate CSS stylesheets programatically](https://apiad.net/violetear/guide/#creating-styles-programatically), which means you can create several related styles with ease using loops and parameters. 
+- [Generate CSS stylesheets programatically](https://apiad.net/violetear/guide/#creating-styles-programatically), which means you can create several related styles with ease using loops and parameters.
 - [Manipulate magnitudes and colors](https://apiad.net/violetear/examples/color-spaces) to easily create custom color palettes.
 - [Generate minimal CSS files](#) including only the subset of rules that are used in a given template.
 - [Create complex layouts using flexbox and grid](https://apiad.net/violetear/examples/fluid-grid) programatically with very few lines of code.
+- [Easily define transitions and animations](https://apiad.net/violetear/examples/animations).
 
 And much more... When you combine a full-flegded programming language with powerful abstractions and carefully designed APIs, your imagination is the only limit.
 
@@ -57,10 +58,25 @@ with sheet.media(min_width=768):
     sheet.redefine(title).display("inline")
 ```
 
-You can style specific states:
+You can style specific states and add animations easily:
 
 ```python
-title.on("hover").font(weight="bolder")
+title.transition(timing="ease-in-out").on("hover").font(weight="bolder")
+```
+
+You can add custom rules for rare cases when `violetear` doesn't have a shorthand method:
+
+```python
+subtitle.rule("hyphens", "auto")
+```
+
+Or a bunch of them all at once (`_` are converted to `-` automatically):
+
+```python
+subtitle.rules(
+    text_decoration_color=Colors.SandyBrown,
+    text_decoration_style="dashed",
+)
 ```
 
 And finally `violetear` has a few ready-made collection of styles for some of the most common design patterns. Here's a [12-column grid system made with flexbox](https://apiad.net/violetear/examples/fluid-grid) with varying screen sizes that is completely customizable in just 5 lines of code:
@@ -73,7 +89,7 @@ sheet.extend(FlexGrid(
     columns=12,        # 12 columns by default
     breakpoints=dict(
         lg=(1600, 8),  # Add several breakpoints at differente
-        md=(1200, 6),  # screen sizes changing the 
+        md=(1200, 6),  # screen sizes changing the
         sm=(800, 4),   # number of columns and adding custom
         xs=(400, 1)    # classes for extra responsiveness
     )
@@ -114,7 +130,7 @@ Or you can automatically add the corresponding selector attributes to a given ta
 
 To learn more, you can:
 
-- Read the introductory [user guide](https://apiad.net/violetear/guide) that showcases the main functionalities of the library. 
+- Read the introductory [user guide](https://apiad.net/violetear/guide) that showcases the main functionalities of the library.
 - Browse the [examples](https://apiad.net/violetear/examples) to see concrete and detailed use cases.
 - Read the [fully annotated API](https://apiad.net/violetear/api) to understand the inner workings of the library.
 
@@ -137,9 +153,13 @@ Right now `violetear` is in pre-release mode, which means the API is completely 
 - Examples for all relevant use cases
 - Fully typed method signatures
 - Full check of argument values and rule attributes
-- Dynamic generation of CSS based on HTML parsing 
+- Dynamic generation of CSS based on HTML parsing
 - Support for transitions and animations with helper methods to create timing curves
 - Parameterized presets for relevant design systems
+
+**v0.10.0**
+
+- Basic support for transitions and transforms.
 
 **v0.9.0**
 

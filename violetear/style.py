@@ -8,7 +8,7 @@ from typing import List, Tuple, Union
 
 # These ones are internal to `violetear`:
 from .selector import Selector
-from .units import GridSize, GridTemplate, Unit, fr, pc, minmax, rem, repeat
+from .units import GridSize, GridTemplate, Unit, fr, ms, pc, minmax, rem, repeat, sec
 from .color import Color, gray
 from .helpers import style_method
 
@@ -47,7 +47,9 @@ class Style:
         self.selector = selector
         self._rules = {}
         self._parent = parent
-        self._children = []
+        self._children = {}
+        self._transitions = []
+        self._transforms = {}
 
     # ### Basic rule manipulation
     # These methods allows manipulating rules manually.
@@ -67,6 +69,16 @@ class Style:
         - `value`: a value for the attribute. It will be converted to `str` internally.
         """
         self._rules[attr] = str(value)
+        return self
+
+    # #### `Style.rules`
+
+    def rules(self, **rules) -> "Style":
+        """Define a bunch of CSS rules at once with kwargs."""
+
+        for rule, value in rules.items():
+            self.rule(rule.replace("_", "-"), value)
+
         return self
 
     # #### `Style.apply`
@@ -119,9 +131,13 @@ class Style:
     # #### `Style.text`
 
     @style_method
-    def text(self, *, align: str = None) -> "Style":
+    def text(self, *, align: str = None, decoration: str = None) -> "Style":
         if align is not None:
             self.rule("text-align", align)
+        if decoration is not None:
+            if decoration == False:
+                decoration = "none"
+            self.rule("text-decoration", decoration)
 
     # #### `Style.center`
 
@@ -308,6 +324,7 @@ class Style:
         self,
         direction: str = "row",
         *,
+        gap: Unit = None,
         wrap: bool = False,
         reverse: bool = False,
         align: str = None,
@@ -328,6 +345,9 @@ class Style:
 
         if justify is not None:
             self.rule("justify-content", justify)
+
+        if gap is not None:
+            self.rule("gap", Unit.infer(gap))
 
     # #### `Style.flex`
 
@@ -479,20 +499,106 @@ class Style:
     ) -> "Style":
         self.position("relative", left=left, right=right, top=top, bottom=bottom)
 
+    # ### Animations
+
+    # #### `Style.transition`
+
+    @style_method
+    def transition(
+        self,
+        property="all",
+        duration: Unit = ms(150),
+        timing: str = "linear",
+        delay: Unit = ms(0),
+    ) -> "Style":
+        self._transitions.append(
+            (
+                property,
+                Unit.infer(duration, sec, ms),
+                timing,
+                Unit.infer(delay, sec, ms),
+            )
+        )
+
+        properties = []
+        durations = []
+        timings = []
+        delays = []
+
+        for property, duration, timing, delay in self._transitions:
+            properties.append(property)
+            durations.append(str(duration))
+            timings.append(timing)
+            delays.append(str(delay))
+
+        self.rule("transition-property", ", ".join(properties))
+        self.rule("transition-duration", ", ".join(durations))
+        self.rule("transition-timing-function", ", ".join(timings))
+        self.rule("transition-delay", ", ".join(delays))
+
+    # #### `Style.transform`
+
+    @style_method
+    def transform(
+        self,
+        translate_x: Unit = None,
+        translate_y: Unit = None,
+        scale_x: float = None,
+        scale_y: float = None,
+        rotate: Unit = None,
+    ) -> "Style":
+        if translate_x is not None:
+            self._transforms["translateX"] = Unit.infer(translate_x)
+        if translate_y is not None:
+            self._transforms["translateY"] = Unit.infer(translate_y)
+        if scale_x is not None:
+            self._transforms["scaleX"] = scale_x
+        if scale_y is not None:
+            self._transforms["scaleY"] = scale_y
+        if rotate is not None:
+            self._transforms["rotate"] = Unit(rotate, "deg")
+
+        transforms = []
+
+        for transform, value in self._transforms.items():
+            transforms.append(f"{transform}({value})")
+
+        self.rule("transform", " ".join(transforms))
+
+    @style_method
+    def translate(self, x: Unit = None, y: Unit = None) -> "Style":
+        self.transform(translate_x=x, translate_y=y)
+
+    @style_method
+    def scale(
+        self, scale: float = None, *, x: float = None, y: float = None
+    ) -> "Style":
+        if scale is not None:
+            x = scale
+            y = scale
+
+        self.transform(scale_x=x, scale_y=y)
+
+    @style_method
+    def rotate(self, rotation: float) -> "Style":
+        self.transform(rotate=rotation)
+
     # ### Sub-styles
 
     # #### `Style.on`
 
     def on(self, state) -> "Style":
-        style = Style(self.selector.on(state))
-        self._children.append(style)
+        selector = self.selector.on(state)
+        style = self._children.get(selector.css(), Style(selector))
+        self._children[selector.css()] = style
         return style
 
     # #### `Style.children`
 
     def children(self, selector: str = "*", *, nth: int = None) -> "Style":
-        style = Style(self.selector.children(selector, nth=nth))
-        self._children.append(style)
+        selector = self.selector.children(selector, nth=nth)
+        style = self._children.get(selector.css(), Style(selector))
+        self._children[selector.css()] = style
         return style
 
     # ### Rendering methods

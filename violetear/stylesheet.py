@@ -4,11 +4,16 @@
 and allows rendering stylesheets either as files or as strings to be injected inline.
 """
 
+# Regular imports:
+
 import io
 import datetime
 from pathlib import Path
 from warnings import warn
 import textwrap
+
+# Internal imports:
+
 from .selector import Selector
 from .style import Style
 from .media import MediaQuery
@@ -20,14 +25,27 @@ class StyleSheet:
     def __init__(
         self, *styles: Style, normalize: bool = True, base: Style = None
     ) -> None:
-        self.styles = list(styles)
-        self.medias = []
+        """Initializes a new StyleSheet, optionally with a set of initial styles
+        and a base style for inheritance.
 
+        **Parameters**:
+
+        - `styles`: A sequence of initial styles to add.
+        - `normalize`: If `True` then the stylesheet will contain a set of normalization
+                       rules taken from <https://github.com/sindresorhus/modern-normalize>.
+        - `base`: A style to use as base for all newly defined styles
+                  (i.e., any new style will `apply` the base style).
+        """
+        self.styles = []
+        self.medias = []
         self._by_name = {}
         self._by_selector = {}
         self._used = set()
         self._media = None
         self._base = base
+
+        for style in styles:
+            self.add(style)
 
         if normalize:
             self._preamble = open(Path(__file__).parent / "normalize.css").read()
@@ -36,7 +54,33 @@ class StyleSheet:
 
     # ### Rendering methods
 
+    # #### `StyleSheet.render`
+
+    # This method renders the stylesheet to CSS. It can work in two ways:
+    # either to write the rules to a file, or to return the rules as a string.
+    # Both ways are implemented using a file, either passed as parameter, or
+    # using an `io.StringIO` instance to generate an in-memory string.
+
+    # Additionally this method can render a "dynamic" file, which means
+    # just outputting the rules that are being used.
+
     def render(self, fp=None, *, dynamic: bool = False):
+        """Render the stylesheet either to a file or a string.
+
+        **Parameters**:
+
+        - `fp`: A file-like object, or a path, to render to a file.
+                If `fp=None`, then a string is returned.
+        - `dynamic`: If `True` then only the styles used (i.e., accessed through
+                     the attribute or dict interfaces) are rendered.
+                     This is useful when you inject the stylesheet into a template.
+        """
+
+        # First we will decide whether to render to a file or a string.
+        # We will keep track of when we call `open` to make sure to call `close`.
+        # If `fp` is a path-like, we'll open it, and if it's `None`, we'll create
+        # an `io.StringIO` file to render to memory and return the stylesheet as a string.
+
         opened = False
 
         if isinstance(fp, (str, Path)):
@@ -46,6 +90,11 @@ class StyleSheet:
         if fp is None:
             fp = io.StringIO()
             opened = True
+
+        # Now we can write all the rules into `fp` regardless of what it is.
+        # First the preamble (which can be empty or the content of normalize.css),
+        # and then all the defined styles (including sub-styles).
+        # Finally, all media-conditioned styles are rendered, wrapped appropiately.
 
         self._write_preamble(fp)
         total = 0
@@ -62,6 +111,10 @@ class StyleSheet:
 
             fp.write("}\n\n")
 
+        # And now we can close the file if we opened it,
+        # and decide whether to return a string or not depending on the
+        # type of file we have.
+
         fp.write(f"/* Generated {total} styles */")
 
         if isinstance(fp, io.StringIO):
@@ -74,7 +127,7 @@ class StyleSheet:
 
         return result
 
-    # These are just rendering helpers.
+    # ### Rendering helpers
 
     def _write_preamble(self, fp):
         fp.write("/* Made with violetear */\n")
@@ -88,7 +141,7 @@ class StyleSheet:
     def _render(self, style: Style, fp, indent=0):
         total = 0
 
-        for s in [style] + list(style._children):
+        for s in [style] + list(style._children.values()):
             if not s._rules:
                 continue
 

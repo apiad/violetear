@@ -4,11 +4,14 @@
 <a name="ref:rem"></a>
 <a name="ref:fr"></a>
 <a name="ref:pc"></a>
+<a name="ref:sec"></a>
+<a name="ref:ms"></a>
 <a name="ref:Unit"></a>
 <a name="ref:repeat"></a>
 <a name="ref:minmax"></a>
 
 ```python linenums="1"
+import math
 from typing import List, Union
 
 
@@ -33,7 +36,15 @@ def fr(x: float):
 
 
 def pc(x: float):
-    return Unit(round(x * 100, 2), "%")
+    return Unit(math.trunc(x * 10000) / 100, "%")
+
+
+def sec(x: float):
+    return Unit(round(x, 2), "s")
+
+
+def ms(x: int):
+    return Unit(x, "ms")
 
 
 class Unit:

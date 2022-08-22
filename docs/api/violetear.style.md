@@ -18,7 +18,7 @@ These ones are internal to `violetear`:
 
 ```python linenums="7"
 from .selector import Selector
-from .units import GridSize, GridTemplate, Unit, fr, pc, minmax, rem, repeat
+from .units import GridSize, GridTemplate, Unit, fr, ms, pc, minmax, rem, repeat, sec
 from .color import Color, gray
 from .helpers import style_method
 ```
@@ -72,7 +72,9 @@ class Style:
         self.selector = selector
         self._rules = {}
         self._parent = parent
-        self._children = []
+        self._children = {}
+        self._transitions = []
+        self._transforms = {}
 ```
 
 ### Basic rule manipulation
@@ -86,7 +88,7 @@ using their corresponding `__str__` methods.
 
 
 
-```python linenums="49"
+```python linenums="51"
     def rule(self, attr: str, value) -> "Style":
 ```
 
@@ -101,608 +103,580 @@ using their corresponding `__str__` methods.
 
 
 
-```python linenums="57"
+```python linenums="59"
         self._rules[attr] = str(value)
         return self
 ```
 
-#### `Style.apply`
-The `apply` method enables style composition, by copying all the rules
-in one or more input styles into this style.
-
-At some point we could implement this in a lazy manner, such that rules
-are only realyy copied when converting to CSS using the `css` method.
-However, at the moment I can't see an interesting use case for that functionality,
-since I seldom modify styles after they are created.
-Maybe this could be interesting for programmatically-created styles with lots of parameters, or for
-some kind of interactive application where the user creates a theme.
-However, in favour of YAGNI, I will refrain from implementing that functionality until
-proven necessary.
+#### `Style.rules`
 
 
 
-```python linenums="70"
-    def apply(self, *others: "Style") -> "Style":
+```python linenums="62"
+    def rules(self, **rules) -> "Style":
 ```
 
 ??? note "Docstring"
-    Copy rules from other styles.
+    Define a bunch of CSS rules at once with kwargs.
     
-    Rules are defined in order, so later styles will override former ones.
+    for rule, value in rules.items():
+    self.rule(rule.replace("_", "-"), value)
     
-    **Parameters**:
+    return self
     
-    - `others`: A sequence of `Style` instances to copy their rules.
+    # #### `Style.apply`
+    # The `apply` method enables style composition, by copying all the rules
+    # in one or more input styles into this style.
+    
+    # At some point we could implement this in a lazy manner, such that rules
+    # are only realyy copied when converting to CSS using the `css` method.
+    # However, at the moment I can't see an interesting use case for that functionality,
+    # since I seldom modify styles after they are created.
+    # Maybe this could be interesting for programmatically-created styles with lots of parameters, or for
+    # some kind of interactive application where the user creates a theme.
+    # However, in favour of YAGNI, I will refrain from implementing that functionality until
+    # proven necessary.
+    
+    def apply(self, *others: "Style") -> "Style":
 
 
 
 
-```python linenums="79"
-        for other in others:
-            for attr, value in other._rules.items():
-                self.rule(attr, value)
+```python linenums="85"
+        Rules are defined in order, so later styles will override former ones.
 
-        return self
+        **Parameters**:
+
+        - `others`: A sequence of `Style` instances to copy their rules.
 ```
 
-### Typographic styles
-These methods allow manipulating font and text properties.
-
-#### `Style.font`
-The `font` method
-
-
-
-```python linenums="88"
+??? note "Docstring"
+    
+    for other in others:
+    for attr, value in other._rules.items():
+    self.rule(attr, value)
+    
+    return self
+    
+    # ### Typographic styles
+    # These methods allow manipulating font and text properties.
+    
+    # #### `Style.font`
+    # The `font` method
+    
     @style_method
     def font(
-        self, size: Unit = None, *, weight: str = None, family: str = None
+    self, size: Unit = None, *, weight: str = None, family: str = None
     ) -> "Style":
-        if size:
-            self.rule("font-size", Unit.infer(size))
-
-        if weight:
-            self.rule("font-weight", weight)
-
-        if family:
-            self.rule("font-family", family)
-```
-
-#### `Style.text`
-
-
-
-```python linenums="101"
+    if size:
+    self.rule("font-size", Unit.infer(size))
+    
+    if weight:
+    self.rule("font-weight", weight)
+    
+    if family:
+    self.rule("font-family", family)
+    
+    # #### `Style.text`
+    
     @style_method
-    def text(self, *, align: str = None) -> "Style":
-        if align is not None:
-            self.rule("text-align", align)
-```
-
-#### `Style.center`
-
-
-
-```python linenums="106"
+    def text(self, *, align: str = None, decoration: str = None) -> "Style":
+    if align is not None:
+    self.rule("text-align", align)
+    if decoration is not None:
+    if decoration == False:
+    decoration = "none"
+    self.rule("text-decoration", decoration)
+    
+    # #### `Style.center`
+    
     @style_method
     def center(self) -> "Style":
-        self.text(align="center")
-```
-
-#### `Style.left`
-
-
-
-```python linenums="110"
+    self.text(align="center")
+    
+    # #### `Style.left`
+    
     @style_method
     def left(self) -> "Style":
-        self.text(align="left")
-```
-
-#### `Style.right`
-
-
-
-```python linenums="114"
+    self.text(align="left")
+    
+    # #### `Style.right`
+    
     @style_method
     def right(self) -> "Style":
-        self.text(align="right")
-```
-
-#### `Style.justify`
-
-
-
-```python linenums="118"
+    self.text(align="right")
+    
+    # #### `Style.justify`
+    
     @style_method
     def justify(self) -> "Style":
-        self.text(align="justify")
-```
-
-### Color styles
-
-#### `Style.color`
-
-
-
-```python linenums="123"
+    self.text(align="justify")
+    
+    # ### Color styles
+    
+    # #### `Style.color`
+    
     @style_method
     def color(
-        self, color: Color = None, *, rgb=None, hsv=None, hls=None, alpha: float = None
+    self, color: Color = None, *, rgb=None, hsv=None, hls=None, alpha: float = None
     ) -> "Style":
-        if color is None:
-            if rgb is not None:
-                r, g, b = rgb
-                color = Color(r, g, b, alpha)
-            elif hsv is not None:
-                h, s, v = hsv
-                color = Color.from_hsv(h, s, v, alpha)
-            elif hls is not None:
-                h, l, s = hls
-                color = Color.from_hls(h, l, s, alpha)
-
-        self.rule("color", color)
-```
-
-#### `Style.background`
-
-
-
-```python linenums="140"
+    if color is None:
+    if rgb is not None:
+    r, g, b = rgb
+    color = Color(r, g, b, alpha)
+    elif hsv is not None:
+    h, s, v = hsv
+    color = Color.from_hsv(h, s, v, alpha)
+    elif hls is not None:
+    h, l, s = hls
+    color = Color.from_hls(h, l, s, alpha)
+    
+    self.rule("color", color)
+    
+    # #### `Style.background`
+    
     @style_method
     def background(
-        self, color: Color = None, *, rgb=None, hsv=None, hls=None, alpha: float = None
+    self, color: Color = None, *, rgb=None, hsv=None, hls=None, alpha: float = None
     ) -> "Style":
-        if color is None:
-            if rgb is not None:
-                r, g, b = rgb
-                color = Color(r, g, b, alpha)
-            elif hsv is not None:
-                h, s, v = hsv
-                color = Color.from_hsv(h, s, v, alpha)
-            elif hls is not None:
-                h, l, s = hls
-                color = Color.from_hls(h, l, s, alpha)
-
-        self.rule("background-color", color)
-```
-
-#### `Style.border`
-
-
-
-```python linenums="157"
+    if color is None:
+    if rgb is not None:
+    r, g, b = rgb
+    color = Color(r, g, b, alpha)
+    elif hsv is not None:
+    h, s, v = hsv
+    color = Color.from_hsv(h, s, v, alpha)
+    elif hls is not None:
+    h, l, s = hls
+    color = Color.from_hls(h, l, s, alpha)
+    
+    self.rule("background-color", color)
+    
+    # #### `Style.border`
+    
     @style_method
     def border(
-        self, width: Unit = None, color: Color = None, *, radius: Unit = None
+    self, width: Unit = None, color: Color = None, *, radius: Unit = None
     ) -> "Style":
-        if width is not None:
-            self.rule("border-width", Unit.infer(width))
-
-        if color is not None:
-            self.rule("border-color", color)
-
-        if radius is not None:
-            self.rule("border-color", Unit.infer(radius))
-```
-
-### Visibility styles
-
-#### `Style.visibility`
-
-
-
-```python linenums="171"
+    if width is not None:
+    self.rule("border-width", Unit.infer(width))
+    
+    if color is not None:
+    self.rule("border-color", color)
+    
+    if radius is not None:
+    self.rule("border-color", Unit.infer(radius))
+    
+    # ### Visibility styles
+    
+    # #### `Style.visibility`
+    
     @style_method
     def visibility(self, visibility: str) -> "Style":
-        self.rule("visibility", visibility)
-```
-
-#### `Style.visible`
-
-
-
-```python linenums="175"
+    self.rule("visibility", visibility)
+    
+    # #### `Style.visible`
+    
     @style_method
     def visible(self) -> "Style":
-        self.visibility("visible")
-```
-
-#### `Style.hidden`
-
-
-
-```python linenums="179"
+    self.visibility("visible")
+    
+    # #### `Style.hidden`
+    
     @style_method
     def hidden(self) -> "Style":
-        self.visibility("hidden")
-```
-
-### Geometry styles
-
-#### `Style.width`
-
-
-
-```python linenums="184"
+    self.visibility("hidden")
+    
+    # ### Geometry styles
+    
+    # #### `Style.width`
+    
     @style_method
     def width(self, value=None, *, min=None, max=None) -> "Style":
-        if value is not None:
-            self.rule("width", Unit.infer(value, on_float=pc))
-
-        if min is not None:
-            self.rule("min-width", Unit.infer(min, on_float=pc))
-
-        if max is not None:
-            self.rule("max-width", Unit.infer(max, on_float=pc))
-```
-
-#### `Style.height`
-
-
-
-```python linenums="195"
+    if value is not None:
+    self.rule("width", Unit.infer(value, on_float=pc))
+    
+    if min is not None:
+    self.rule("min-width", Unit.infer(min, on_float=pc))
+    
+    if max is not None:
+    self.rule("max-width", Unit.infer(max, on_float=pc))
+    
+    # #### `Style.height`
+    
     @style_method
     def height(self, value=None, *, min=None, max=None) -> "Style":
-        if value is not None:
-            self.rule("height", Unit.infer(value, on_float=pc))
-
-        if min is not None:
-            self.rule("min-height", Unit.infer(min, on_float=pc))
-
-        if max is not None:
-            self.rule("max-height", Unit.infer(max, on_float=pc))
-```
-
-#### `Style.margin`
-
-
-
-```python linenums="206"
+    if value is not None:
+    self.rule("height", Unit.infer(value, on_float=pc))
+    
+    if min is not None:
+    self.rule("min-height", Unit.infer(min, on_float=pc))
+    
+    if max is not None:
+    self.rule("max-height", Unit.infer(max, on_float=pc))
+    
+    # #### `Style.margin`
+    
     @style_method
     def margin(
-        self, all=None, *, left=None, right=None, top=None, bottom=None
+    self, all=None, *, left=None, right=None, top=None, bottom=None
     ) -> "Style":
-        if all is not None:
-            self.rule("margin", Unit.infer(all))
-        if left is not None:
-            self.rule("margin-left", Unit.infer(left))
-        if right is not None:
-            self.rule("margin-right", Unit.infer(right))
-        if top is not None:
-            self.rule("margin-top", Unit.infer(top))
-        if bottom is not None:
-            self.rule("margin-bottom", Unit.infer(bottom))
-```
-
-#### `Style.padding`
-
-
-
-```python linenums="221"
+    if all is not None:
+    self.rule("margin", Unit.infer(all))
+    if left is not None:
+    self.rule("margin-left", Unit.infer(left))
+    if right is not None:
+    self.rule("margin-right", Unit.infer(right))
+    if top is not None:
+    self.rule("margin-top", Unit.infer(top))
+    if bottom is not None:
+    self.rule("margin-bottom", Unit.infer(bottom))
+    
+    # #### `Style.padding`
+    
     @style_method
     def padding(
-        self, all=None, *, left=None, right=None, top=None, bottom=None
+    self, all=None, *, left=None, right=None, top=None, bottom=None
     ) -> "Style":
-        if all is not None:
-            self.rule("padding", Unit.infer(all))
-        if left is not None:
-            self.rule("padding-left", Unit.infer(left))
-        if right is not None:
-            self.rule("padding-right", Unit.infer(right))
-        if top is not None:
-            self.rule("padding-top", Unit.infer(top))
-        if bottom is not None:
-            self.rule("padding-bottom", Unit.infer(bottom))
-```
-
-#### `Style.rounded`
-
-
-
-```python linenums="236"
+    if all is not None:
+    self.rule("padding", Unit.infer(all))
+    if left is not None:
+    self.rule("padding-left", Unit.infer(left))
+    if right is not None:
+    self.rule("padding-right", Unit.infer(right))
+    if top is not None:
+    self.rule("padding-top", Unit.infer(top))
+    if bottom is not None:
+    self.rule("padding-bottom", Unit.infer(bottom))
+    
+    # #### `Style.rounded`
+    
     @style_method
     def rounded(self, radius: Unit = None) -> "Style":
-        if radius is None:
-            radius = 0.25
-
-        self.rule("border-radius", Unit.infer(radius))
-```
-
-### Layout styles
-
-#### `Style.display`
-
-
-
-```python linenums="244"
+    if radius is None:
+    radius = 0.25
+    
+    self.rule("border-radius", Unit.infer(radius))
+    
+    # ### Layout styles
+    
+    # #### `Style.display`
+    
     @style_method
     def display(self, display: str) -> "Style":
-        self.rule("display", display)
-```
-
-#### `Style.flexbox`
-
-
-
-```python linenums="248"
+    self.rule("display", display)
+    
+    # #### `Style.flexbox`
+    
     @style_method
     def flexbox(
-        self,
-        direction: str = "row",
-        *,
-        wrap: bool = False,
-        reverse: bool = False,
-        align: str = None,
-        justify: str = None,
+    self,
+    direction: str = "row",
+    *,
+    gap: Unit = None,
+    wrap: bool = False,
+    reverse: bool = False,
+    align: str = None,
+    justify: str = None,
     ) -> "Style":
-        self.display("flex")
-
-        if reverse:
-            direction += "-reverse"
-
-        self.rule("flex-direction", direction)
-
-        if wrap:
-            self.rule("flex-wrap", "wrap")
-
-        if align is not None:
-            self.rule("align-items", align)
-
-        if justify is not None:
-            self.rule("justify-content", justify)
-```
-
-#### `Style.flex`
-
-
-
-```python linenums="274"
+    self.display("flex")
+    
+    if reverse:
+    direction += "-reverse"
+    
+    self.rule("flex-direction", direction)
+    
+    if wrap:
+    self.rule("flex-wrap", "wrap")
+    
+    if align is not None:
+    self.rule("align-items", align)
+    
+    if justify is not None:
+    self.rule("justify-content", justify)
+    
+    if gap is not None:
+    self.rule("gap", Unit.infer(gap))
+    
+    # #### `Style.flex`
+    
     @style_method
     def flex(
-        self,
-        grow: float = None,
-        shrink: float = None,
-        basis: int = None,
+    self,
+    grow: float = None,
+    shrink: float = None,
+    basis: int = None,
     ) -> "Style":
-        if grow is not None:
-            self.rule("flex-grow", float(grow))
-
-        if shrink is not None:
-            self.rule("flex-shrink", float(shrink))
-
-        if basis is not None:
-            self.rule("flex-basis", Unit.infer(basis, on_float=fr))
-```
-
-#### `Style.grid`
-
-
-
-```python linenums="290"
+    if grow is not None:
+    self.rule("flex-grow", float(grow))
+    
+    if shrink is not None:
+    self.rule("flex-shrink", float(shrink))
+    
+    if basis is not None:
+    self.rule("flex-basis", Unit.infer(basis, on_float=fr))
+    
+    # #### `Style.grid`
+    
     @style_method
     def grid(
-        self,
-        *,
-        columns: Union[int, List[GridTemplate]] = None,
-        rows: Union[int, List[GridTemplate]] = None,
-        auto_columns: GridSize = None,
-        auto_rows: GridSize = None,
-        gap: Unit = 0,
+    self,
+    *,
+    columns: Union[int, List[GridTemplate]] = None,
+    rows: Union[int, List[GridTemplate]] = None,
+    auto_columns: GridSize = None,
+    auto_rows: GridSize = None,
+    gap: Unit = 0,
     ) -> "Style":
-        self.display("grid")
-
-        if columns is None and rows is None:
-            raise ValueError("Either columns or rows must be specified")
-
-        if isinstance(columns, int):
-            columns = repeat(columns, fr(1))
-
-        if isinstance(rows, int):
-            rows = repeat(rows, fr(1))
-
-        if columns is not None:
-            self.rule("grid-template-columns", columns)
-        elif auto_columns is not None:
-            self.rule("grid-auto-columns", auto_columns)
-
-        if rows is not None:
-            self.rule("grid-template-rows", rows)
-        elif auto_rows is not None:
-            self.rule("grid-auto-rows", auto_rows)
-
-        self.rule("gap", Unit.infer(gap, on_float=fr))
-```
-
-#### `Style.columns`
-
-
-
-```python linenums="323"
+    self.display("grid")
+    
+    if columns is None and rows is None:
+    raise ValueError("Either columns or rows must be specified")
+    
+    if isinstance(columns, int):
+    columns = repeat(columns, fr(1))
+    
+    if isinstance(rows, int):
+    rows = repeat(rows, fr(1))
+    
+    if columns is not None:
+    self.rule("grid-template-columns", columns)
+    elif auto_columns is not None:
+    self.rule("grid-auto-columns", auto_columns)
+    
+    if rows is not None:
+    self.rule("grid-template-rows", rows)
+    elif auto_rows is not None:
+    self.rule("grid-auto-rows", auto_rows)
+    
+    self.rule("gap", Unit.infer(gap, on_float=fr))
+    
+    # #### `Style.columns`
+    
     @style_method
     def columns(
-        self, count: int, min: GridSize = None, max: GridSize = None, *, gap: Unit = 0
+    self, count: int, min: GridSize = None, max: GridSize = None, *, gap: Unit = 0
     ) -> "Style":
-        if min is None:
-            min = fr(1)
-
-        if max is None:
-            max = fr(1)
-
-        self.grid(columns=repeat(count, minmax(min, max)), gap=gap)
-```
-
-#### `Style.rows`
-
-
-
-```python linenums="335"
+    if min is None:
+    min = fr(1)
+    
+    if max is None:
+    max = fr(1)
+    
+    self.grid(columns=repeat(count, minmax(min, max)), gap=gap)
+    
+    # #### `Style.rows`
+    
     @style_method
     def rows(
-        self, count: int, min: GridSize = None, max: GridSize = None, *, gap: Unit = 0
+    self, count: int, min: GridSize = None, max: GridSize = None, *, gap: Unit = 0
     ) -> "Style":
-        if min is None:
-            min = fr(1)
-
-        if max is None:
-            max = fr(1)
-
-        self.grid(rows=repeat(count, minmax(min, max)), gap=gap)
-```
-
-#### `Style.place`
-
-
-
-```python linenums="347"
+    if min is None:
+    min = fr(1)
+    
+    if max is None:
+    max = fr(1)
+    
+    self.grid(rows=repeat(count, minmax(min, max)), gap=gap)
+    
+    # #### `Style.place`
+    
     @style_method
     def place(
-        self,
-        columns: Union[int, Tuple[int, int]] = None,
-        rows: Union[int, Tuple[int, int]] = None,
+    self,
+    columns: Union[int, Tuple[int, int]] = None,
+    rows: Union[int, Tuple[int, int]] = None,
     ) -> "Style":
-        if columns is not None:
-            if isinstance(columns, tuple):
-                columns = f"{columns[0]} / {columns[1]+1}"
-
-            self.rule("grid-column", columns)
-
-        if rows is not None:
-            if isinstance(rows, tuple):
-                rows = f"{rows[0]} / {rows[1]+1}"
-
-            self.rule("grid-row", rows)
-```
-
-#### `Style.position`
-
-
-
-```python linenums="365"
+    if columns is not None:
+    if isinstance(columns, tuple):
+    columns = f"{columns[0]} / {columns[1]+1}"
+    
+    self.rule("grid-column", columns)
+    
+    if rows is not None:
+    if isinstance(rows, tuple):
+    rows = f"{rows[0]} / {rows[1]+1}"
+    
+    self.rule("grid-row", rows)
+    
+    # #### `Style.position`
+    
     @style_method
     def position(
-        self,
-        position: str,
-        *,
-        left: int = None,
-        right: int = None,
-        top: int = None,
-        bottom: int = None,
+    self,
+    position: str,
+    *,
+    left: int = None,
+    right: int = None,
+    top: int = None,
+    bottom: int = None,
     ) -> "Style":
-        self.rule("position", position)
-
-        if left is not None:
-            self.rule("left", Unit.infer(left))
-        if right is not None:
-            self.rule("right", Unit.infer(right))
-        if top is not None:
-            self.rule("top", Unit.infer(top))
-        if bottom is not None:
-            self.rule("bottom", Unit.infer(bottom))
-```
-
-#### `Style.absolute`
-
-
-
-```python linenums="386"
+    self.rule("position", position)
+    
+    if left is not None:
+    self.rule("left", Unit.infer(left))
+    if right is not None:
+    self.rule("right", Unit.infer(right))
+    if top is not None:
+    self.rule("top", Unit.infer(top))
+    if bottom is not None:
+    self.rule("bottom", Unit.infer(bottom))
+    
+    # #### `Style.absolute`
+    
     @style_method
     def absolute(
-        self,
-        *,
-        left: int = None,
-        right: int = None,
-        top: int = None,
-        bottom: int = None,
+    self,
+    *,
+    left: int = None,
+    right: int = None,
+    top: int = None,
+    bottom: int = None,
     ) -> "Style":
-        self.position("absolute", left=left, right=right, top=top, bottom=bottom)
-```
-
-#### `Style.relative`
-
-
-
-```python linenums="397"
+    self.position("absolute", left=left, right=right, top=top, bottom=bottom)
+    
+    # #### `Style.relative`
+    
     @style_method
     def relative(
-        self,
-        *,
-        left: int = None,
-        right: int = None,
-        top: int = None,
-        bottom: int = None,
+    self,
+    *,
+    left: int = None,
+    right: int = None,
+    top: int = None,
+    bottom: int = None,
     ) -> "Style":
-        self.position("relative", left=left, right=right, top=top, bottom=bottom)
-```
-
-### Sub-styles
-
-#### `Style.on`
-
-
-
-```python linenums="409"
+    self.position("relative", left=left, right=right, top=top, bottom=bottom)
+    
+    # ### Animations
+    
+    # #### `Style.transition`
+    
+    @style_method
+    def transition(
+    self,
+    property="all",
+    duration: Unit = ms(150),
+    timing: str = "linear",
+    delay: Unit = ms(0),
+    ) -> "Style":
+    self._transitions.append(
+    (
+    property,
+    Unit.infer(duration, sec, ms),
+    timing,
+    Unit.infer(delay, sec, ms),
+    )
+    )
+    
+    properties = []
+    durations = []
+    timings = []
+    delays = []
+    
+    for property, duration, timing, delay in self._transitions:
+    properties.append(property)
+    durations.append(str(duration))
+    timings.append(timing)
+    delays.append(str(delay))
+    
+    self.rule("transition-property", ", ".join(properties))
+    self.rule("transition-duration", ", ".join(durations))
+    self.rule("transition-timing-function", ", ".join(timings))
+    self.rule("transition-delay", ", ".join(delays))
+    
+    # #### `Style.transform`
+    
+    @style_method
+    def transform(
+    self,
+    translate_x: Unit = None,
+    translate_y: Unit = None,
+    scale_x: float = None,
+    scale_y: float = None,
+    rotate: Unit = None,
+    ) -> "Style":
+    if translate_x is not None:
+    self._transforms["translateX"] = Unit.infer(translate_x)
+    if translate_y is not None:
+    self._transforms["translateY"] = Unit.infer(translate_y)
+    if scale_x is not None:
+    self._transforms["scaleX"] = scale_x
+    if scale_y is not None:
+    self._transforms["scaleY"] = scale_y
+    if rotate is not None:
+    self._transforms["rotate"] = Unit(rotate, "deg")
+    
+    transforms = []
+    
+    for transform, value in self._transforms.items():
+    transforms.append(f"{transform}({value})")
+    
+    self.rule("transform", " ".join(transforms))
+    
+    @style_method
+    def translate(self, x: Unit = None, y: Unit = None) -> "Style":
+    self.transform(translate_x=x, translate_y=y)
+    
+    @style_method
+    def scale(
+    self, scale: float = None, *, x: float = None, y: float = None
+    ) -> "Style":
+    if scale is not None:
+    x = scale
+    y = scale
+    
+    self.transform(scale_x=x, scale_y=y)
+    
+    @style_method
+    def rotate(self, rotation: float) -> "Style":
+    self.transform(rotate=rotation)
+    
+    # ### Sub-styles
+    
+    # #### `Style.on`
+    
     def on(self, state) -> "Style":
-        style = Style(self.selector.on(state))
-        self._children.append(style)
-        return style
-```
-
-#### `Style.children`
-
-
-
-```python linenums="414"
+    selector = self.selector.on(state)
+    style = self._children.get(selector.css(), Style(selector))
+    self._children[selector.css()] = style
+    return style
+    
+    # #### `Style.children`
+    
     def children(self, selector: str = "*", *, nth: int = None) -> "Style":
-        style = Style(self.selector.children(selector, nth=nth))
-        self._children.append(style)
-        return style
-```
-
-### Rendering methods
-
-#### `Style.css`
-
-
-
-```python linenums="420"
+    selector = self.selector.children(selector, nth=nth)
+    style = self._children.get(selector.css(), Style(selector))
+    self._children[selector.css()] = style
+    return style
+    
+    # ### Rendering methods
+    
+    # #### `Style.css`
+    
     def css(self, inline: bool = False) -> str:
-        separator = "" if inline else "\n"
-
-        rules = separator.join(
-            f"{attr}: {value};" for attr, value in self._rules.items()
-        )
-
-        if inline:
-            return rules
-
-        return f"{self.selector.css()} {{\n{textwrap.indent(rules, 4*' ')}\n}}"
-```
-
-#### `Style.inline`
-
-
-
-```python linenums="432"
+    separator = "" if inline else "\n"
+    
+    rules = separator.join(
+    f"{attr}: {value};" for attr, value in self._rules.items()
+    )
+    
+    if inline:
+    return rules
+    
+    return f"{self.selector.css()} {{\n{textwrap.indent(rules, 4*' ')}\n}}"
+    
+    # #### `Style.inline`
+    
     def inline(self) -> str:
-        return f'style="{self.css(inline=True)}"'
-```
-
-#### `Style.markup`
-
-
-
-```python linenums="435"
+    return f'style="{self.css(inline=True)}"'
+    
+    # #### `Style.markup`
+    
     def markup(self) -> str:
-        return self.selector.markup()
-```
-
-#### `Style.__str__`
-
-
-
-```python linenums="438"
+    return self.selector.markup()
+    
+    # #### `Style.__str__`
+    
     def __str__(self):
-        return self.markup()
-```
-
+    return self.markup()
