@@ -1,6 +1,7 @@
 from violetear import StyleSheet
 from violetear.color import Colors
-from violetear.units import Unit, px, rem
+from violetear.units import Unit, rem
+from violetear.presets import SemanticDesign
 
 sheet = StyleSheet(normalize=True)
 
@@ -16,6 +17,7 @@ base_btn = (
     .rule("cursor", "pointer")
     .rounded()
     .shadow(Colors.Black.transparent(0.2), x=2, y=2, blur=4)
+    .transition(duration=50)
 )
 
 for cls, font, pd in zip(["xs", "sm", "md", "lg", "xl"], font_sizes, padding_sizes):
@@ -54,7 +56,7 @@ for cls, color in zip(
         btn_style.on("active")
         .background(color.darker(0.1))
         .color(accent_color)
-        .shadow(Colors.Black.transparent(0.2), x=0, y=0, blur=2, spread=1)
+        .shadow(color.lit(0.2).transparent(0.2), x=0, y=0, blur=2, spread=1)
     )
 
 if __name__ == "__main__":

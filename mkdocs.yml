@@ -75,3 +75,7 @@ nav:
     - violetear.media: api/violetear.media.md
     - violetear.presets: api/violetear.presets.md
     - violetear.helpers: api/violetear.helpers.md
+
+watch:
+  - docs
+  - violetear

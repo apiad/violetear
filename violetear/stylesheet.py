@@ -53,7 +53,7 @@ class StyleSheet:
         if normalize:
             self._preamble = open(Path(__file__).parent / "normalize.css").read()
         else:
-            self._preamble = None
+            self._preamble = ""
 
     # ### Rendering methods
 
