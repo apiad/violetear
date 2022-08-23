@@ -311,7 +311,7 @@ body {
 }
 
 .btn.sm {
-    font-size: 18px;
+    font-size: 19px;
     padding-left: 10px;
     padding-right: 10px;
     padding-top: 5px;
@@ -319,7 +319,7 @@ body {
 }
 
 .btn.md {
-    font-size: 23px;
+    font-size: 25px;
     padding-left: 12px;
     padding-right: 12px;
     padding-top: 6px;
@@ -327,7 +327,7 @@ body {
 }
 
 .btn.lg {
-    font-size: 27px;
+    font-size: 30px;
     padding-left: 14px;
     padding-right: 14px;
     padding-top: 7px;
@@ -335,7 +335,7 @@ body {
 }
 
 .btn.xl {
-    font-size: 32px;
+    font-size: 36px;
     padding-left: 16px;
     padding-right: 16px;
     padding-top: 8px;
@@ -348,7 +348,7 @@ body {
 }
 
 .btn:hover {
-    background-color: rgba(221,213,213,1.0);
+    background-color: rgba(231,231,231,1.0);
     color: rgba(0,0,0,1.0);
 }
 
@@ -363,7 +363,7 @@ body {
 }
 
 .btn.primary:hover {
-    background-color: rgba(0,0,153,1.0);
+    background-color: rgba(9,77,179,1.0);
     color: rgba(255,255,255,1.0);
 }
 
@@ -378,7 +378,7 @@ body {
 }
 
 .btn.success:hover {
-    background-color: rgba(0,153,0,1.0);
+    background-color: rgba(43,179,9,1.0);
     color: rgba(255,255,255,1.0);
 }
 
@@ -393,7 +393,7 @@ body {
 }
 
 .btn.warning:hover {
-    background-color: rgba(255,181,45,1.0);
+    background-color: rgba(245,176,79,1.0);
     color: rgba(0,0,0,1.0);
 }
 
@@ -408,7 +408,7 @@ body {
 }
 
 .btn.error:hover {
-    background-color: rgba(153,0,0,1.0);
+    background-color: rgba(179,9,9,1.0);
     color: rgba(255,255,255,1.0);
 }
 
@@ -423,7 +423,7 @@ body {
 }
 
 .btn.info:hover {
-    background-color: rgba(0,202,204,1.0);
+    background-color: rgba(11,222,160,1.0);
     color: rgba(0,0,0,1.0);
 }
 
