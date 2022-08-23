@@ -62,6 +62,9 @@ class Unit:
     def __mul__(self, other: Union[int, float]):
         return Unit(self.value * other, self.unit)
 
+    def __truediv__(self, other: Union[int, float]):
+        return Unit(self.value / other, self.unit)
+
     @staticmethod
     def infer(x, on_float=rem, on_int=px):
         if isinstance(x, int):

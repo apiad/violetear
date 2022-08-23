@@ -21,7 +21,7 @@ base_btn = (
 
 for cls, font in zip(["xs", "sm", "md", "lg", "xl"], font_sizes):
     text_size = sheet.select(f".text.{cls}").font(size=font)
-    pd = font/4
+    pd = font / 4
     btn_size = (
         sheet.select(f".btn.{cls}")
         .font(size=font)

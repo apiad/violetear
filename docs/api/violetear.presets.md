@@ -62,18 +62,18 @@ class SemanticDesign(StyleSheet):
         *,
         text_class: str = "text",
         button_class: str = "btn",
-        sizes : Dict[str, Unit] = dict(
+        sizes: Dict[str, Unit] = dict(
             sm=1.0,
             md=1.4,
             lg=2,
         ),
-        colors : Dict[str, Color] = dict(
+        colors: Dict[str, Color] = dict(
             normal=Colors.White.lit(0.9),
             primary=Colors.Blue.lit(0.3),
             success=Colors.Green.lit(0.3),
             warning=Colors.Orange.lit(0.6),
             error=Colors.Red.lit(0.3),
-        )
+        ),
     ) -> None:
         super().__init__()
 
@@ -103,7 +103,7 @@ class SemanticDesign(StyleSheet):
         )
 
         for cls, font in self._sizes.items():
-            pd = font/4
+            pd = font / 4
             btn_size = (
                 self.select(f".{self._button_class}.{cls}")
                 .font(size=font)
@@ -119,7 +119,9 @@ class SemanticDesign(StyleSheet):
                 accent_color = Colors.Black
 
             btn_style = self.select(f".btn.{cls}").background(color).color(text_color)
-            hover_style = btn_style.on("hover").background(color.lighter(0.2)).color(accent_color)
+            hover_style = (
+                btn_style.on("hover").background(color.lighter(0.2)).color(accent_color)
+            )
             active_style = (
                 btn_style.on("active")
                 .background(color.darker(0.1))
