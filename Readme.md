@@ -81,8 +81,7 @@ subtitle.rules(
 )
 ```
 
-And finally `violetear` has a few ready-made collection of styles for some of the most common design patterns. Here's a [12-column grid system made with flexbox](https://apiad.net/violetear/examples/fluid-grid) with varying screen sizes that is completely customizable in just 5 lines of code:
-
+And finally `violetear` has a few ready-made collection of styles for some of the most common design patterns. Here's a [12-column grid system made with flexbox](https://apiad.net/violetear/api/violetear.presets#flex-based-grid-system) with varying screen sizes that is completely customizable in just 5 lines of code:
 
 ```python
 from violetear.presets import FlexGrid
@@ -90,12 +89,28 @@ from violetear.presets import FlexGrid
 sheet.extend(FlexGrid(
     columns=12,        # 12 columns by default
     breakpoints=dict(
-        lg=(1600, 8),  # Add several breakpoints at differente
+        lg=(1600, 8),  # Add several breakpoints at different
         md=(1200, 6),  # screen sizes changing the
         sm=(800, 4),   # number of columns and adding custom
         xs=(400, 1)    # classes for extra responsiveness
     )
 ))
+```
+
+And here's a [semantic design with typography and button styles](https://apiad.net/violetear/api/violetear.presets#semantic-input-system)  like `.text.md` and `.btn.primary` that is also completely customizable:
+
+```python
+from violetear.presets import SemanticDesign
+
+sheet.extend(SemanticDesign(
+    sizes=dict(sm=1.0, md=1.5, lg=2.0),
+    colors=dict(
+        normal=Colors.White.lit(0.8),
+        primary=Colors.Blue.lit(0.4),
+        success=Colors.Green.lit(0.4),
+        error=Colors.Red.lit(0.4),
+    )
+).all())
 ```
 
 Once your stylesheet is complete, you have a few options to deliver the styles to your frontend.
