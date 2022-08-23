@@ -356,6 +356,7 @@ body {
 .btn:active {
     background-color: rgba(206,206,206,1.0);
     color: rgba(0,0,0,1.0);
+    box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.2);
 }
 
 .btn.primary {
@@ -371,6 +372,7 @@ body {
 .btn.primary:active {
     background-color: rgba(0,0,137,1.0);
     color: rgba(255,255,255,1.0);
+    box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.2);
 }
 
 .btn.success {
@@ -386,6 +388,7 @@ body {
 .btn.success:active {
     background-color: rgba(0,137,0,1.0);
     color: rgba(255,255,255,1.0);
+    box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.2);
 }
 
 .btn.warning {
@@ -401,6 +404,7 @@ body {
 .btn.warning:active {
     background-color: rgba(229,164,44,1.0);
     color: rgba(0,0,0,1.0);
+    box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.2);
 }
 
 .btn.error {
@@ -416,6 +420,7 @@ body {
 .btn.error:active {
     background-color: rgba(137,0,0,1.0);
     color: rgba(255,255,255,1.0);
+    box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.2);
 }
 
 .btn.info {
@@ -431,6 +436,7 @@ body {
 .btn.info:active {
     background-color: rgba(0,182,183,1.0);
     color: rgba(0,0,0,1.0);
+    box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.2);
 }
 
 /* Generated 25 styles */

@@ -43,8 +43,13 @@ for cls, color in zip(
         accent_color = Colors.Black
 
     btn_style = sheet.select(f".btn{cls}").background(color).color(text_color)
-    btn_style.on("hover").background(color.lighter(0.2)).color(accent_color)
-    btn_style.on("active").background(color.darker(0.1)).color(accent_color)
+    hover = btn_style.on("hover").background(color.lighter(0.2)).color(accent_color)
+    active = (
+        btn_style.on("active")
+        .background(color.darker(0.1))
+        .color(accent_color)
+        .shadow(Colors.Black.transparent(0.2), x=0, y=0, blur=5)
+    )
 
 if __name__ == "__main__":
     sheet.render("semantic-inputs.css")
