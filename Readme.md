@@ -103,12 +103,12 @@ And here's a [semantic design with typography and button styles](https://apiad.n
 from violetear.presets import SemanticDesign
 
 sheet.extend(SemanticDesign(
-    sizes=dict(sm=1.0, md=1.5, lg=2.0),
+    sizes=dict(sm=1.0, md=1.5, lg=2.0),  # Custom sizes
     colors=dict(
-        normal=Colors.White.lit(0.8),
-        primary=Colors.Blue.lit(0.4),
-        success=Colors.Green.lit(0.4),
-        error=Colors.Red.lit(0.4),
+        normal=Colors.White.lit(0.8),    # Custom colors for different
+        primary=Colors.Blue.lit(0.4),    # semantic classes
+        success=Colors.Green.lit(0.4),   # applied to buttons
+        error=Colors.Red.lit(0.4),       # and text
     )
 ).all())
 ```
