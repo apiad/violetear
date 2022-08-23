@@ -180,6 +180,10 @@ Right now `violetear` is in pre-release mode, which means the API is completely 
 - [x] States
 - [x] Media queries
 
+**v0.10.3**
+
+- Add semantic design preset
+
 **v0.10.2**
 
 - Support multiple animations in a single element.
