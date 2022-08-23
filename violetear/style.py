@@ -13,7 +13,7 @@ from typing import List, Tuple, Union, TYPE_CHECKING
 from .selector import Selector
 from .units import Unit, fr, ms, pc, minmax, rem, repeat, sec
 from .types import GridSize, GridTemplate, FontWeight
-from .color import Color, gray
+from .color import Color, Colors, gray
 from .helpers import style_method
 
 # This trick is necessary to annotate the `Style.animation` method
@@ -201,6 +201,30 @@ class Style:
     @style_method
     def background(self, color: Color) -> Style:
         self.rule("background-color", color)
+
+    @style_method
+    def shadow(
+        self,
+        color: Color = None,
+        *,
+        x: Unit = 0,
+        y: Unit = 0,
+        blur: Unit = 0,
+        spread: Unit = 0,
+    ) -> Style:
+        if color is None:
+            self.rule("box-shadow", "none")
+            return self
+
+        rule = [
+            str(Unit.infer(x)),
+            str(Unit.infer(y)),
+            str(Unit.infer(blur)),
+            str(Unit.infer(spread)),
+            str(color)
+        ]
+
+        self.rule('box-shadow', " ".join(rule))
 
     # #### `Style.border`
 

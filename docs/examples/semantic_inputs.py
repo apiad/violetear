@@ -6,7 +6,12 @@ sheet = StyleSheet(normalize=True)
 
 sheet.select("body").width(max=768).margin("auto")
 
-sheet.select(".btn").rule('cursor', 'pointer').rounded()
+base = (
+    sheet.select(".btn")
+    .rule("cursor", "pointer")
+    .rounded()
+    .shadow(Colors.Black.transparent(0.2), x=2, y=2, blur=5)
+)
 
 font_sizes = Unit.scale(px, 14, 36, 5)
 padding_sizes = Unit.scale(px, 5, 8, 5)
@@ -27,7 +32,9 @@ colors = [
     Colors.Cyan.lit(0.4),
 ]
 
-for cls, color in zip(["", ".primary", ".success", ".warning", ".error", ".info"], colors):
+for cls, color in zip(
+    ["", ".primary", ".success", ".warning", ".error", ".info"], colors
+):
     if color.lightness < 0.4:
         text_color = color.lit(0.9)
         accent_color = Colors.White

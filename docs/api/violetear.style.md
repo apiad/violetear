@@ -26,7 +26,7 @@ These ones are internal to `violetear`:
 from .selector import Selector
 from .units import Unit, fr, ms, pc, minmax, rem, repeat, sec
 from .types import GridSize, GridTemplate, FontWeight
-from .color import Color, gray
+from .color import Color, Colors, gray
 from .helpers import style_method
 ```
 
@@ -297,13 +297,37 @@ Shorthand method for justified align.
     @style_method
     def background(self, color: Color) -> Style:
         self.rule("background-color", color)
+
+    @style_method
+    def shadow(
+        self,
+        color: Color = None,
+        *,
+        x: Unit = 0,
+        y: Unit = 0,
+        blur: Unit = 0,
+        spread: Unit = 0,
+    ) -> Style:
+        if color is None:
+            self.rule("box-shadow", "none")
+            return self
+
+        rule = [
+            str(Unit.infer(x)),
+            str(Unit.infer(y)),
+            str(Unit.infer(blur)),
+            str(Unit.infer(spread)),
+            str(color)
+        ]
+
+        self.rule('box-shadow', " ".join(rule))
 ```
 
 #### `Style.border`
 
 
 
-```python linenums="165"
+```python linenums="189"
     @style_method
     def border(
         self, width: Unit = None, color: Color = None, *, radius: Unit = None
@@ -324,7 +348,7 @@ Shorthand method for justified align.
 
 
 
-```python linenums="179"
+```python linenums="203"
     @style_method
     def visibility(self, visibility: str) -> Style:
         self.rule("visibility", visibility)
@@ -334,7 +358,7 @@ Shorthand method for justified align.
 
 
 
-```python linenums="183"
+```python linenums="207"
     @style_method
     def visible(self) -> Style:
         self.visibility("visible")
@@ -344,7 +368,7 @@ Shorthand method for justified align.
 
 
 
-```python linenums="187"
+```python linenums="211"
     @style_method
     def hidden(self) -> Style:
         self.visibility("hidden")
@@ -356,7 +380,7 @@ Shorthand method for justified align.
 
 
 
-```python linenums="192"
+```python linenums="216"
     @style_method
     def width(self, value=None, *, min=None, max=None) -> Style:
         if value is not None:
@@ -373,7 +397,7 @@ Shorthand method for justified align.
 
 
 
-```python linenums="203"
+```python linenums="227"
     @style_method
     def height(self, value=None, *, min=None, max=None) -> Style:
         if value is not None:
@@ -390,7 +414,7 @@ Shorthand method for justified align.
 
 
 
-```python linenums="214"
+```python linenums="238"
     @style_method
     def size(self, width: Unit, height: Unit) -> Style:
         self.width(width)
@@ -401,7 +425,7 @@ Shorthand method for justified align.
 
 
 
-```python linenums="219"
+```python linenums="243"
     @style_method
     def margin(
         self,
@@ -428,7 +452,7 @@ Shorthand method for justified align.
 
 
 
-```python linenums="240"
+```python linenums="264"
     @style_method
     def padding(
         self,
@@ -455,7 +479,7 @@ Shorthand method for justified align.
 
 
 
-```python linenums="261"
+```python linenums="285"
     @style_method
     def rounded(self, radius: Unit = None) -> Style:
         if radius is None:
@@ -470,7 +494,7 @@ Shorthand method for justified align.
 
 
 
-```python linenums="269"
+```python linenums="293"
     @style_method
     def display(self, display: str) -> Style:
         self.rule("display", display)
@@ -480,7 +504,7 @@ Shorthand method for justified align.
 
 
 
-```python linenums="273"
+```python linenums="297"
     @style_method
     def flexbox(
         self,
@@ -515,7 +539,7 @@ Shorthand method for justified align.
 
 
 
-```python linenums="302"
+```python linenums="326"
     @style_method
     def flex(
         self,
@@ -537,7 +561,7 @@ Shorthand method for justified align.
 
 
 
-```python linenums="318"
+```python linenums="342"
     @style_method
     def grid(
         self,
@@ -576,7 +600,7 @@ Shorthand method for justified align.
 
 
 
-```python linenums="351"
+```python linenums="375"
     @style_method
     def columns(
         self,
@@ -599,7 +623,7 @@ Shorthand method for justified align.
 
 
 
-```python linenums="368"
+```python linenums="392"
     @style_method
     def rows(
         self,
@@ -622,7 +646,7 @@ Shorthand method for justified align.
 
 
 
-```python linenums="385"
+```python linenums="409"
     @style_method
     def place(
         self,
@@ -646,7 +670,7 @@ Shorthand method for justified align.
 
 
 
-```python linenums="403"
+```python linenums="427"
     @style_method
     def position(
         self,
@@ -673,7 +697,7 @@ Shorthand method for justified align.
 
 
 
-```python linenums="424"
+```python linenums="448"
     @style_method
     def absolute(
         self,
@@ -690,7 +714,7 @@ Shorthand method for justified align.
 
 
 
-```python linenums="435"
+```python linenums="459"
     @style_method
     def relative(
         self,
@@ -709,7 +733,7 @@ Shorthand method for justified align.
 
 
 
-```python linenums="447"
+```python linenums="471"
     @style_method
     def transition(
         self,
@@ -748,7 +772,7 @@ Shorthand method for justified align.
 
 
 
-```python linenums="480"
+```python linenums="504"
     @style_method
     def transform(
         self,
@@ -797,7 +821,7 @@ Shorthand method for justified align.
 
 
 
-```python linenums="523"
+```python linenums="547"
     @style_method
     def animate(
         self,
@@ -839,7 +863,7 @@ Shorthand method for justified align.
 
 
 
-```python linenums="558"
+```python linenums="582"
     def on(self, state) -> Style:
         selector = self.selector.on(state)
         style = self._children.get(selector.css(), Style(selector))
@@ -851,7 +875,7 @@ Shorthand method for justified align.
 
 
 
-```python linenums="564"
+```python linenums="588"
     def children(self, selector: str = "*", *, nth: int = None) -> Style:
         selector = self.selector.children(selector, nth=nth)
         style = self._children.get(selector.css(), Style(selector))
@@ -865,7 +889,7 @@ Shorthand method for justified align.
 
 
 
-```python linenums="571"
+```python linenums="595"
     def css(self, inline: bool = False) -> str:
         separator = "" if inline else "\n"
 
@@ -884,7 +908,7 @@ Shorthand method for justified align.
 
 
 
-```python linenums="584"
+```python linenums="608"
     def inline(self) -> str:
         return f'style="{self.css(inline=True)}"'
 ```
@@ -893,7 +917,7 @@ Shorthand method for justified align.
 
 
 
-```python linenums="587"
+```python linenums="611"
     def markup(self) -> str:
         return self.selector.markup()
 ```
@@ -902,7 +926,7 @@ Shorthand method for justified align.
 
 
 
-```python linenums="590"
+```python linenums="614"
     def __str__(self):
         return self.markup()
 ```
