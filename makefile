@@ -8,7 +8,7 @@ test:
 	pytest
 
 .PHONY: docs
-docs:
+docs: examples
 	cp Readme.md docs/index.md
 	mkdocs build
 
