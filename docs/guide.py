@@ -32,4 +32,4 @@ with sheet.media(max_width=600):
     sheet.redefine(root).flexbox("column").children("div").width(max=200)
 
 if __name__ == "__main__":
-    sheet.render("styles.css")
+    sheet.render("guide.css")

@@ -18,7 +18,7 @@ illiterate:
 
 .PHONY: examples
 examples:
-	(cd docs && python styles.py)
+	(cd docs && python guide.py)
 	(cd docs/examples && python animations.py)
 	(cd docs/examples && python color_spaces.py)
 	(cd docs/examples && python fluid_grid.py)

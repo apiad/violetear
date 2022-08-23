@@ -136,13 +136,3 @@ if __name__ == "__main__":
     sheet.render("fluid-grid.css")
 
 # End of tutorial
-
-from violetear import StyleSheet
-from violetear.presets import FlexGrid
-
-sheet2 = StyleSheet(normalize=True).extend(
-    FlexGrid(
-        columns=12,
-        breakpoints=dict(lg=(1600, 8), md=(1200, 6), sm=(800, 4), xs=(400, 1)),
-    )
-)
