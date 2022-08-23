@@ -22,10 +22,10 @@ Using a general-purpose programming language to generate CSS we can obtain the b
 
 - [Create CSS styles from Python code](https://apiad.net/violetear/guide/#simple-styling) using a fluent, fully documented API that covers the most common rules.
 - [Generate CSS stylesheets programatically](https://apiad.net/violetear/guide/#creating-styles-programatically), which means you can create several related styles with ease using loops and parameters.
-- [Manipulate magnitudes and colors](https://apiad.net/violetear/examples/color-spaces) to easily create custom color palettes.
+- [Manipulate magnitudes and colors](https://apiad.net/violetear/examples/color-spaces) to create custom color palettes.
 - [Generate minimal CSS files](#) including only the subset of rules that are used in a given template.
 - [Create complex layouts using flexbox and grid](https://apiad.net/violetear/examples/fluid-grid) programatically with very few lines of code.
-- [Easily define transitions and animations](https://apiad.net/violetear/examples/animations).
+- [Define transitions and animations](https://apiad.net/violetear/examples/animations) in a modular way.
 
 And much more... When you combine a full-flegded programming language with powerful abstractions and carefully designed APIs, your imagination is the only limit.
 

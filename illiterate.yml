@@ -2,12 +2,12 @@ inline: true
 output: docs/api
 sources:
   violetear: violetear/__init__.py
+  violetear.animation: violetear/animation.py
   violetear.color: violetear/color.py
   violetear.helpers: violetear/helpers.py
   violetear.media: violetear/media.py
+  violetear.presets: violetear/presets.py
   violetear.selector: violetear/selector.py
   violetear.style: violetear/style.py
   violetear.stylesheet: violetear/stylesheet.py
   violetear.units: violetear/units.py
-  violetear.presets: violetear/presets.py
-  violetear.animation: violetear/animation.py

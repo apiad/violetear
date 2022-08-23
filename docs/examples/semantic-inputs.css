@@ -292,118 +292,136 @@ summary {
 
 /* End of modern-normalize.css */
 
-.menu {
-    display: flex;
-    flex-direction: row;
-    gap: 10px;
-    padding: 10px;
+body {
+    max-width: 768px;
+    margin: auto;
 }
 
-.menu-item {
-    padding: 5px;
-    border-width: 0.1rem;
-    border-color: rgba(127,127,127,1.0);
-    background-color: rgba(178,178,178,1.0);
-    text-decoration: none;
-    font-weight: 600;
-    transition-property: background-color, color, transform;
-    transition-duration: 150ms, 300ms, 150ms;
-    transition-timing-function: linear, linear, ease-in-out;
-    transition-delay: 0ms, 0ms, 150ms;
+.btn {
+    cursor: pointer;
+    border-radius: 0.25rem;
 }
 
-.menu-item:hover {
+.btn.xs {
+    font-size: 14px;
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+
+.btn.sm {
+    font-size: 20px;
+    padding-left: 12px;
+    padding-right: 12px;
+    padding-top: 6px;
+    padding-bottom: 6px;
+}
+
+.btn.md {
+    font-size: 26px;
+    padding-left: 14px;
+    padding-right: 14px;
+    padding-top: 7px;
+    padding-bottom: 7px;
+}
+
+.btn.lg {
+    font-size: 32px;
+    padding-left: 16px;
+    padding-right: 16px;
+    padding-top: 8px;
+    padding-bottom: 8px;
+}
+
+.btn {
     background-color: rgba(229,229,229,1.0);
-    color: rgba(255,0,0,1.0);
-    transform: scaleX(1.1) scaleY(1.1) translateY(5px);
+    color: rgba(25,25,25,1.0);
 }
 
-.marquee {
-    height: 500px;
-    overflow: hidden;
-    padding: 20px;
+.btn:hover {
+    background-color: rgba(231,231,231,1.0);
+    color: rgba(0,0,0,1.0);
 }
 
-p {
-    font-size: 22px;
-    font-weight: 100;
-    position: relative;
-    animation-name: text-up;
-    animation-duration: 10s;
-    animation-timing-function: linear;
-    animation-iteration-count: infinite;
-    animation-direction: normal;
+.btn:active {
+    background-color: rgba(206,206,206,1.0);
+    color: rgba(0,0,0,1.0);
 }
 
-.playground {
-    width: 100.0%;
-    height: 300px;
-    overflow: hidden;
-    margin-top: 20px;
-    padding-right: 50px;
-    padding-bottom: 50px;
-    background-color: rgba(242,242,242,1.0);
+.btn.primary {
+    background-color: rgba(0,0,153,1.0);
+    color: rgba(204,204,254,1.0);
 }
 
-.ball {
-    width: 50px;
-    height: 50px;
-    border-radius: 50px;
-    background-color: rgba(255,153,153,1.0);
-    position: relative;
-    text-align: center;
-    font-size: 40px;
-    animation-name: _a0, _a1;
-    animation-duration: 5s, 2s;
-    animation-timing-function: linear, linear;
-    animation-iteration-count: infinite, infinite;
-    animation-direction: alternate, alternate;
+.btn.primary:hover {
+    background-color: rgba(9,77,179,1.0);
+    color: rgba(255,255,255,1.0);
 }
 
-@keyframes _a0 {
-    0.0%  {
-        left: 0.0%;
-    }
-
-    100.0%  {
-        left: 100.0%;
-    }
-
+.btn.primary:active {
+    background-color: rgba(6,56,130,1.0);
+    color: rgba(255,255,255,1.0);
 }
 
-@keyframes _a1 {
-    0.0%  {
-        top: 0.0%;
-    }
-
-    100.0%  {
-        top: 100.0%;
-    }
-
+.btn.success {
+    background-color: rgba(0,153,0,1.0);
+    color: rgba(204,254,204,1.0);
 }
 
-@keyframes text-up {
-    0.0%  {
-        top: 500px;
-    }
-
-    25.0%  {
-        color: rgba(0,153,0,1.0);
-    }
-
-    50.0%  {
-        color: rgba(0,0,153,1.0);
-        font-weight: 900;
-    }
-
-    75.0%  {
-        color: rgba(153,0,0,1.0);
-    }
-
-    100.0%  {
-        top: -500px;
-    }
-
+.btn.success:hover {
+    background-color: rgba(43,179,9,1.0);
+    color: rgba(255,255,255,1.0);
 }
 
-/* Generated 7 styles */
+.btn.success:active {
+    background-color: rgba(31,130,6,1.0);
+    color: rgba(255,255,255,1.0);
+}
+
+.btn.warning {
+    background-color: rgba(255,183,50,1.0);
+    color: rgba(51,33,0,1.0);
+}
+
+.btn.warning:hover {
+    background-color: rgba(245,176,79,1.0);
+    color: rgba(0,0,0,1.0);
+}
+
+.btn.warning:active {
+    background-color: rgba(243,155,31,1.0);
+    color: rgba(0,0,0,1.0);
+}
+
+.btn.error {
+    background-color: rgba(153,0,0,1.0);
+    color: rgba(254,204,204,1.0);
+}
+
+.btn.error:hover {
+    background-color: rgba(179,9,9,1.0);
+    color: rgba(255,255,255,1.0);
+}
+
+.btn.error:active {
+    background-color: rgba(130,6,6,1.0);
+    color: rgba(255,255,255,1.0);
+}
+
+.btn.info {
+    background-color: rgba(101,101,255,1.0);
+    color: rgba(0,0,51,1.0);
+}
+
+.btn.info:hover {
+    background-color: rgba(123,173,248,1.0);
+    color: rgba(0,0,0,1.0);
+}
+
+.btn.info:active {
+    background-color: rgba(74,143,245,1.0);
+    color: rgba(0,0,0,1.0);
+}
+
+/* Generated 24 styles */

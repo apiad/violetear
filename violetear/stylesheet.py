@@ -26,7 +26,7 @@ from .media import MediaQuery
 
 class StyleSheet:
     def __init__(
-        self, *styles: Style, normalize: bool = True, base: Style = None
+        self, *styles: Style, normalize: bool = False, base: Style = None
     ) -> None:
         """Initializes a new StyleSheet, optionally with a set of initial styles
         and a base style for inheritance.

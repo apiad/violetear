@@ -34,6 +34,22 @@ class Color:
     def __repr__(self):
         return f"Color({self.r},{self.g},{self.b}, alpha={self.a})"
 
+    @property
+    def lightness(self):
+        return hls(self)[1]
+
+    @property
+    def hue(self):
+        return hls(self)[0]
+
+    @property
+    def value(self):
+        return hls(self)[2]
+
+    @property
+    def saturation(self):
+        return hsv(self)[2]
+
     # #### `Color.saturated`
 
     def saturated(self, saturation: float) -> Color:
@@ -56,6 +72,26 @@ class Color:
 
     def transparent(self, alpha: float) -> Color:
         return Color(self.r, self.g, self.b, alpha=alpha)
+
+    # #### `Color.lighter`
+
+    def lighter(self, alpha: float) -> Color:
+        return self.towards(self.lit(1.0), alpha)
+
+    # #### `Color.darker`
+
+    def darker(self, alpha: float) -> Color:
+        return self.towards(self.lit(0.0), alpha)
+
+    # #### `Color.brighter`
+
+    def brighter(self, alpha: float) -> Color:
+        return self.towards(self.saturated(1.0), alpha)
+
+    # #### `Color.dimmer`
+
+    def dimmer(self, alpha: float) -> Color:
+        return self.towards(self.saturated(0.0), alpha)
 
     # #### `Color.redshift`
 

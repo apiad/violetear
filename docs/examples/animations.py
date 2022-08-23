@@ -46,6 +46,7 @@ playground = (
     .height(300)
     .rules(overflow="hidden")
     .margin(top=20)
+    .padding(right=50, bottom=50)
     .background(gray(0.95))
 )
 

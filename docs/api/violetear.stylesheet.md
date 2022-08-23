@@ -37,7 +37,7 @@ from .media import MediaQuery
 ```python linenums="19"
 class StyleSheet:
     def __init__(
-        self, *styles: Style, normalize: bool = True, base: Style = None
+        self, *styles: Style, normalize: bool = False, base: Style = None
     ) -> None:
 ```
 

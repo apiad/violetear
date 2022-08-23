@@ -14,13 +14,13 @@
 from __future__ import annotations
 
 import math
-from typing import List
+from typing import List, Union
 
 from violetear.types import GridTemplate
 
 
 def px(x: int):
-    return Unit(x, "px")
+    return Unit(int(x), "px")
 
 
 def pt(x: float):
@@ -48,7 +48,7 @@ def sec(x: float):
 
 
 def ms(x: int):
-    return Unit(x, "ms")
+    return Unit(int(x), "ms")
 
 
 class Unit:
@@ -58,6 +58,9 @@ class Unit:
 
     def __str__(self):
         return f"{self.value}{self.unit}"
+
+    def __mul__(self, other: Union[int, float]):
+        return Unit(self.value * other, self.unit)
 
     @staticmethod
     def infer(x, on_float=rem, on_int=px):

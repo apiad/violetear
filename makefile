@@ -22,3 +22,4 @@ examples:
 	(cd docs/examples && python animations.py)
 	(cd docs/examples && python color_spaces.py)
 	(cd docs/examples && python fluid_grid.py)
+	(cd docs/examples && python semantic_inputs.py)
