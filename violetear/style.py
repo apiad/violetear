@@ -221,10 +221,10 @@ class Style:
             str(Unit.infer(y)),
             str(Unit.infer(blur)),
             str(Unit.infer(spread)),
-            str(color)
+            str(color),
         ]
 
-        self.rule('box-shadow', " ".join(rule))
+        self.rule("box-shadow", " ".join(rule))
 
     # #### `Style.border`
 

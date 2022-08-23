@@ -297,66 +297,98 @@ body {
     margin: auto;
 }
 
+.text {
+    color: rgba(51,51,51,1.0);
+}
+
 .btn {
     cursor: pointer;
     border-radius: 0.25rem;
-    box-shadow: 2px 2px 5px 0px rgba(0,0,0,0.2);
+    box-shadow: 2px 2px 4px 0px rgba(0,0,0,0.2);
+}
+
+.text.xs {
+    font-size: 0.8rem;
 }
 
 .btn.xs {
-    font-size: 14px;
-    padding-left: 10px;
-    padding-right: 10px;
-    padding-top: 5px;
-    padding-bottom: 5px;
+    font-size: 0.8rem;
+    padding-left: 0.8rem;
+    padding-right: 0.8rem;
+    padding-top: 0.4rem;
+    padding-bottom: 0.4rem;
+}
+
+.text.sm {
+    font-size: 1.15rem;
 }
 
 .btn.sm {
-    font-size: 19px;
-    padding-left: 10px;
-    padding-right: 10px;
-    padding-top: 5px;
-    padding-bottom: 5px;
+    font-size: 1.15rem;
+    padding-left: 1.0rem;
+    padding-right: 1.0rem;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+}
+
+.text.md {
+    font-size: 1.5rem;
 }
 
 .btn.md {
-    font-size: 25px;
-    padding-left: 12px;
-    padding-right: 12px;
-    padding-top: 6px;
-    padding-bottom: 6px;
+    font-size: 1.5rem;
+    padding-left: 1.2rem;
+    padding-right: 1.2rem;
+    padding-top: 0.6rem;
+    padding-bottom: 0.6rem;
+}
+
+.text.lg {
+    font-size: 1.85rem;
 }
 
 .btn.lg {
-    font-size: 30px;
-    padding-left: 14px;
-    padding-right: 14px;
-    padding-top: 7px;
-    padding-bottom: 7px;
+    font-size: 1.85rem;
+    padding-left: 1.4rem;
+    padding-right: 1.4rem;
+    padding-top: 0.7rem;
+    padding-bottom: 0.7rem;
+}
+
+.text.xl {
+    font-size: 2.2rem;
 }
 
 .btn.xl {
-    font-size: 36px;
-    padding-left: 16px;
-    padding-right: 16px;
-    padding-top: 8px;
-    padding-bottom: 8px;
+    font-size: 2.2rem;
+    padding-left: 1.6rem;
+    padding-right: 1.6rem;
+    padding-top: 0.8rem;
+    padding-bottom: 0.8rem;
 }
 
-.btn {
+.text.normal {
+    color: rgba(51,51,51,1.0);
+}
+
+.btn.normal {
     background-color: rgba(229,229,229,1.0);
     color: rgba(25,25,25,1.0);
 }
 
-.btn:hover {
+.btn.normal:hover {
     background-color: rgba(234,234,234,1.0);
     color: rgba(0,0,0,1.0);
 }
 
-.btn:active {
+.btn.normal:active {
     background-color: rgba(206,206,206,1.0);
     color: rgba(0,0,0,1.0);
-    box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.2);
+    box-shadow: 0px 0px 2px 1px rgba(0,0,0,0.2);
+}
+
+.text.primary {
+    color: rgba(0,0,102,1.0);
 }
 
 .btn.primary {
@@ -372,7 +404,11 @@ body {
 .btn.primary:active {
     background-color: rgba(0,0,137,1.0);
     color: rgba(255,255,255,1.0);
-    box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.2);
+    box-shadow: 0px 0px 2px 1px rgba(0,0,0,0.2);
+}
+
+.text.success {
+    color: rgba(0,102,0,1.0);
 }
 
 .btn.success {
@@ -388,7 +424,11 @@ body {
 .btn.success:active {
     background-color: rgba(0,137,0,1.0);
     color: rgba(255,255,255,1.0);
-    box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.2);
+    box-shadow: 0px 0px 2px 1px rgba(0,0,0,0.2);
+}
+
+.text.warning {
+    color: rgba(102,66,0,1.0);
 }
 
 .btn.warning {
@@ -404,7 +444,11 @@ body {
 .btn.warning:active {
     background-color: rgba(229,164,44,1.0);
     color: rgba(0,0,0,1.0);
-    box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.2);
+    box-shadow: 0px 0px 2px 1px rgba(0,0,0,0.2);
+}
+
+.text.error {
+    color: rgba(102,0,0,1.0);
 }
 
 .btn.error {
@@ -420,7 +464,11 @@ body {
 .btn.error:active {
     background-color: rgba(137,0,0,1.0);
     color: rgba(255,255,255,1.0);
-    box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.2);
+    box-shadow: 0px 0px 2px 1px rgba(0,0,0,0.2);
+}
+
+.text.info {
+    color: rgba(0,101,102,1.0);
 }
 
 .btn.info {
@@ -436,7 +484,7 @@ body {
 .btn.info:active {
     background-color: rgba(0,182,183,1.0);
     color: rgba(0,0,0,1.0);
-    box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.2);
+    box-shadow: 0px 0px 2px 1px rgba(0,0,0,0.2);
 }
 
-/* Generated 25 styles */
+/* Generated 37 styles */

@@ -6,17 +6,21 @@ sheet = StyleSheet(normalize=True)
 
 sheet.select("body").width(max=768).margin("auto")
 
-base = (
+font_sizes = Unit.scale(rem, 0.8, 2.2, 5)
+padding_sizes = Unit.scale(rem, 0.4, 0.8, 5)
+
+base_text = sheet.select('.text').color(Colors.Black.lit(0.2))
+
+base_btn = (
     sheet.select(".btn")
     .rule("cursor", "pointer")
     .rounded()
-    .shadow(Colors.Black.transparent(0.2), x=2, y=2, blur=5)
+    .shadow(Colors.Black.transparent(0.2), x=2, y=2, blur=4)
 )
 
-font_sizes = Unit.scale(px, 14, 36, 5)
-padding_sizes = Unit.scale(px, 5, 8, 5)
-
 for cls, font, pd in zip(["xs", "sm", "md", "lg", "xl"], font_sizes, padding_sizes):
+    text_size = sheet.select(f".text.{cls}").font(size=font)
+
     btn_size = (
         sheet.select(f".btn.{cls}")
         .font(size=font)
@@ -33,7 +37,7 @@ colors = [
 ]
 
 for cls, color in zip(
-    ["", ".primary", ".success", ".warning", ".error", ".info"], colors
+    ["normal", "primary", "success", "warning", "error", "info"], colors
 ):
     if color.lightness < 0.4:
         text_color = color.lit(0.9)
@@ -42,13 +46,15 @@ for cls, color in zip(
         text_color = color.lit(0.1)
         accent_color = Colors.Black
 
-    btn_style = sheet.select(f".btn{cls}").background(color).color(text_color)
+    text_style = sheet.select(f".text.{cls}").color(color.lit(0.2))
+
+    btn_style = sheet.select(f".btn.{cls}").background(color).color(text_color)
     hover = btn_style.on("hover").background(color.lighter(0.2)).color(accent_color)
     active = (
         btn_style.on("active")
         .background(color.darker(0.1))
         .color(accent_color)
-        .shadow(Colors.Black.transparent(0.2), x=0, y=0, blur=5)
+        .shadow(Colors.Black.transparent(0.2), x=0, y=0, blur=2, spread=1)
     )
 
 if __name__ == "__main__":
