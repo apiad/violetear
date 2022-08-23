@@ -36,7 +36,7 @@ for cls, color in zip(["", ".primary", ".success", ".warning", ".error", ".info"
         accent_color = Colors.Black
 
     btn_style = sheet.select(f".btn{cls}").background(color).color(text_color)
-    btn_style.on("hover").background(color.lighter(0.1)).color(accent_color)
+    btn_style.on("hover").background(color.lighter(0.2)).color(accent_color)
     btn_style.on("active").background(color.darker(0.1)).color(accent_color)
 
 if __name__ == "__main__":

@@ -348,7 +348,7 @@ body {
 }
 
 .btn:hover {
-    background-color: rgba(231,231,231,1.0);
+    background-color: rgba(234,234,234,1.0);
     color: rgba(0,0,0,1.0);
 }
 
@@ -363,12 +363,12 @@ body {
 }
 
 .btn.primary:hover {
-    background-color: rgba(9,77,179,1.0);
+    background-color: rgba(51,51,173,1.0);
     color: rgba(255,255,255,1.0);
 }
 
 .btn.primary:active {
-    background-color: rgba(6,56,130,1.0);
+    background-color: rgba(0,0,137,1.0);
     color: rgba(255,255,255,1.0);
 }
 
@@ -378,12 +378,12 @@ body {
 }
 
 .btn.success:hover {
-    background-color: rgba(43,179,9,1.0);
+    background-color: rgba(51,173,51,1.0);
     color: rgba(255,255,255,1.0);
 }
 
 .btn.success:active {
-    background-color: rgba(31,130,6,1.0);
+    background-color: rgba(0,137,0,1.0);
     color: rgba(255,255,255,1.0);
 }
 
@@ -393,12 +393,12 @@ body {
 }
 
 .btn.warning:hover {
-    background-color: rgba(245,176,79,1.0);
+    background-color: rgba(255,197,91,1.0);
     color: rgba(0,0,0,1.0);
 }
 
 .btn.warning:active {
-    background-color: rgba(243,155,31,1.0);
+    background-color: rgba(229,164,44,1.0);
     color: rgba(0,0,0,1.0);
 }
 
@@ -408,12 +408,12 @@ body {
 }
 
 .btn.error:hover {
-    background-color: rgba(179,9,9,1.0);
+    background-color: rgba(173,51,51,1.0);
     color: rgba(255,255,255,1.0);
 }
 
 .btn.error:active {
-    background-color: rgba(130,6,6,1.0);
+    background-color: rgba(137,0,0,1.0);
     color: rgba(255,255,255,1.0);
 }
 
@@ -423,12 +423,12 @@ body {
 }
 
 .btn.info:hover {
-    background-color: rgba(11,222,160,1.0);
+    background-color: rgba(51,213,214,1.0);
     color: rgba(0,0,0,1.0);
 }
 
 .btn.info:active {
-    background-color: rgba(9,174,125,1.0);
+    background-color: rgba(0,182,183,1.0);
     color: rgba(0,0,0,1.0);
 }
 

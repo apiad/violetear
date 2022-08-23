@@ -76,36 +76,36 @@ class Color:
     # #### `Color.lighter`
 
     def lighter(self, alpha: float) -> Color:
-        return self.towards(self.lit(1.0), alpha)
+        return self.towards(Colors.White, alpha, space="rgb")
 
     # #### `Color.darker`
 
     def darker(self, alpha: float) -> Color:
-        return self.towards(self.lit(0.0), alpha)
+        return self.towards(Colors.Black, alpha, space="rgb")
 
     # #### `Color.brighter`
 
     def brighter(self, alpha: float) -> Color:
-        return self.towards(self.saturated(1.0), alpha)
+        return self.towards(self.saturated(1.0), alpha, space="hsv")
 
     # #### `Color.dimmer`
 
     def dimmer(self, alpha: float) -> Color:
-        return self.towards(self.saturated(0.0), alpha)
+        return self.towards(self.saturated(0.0), alpha, space="hsv")
 
     # #### `Color.redshift`
 
-    def redshift(self, percent: float, *, space="hls") -> Color:
+    def redshift(self, percent: float) -> Color:
         _, l, s = hls(self)
         target = hls(0, l, s)
-        return self.towards(target, percent, space=space)
+        return self.towards(target, percent, space="rgb")
 
     # #### `Color.blueshift`
 
-    def blueshift(self, percent: float, *, space="hls") -> Color:
+    def blueshift(self, percent: float) -> Color:
         _, l, s = hls(self)
         target = hls(1, l, s)
-        return self.towards(target, percent, space=space)
+        return self.towards(target, percent, space="rgb")
 
     # #### `Color.towards`
 
@@ -147,7 +147,7 @@ def rgb(*args, **kwargs):
         return color.r / 255, color.g / 255, color.b / 255
     else:
         r, g, b = args
-        alpha = kwargs.pop("alpha")
+        alpha = kwargs.pop("alpha", 1.0)
 
         return Color(int(r * 255), int(g * 255), int(b * 255), alpha=alpha)
 
@@ -172,7 +172,7 @@ def hsv(*args, **kwargs):
     else:
         h, s, v = args
         r, g, b = colorsys.hsv_to_rgb(h, s, v)
-        alpha = kwargs.pop("alpha")
+        alpha = kwargs.pop("alpha", 1.0)
 
         return rgb(r, g, b, alpha=alpha)
 
