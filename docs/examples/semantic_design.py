@@ -59,4 +59,4 @@ for cls, color in zip(
     )
 
 if __name__ == "__main__":
-    sheet.render("semantic-inputs.css")
+    sheet.render("semantic-design.css")

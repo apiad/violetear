@@ -62,7 +62,8 @@ nav:
   - Examples:
     - Welcome: examples/index.md
     - Color spaces: examples/color-spaces.md
-    - Fluid grid: examples/fluid-grid.md
+    - Fluid grid: examples/flex-grid.md
+    - Semantic design: examples/semantic-design.md
     - Animations: examples/animations.md
   - API:
     - violetear: api/violetear.md

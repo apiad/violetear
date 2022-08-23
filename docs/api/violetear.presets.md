@@ -61,11 +61,11 @@ class SemanticDesign(StyleSheet):
         self,
         *,
         text_class: str = "text",
-        button_class: str = "btn",
+        button_class: str = "button",
         sizes: Dict[str, Unit] = dict(
-            sm=1.0,
-            md=1.4,
-            lg=2,
+            small=1.0,
+            medium=1.4,
+            large=2,
         ),
         colors: Dict[str, Color] = dict(
             normal=Colors.White.lit(0.9),

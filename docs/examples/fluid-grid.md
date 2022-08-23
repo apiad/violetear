@@ -1,6 +1,6 @@
 # Making a fluid grid with flexbox
 
-In this example we'll build a fluid grid system (a la old-fashion Bootstrap) using flexbox. You can see the HTML result [here](fluid-grid.html) and the final CSS file [here](fluid-grid.css). Try resizing the browser window so you can get a feel for the kind of behaviour we want to replicate.
+In this example we'll build a fluid grid system (a la old-fashion Bootstrap) using flexbox. You can see the HTML result [here](flex-grid.html) and the final CSS file [here](flex-grid.css). Try resizing the browser window so you can get a feel for the kind of behaviour we want to replicate.
 
 Ready? Let's begin!
 
@@ -14,9 +14,9 @@ The concepts we want to express are:
 - `.col` is a single cell inside a row.
 - `span-1` ... `.span-12` is the size of each cell.
 
-This is our test markup (you can check it [here](fluid-grid-1.html))
+This is our test markup (you can check it [here](flex-grid-1.html))
 
-```html title="fluid-grid.html"
+```html title="flex-grid.html"
 <!-- The usual stuff (1) -->
 <body class="main">
     <div class="container">
@@ -48,7 +48,7 @@ This is our test markup (you can check it [here](fluid-grid-1.html))
 
 As usual, we start by creating an stylesheet empty:
 
-```python title="fluid-grid.py" hl_lines="4"
+```python title="flex-grid.py" hl_lines="4"
 from violetear import StyleSheet
 from violetear.color import gray
 
@@ -63,12 +63,12 @@ sheet.select(".row").flexbox(wrap=True)
 for size in range(1, 13):
     sheet.select(f".span-{size}").width(size / 12)
 
-sheet.render("fluid-grid.css")
+sheet.render("flex-grid.css")
 ```
 
 Next we will add some basic styling to make some space and to render our containers and cols visible:
 
-```python title="fluid-grid.py" hl_lines="6 7 8"
+```python title="flex-grid.py" hl_lines="6 7 8"
 from violetear import StyleSheet
 from violetear.color import gray
 
@@ -83,12 +83,12 @@ sheet.select(".row").flexbox(wrap=True)
 for size in range(1, 13):
     sheet.select(f".span-{size}").width(size / 12)
 
-sheet.render("fluid-grid.css")
+sheet.render("flex-grid.css")
 ```
 
 Next we make each `.row` flexible using `.flexbox` with `wrap=True`. This immediately makes all columns to align horizontally.
 
-```python title="fluid-grid.py" hl_lines="10"
+```python title="flex-grid.py" hl_lines="10"
 from violetear import StyleSheet
 from violetear.color import gray
 
@@ -103,12 +103,12 @@ sheet.select(".row").flexbox(wrap=True)
 for size in range(1, 13):
     sheet.select(f".span-{size}").width(size / 12)
 
-sheet.render("fluid-grid.css")
+sheet.render("flex-grid.css")
 ```
 
 And finally, we will create all our `.span-x` styles in single sweep of a hand, simply by setting their width to the corresponding fraction of the grid:
 
-```python title="fluid-grid.py" hl_lines="12 13"
+```python title="flex-grid.py" hl_lines="12 13"
 from violetear import StyleSheet
 from violetear.color import gray
 
@@ -123,7 +123,7 @@ sheet.select(".row").flexbox(wrap=True)
 for size in range(1, 13):
     sheet.select(f".span-{size}").width(size / 12)
 
-sheet.render("fluid-grid.css")
+sheet.render("flex-grid.css")
 ```
 
 And that's it. Just like that, we have a flexible grid system that expands and stretches as necessary. Call it a day? No way! We still haven't even scratched the surface of what we can achieve.
@@ -151,7 +151,7 @@ def make_grid_styles(columns):
 
 Now we just need to call this function at different breakpoints with the right column count:
 
-```python title="fluid_grid.py" hl_lines="21 23 24 26 27 29 30 32 33"
+```python title="flex_grid.py" hl_lines="21 23 24 26 27 29 30 32 33"
 from violetear import StyleSheet
 from violetear.color import gray
 
@@ -186,10 +186,10 @@ with sheet.media(max_width=800):
 with sheet.media(max_width=600):
     make_grid_styles(1)
 
-sheet.render("fluid-grid.css")
+sheet.render("flex-grid.css")
 ```
 
-Go ahead and play with the [HTML file](fluid-grid-2.html) we have so far and reduce the browser screen to see how columns will snap into an 8-grid, 6-grid, 4-grid, and then a single column at convenient breakpoints. Beautifull, isn't it? Well..., not perfect, because now we have some holes when columns doesn't fit in a single row and they don't add up to full size. We will fix this next.
+Go ahead and play with the [HTML file](flex-grid-2.html) we have so far and reduce the browser screen to see how columns will snap into an 8-grid, 6-grid, 4-grid, and then a single column at convenient breakpoints. Beautifull, isn't it? Well..., not perfect, because now we have some holes when columns doesn't fit in a single row and they don't add up to full size. We will fix this next.
 
 ## Conditional sizes
 
@@ -197,7 +197,7 @@ What we want now is to use additional classes in `.col` element to redefine what
 
 Extending this idea into all grid breakpoints, what we want now is to have `sm-1` to `sm-4` for small screens (400px to 800px), `md-1` to `md-6` for medium screens (800px to 1200px), `lg-1` to `lg-8` for large screens (1200px to 1600px) and our 12 original `span-x` for the general size (over 1600px). With these classes, we could mark our HTML in the following way:
 
-```html title="fluid-grid.html"
+```html title="flex-grid.html"
 <body class="main">
     <div class="container">
         .container
@@ -235,7 +235,7 @@ This sounds pretty complex but in reality it only requires a few tweaks to our c
 First, we will update our `make_grid_styles` method to accept an additional `custom` parameter which we will use to define a new set of styles.
 For example, when `custom="lg"`, we will create all the corresponding `lg-1` to `lg-8` classes with the right width:
 
-```python title="fluid-grid.py" hl_lines="10 17 18 19"
+```python title="flex-grid.py" hl_lines="10 17 18 19"
 sheet = StyleSheet(normalize=True)
 
 sheet.select(".main").padding(50)
@@ -271,13 +271,13 @@ with sheet.media(max_width=800):
 with sheet.media(max_width=600):
     make_grid_styles(1)
 
-sheet.render("fluid-grid.css")
+sheet.render("flex-grid.css")
 ```
 
 Finally, we just need to update our calls to `make_grid_styles` with the corresponding class prefixes `lg`, `md` and `sm`.
-Go ahead and play with the [HTML file](fluid-grid-3.html) we have right now to see how the elements now snap to their desired size leaving no gaps.
+Go ahead and play with the [HTML file](flex-grid-3.html) we have right now to see how the elements now snap to their desired size leaving no gaps.
 
-```python title="fluid-grid.py" hl_lines="25 28 31"
+```python title="flex-grid.py" hl_lines="25 28 31"
 sheet = StyleSheet(normalize=True)
 
 sheet.select(".main").padding(50)
@@ -313,14 +313,14 @@ with sheet.media(max_width=800):
 with sheet.media(max_width=600):
     make_grid_styles(1)
 
-sheet.render("fluid-grid.css")
+sheet.render("flex-grid.css")
 ```
 
 ## Making a fixed grid
 
 Finally, we will add a `fixed` class to `container`s when we want them to have a fixed size instead of flowing with the browser width. This is by far the simplest change, we just to define `.fixed` conveniently at all screen sizes, taking into account to substract the padding from the `.main` element:
 
-```python title="fluid_grid.py" hl_lines="4 8 12 16"
+```python title="flex_grid.py" hl_lines="4 8 12 16"
 # ...
 
 make_grid_styles(12)
@@ -344,7 +344,7 @@ with sheet.media(max_width=600):
 # ...
 ```
 
-And now we're done. Check the [final HTML file](fluid-grid.html) to see how the lower grid remains fixed while the upper one flows. Beautiful!
+And now we're done. Check the [final HTML file](flex-grid.html) to see how the lower grid remains fixed while the upper one flows. Beautiful!
 
 We just created a fully fledged grid system with over 80 styles spanning four different screen sizes in little less than 30 lines of Python code!
 

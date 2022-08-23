@@ -13,7 +13,7 @@ for size in range(1, 13):
     sheet.select(f".span-{size}").width(size / 12)
 
 if __name__ == "__main__":
-    sheet.render("fluid-grid-1.css")
+    sheet.render("flex-grid-1.css")
 
 # End of first section
 
@@ -49,7 +49,7 @@ with sheet.media(max_width=600):
     make_grid_styles(1)
 
 if __name__ == "__main__":
-    sheet.render("fluid-grid-2.css")
+    sheet.render("flex-grid-2.css")
 
 # End of second section
 
@@ -89,7 +89,7 @@ with sheet.media(max_width=600):
     make_grid_styles(1)
 
 if __name__ == "__main__":
-    sheet.render("fluid-grid-3.css")
+    sheet.render("flex-grid-3.css")
 
 # End of third section
 
@@ -133,6 +133,6 @@ with sheet.media(max_width=600):
     make_grid_styles(1)
 
 if __name__ == "__main__":
-    sheet.render("fluid-grid.css")
+    sheet.render("flex-grid.css")
 
 # End of tutorial
