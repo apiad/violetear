@@ -7,7 +7,6 @@ and allows rendering stylesheets either as files or as strings to be injected in
 # Regular imports:
 
 import io
-import datetime
 from pathlib import Path
 from typing import Set
 from warnings import warn
@@ -182,7 +181,7 @@ class StyleSheet:
             self._by_name[name] = style
             return style
 
-        style = Style(Selector.from_css(selector))
+        style = Style(Selector.parse(selector))
 
         if self._base:
             style.apply(self._base)
@@ -236,11 +235,16 @@ class StyleSheet:
             style = self._by_name[key]
             self._used.add(style)
             return style
-        except KeyError:  # This is necessary because template engines will
-            warn(
-                f"Style {key} not defined"
-            )  # often silence `KeyError` exceptions and instead
-            raise  # return `None`, so you at least see a warning.
 
-    def __getattr__(self, key) -> Style:
-        return self[key]
+        # This is necessary because template engines will
+        # often silence `KeyError` exceptions and instead
+        # return `None`, so you at least see a warning.
+        except KeyError:
+            warn(f"Style {key} not defined")
+            raise
+
+    def __getattr__(self, attr) -> Style:
+        try:
+            self[attr]
+        except KeyError:
+            raise AttributeError(attr)

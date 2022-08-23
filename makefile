@@ -5,7 +5,7 @@ format:
 .PHONY: format
 test:
 	black --check .
-	pytest
+	pytest --doctest-modules violetear tests
 
 .PHONY: docs
 docs: examples

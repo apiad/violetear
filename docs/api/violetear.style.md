@@ -76,7 +76,7 @@ class Style:
     **Parameters**:
     
     - `selector`: The selector to which this style applies. Can be `None`, or a string,
-    in which case it is parsed with `Selector.from_css`.
+    in which case it is parsed with `Selector.parse`.
     - `parent`: An optional parent style (e.g., if this is an state or children style) so
     that when checking which styles are used, the parent can be referenced.
 
@@ -85,7 +85,7 @@ class Style:
 
 ```python linenums="42"
         if isinstance(selector, str):
-            selector = Selector.from_css(selector)
+            selector = Selector.parse(selector)
 
         self.selector = selector
         self._rules = {}
@@ -864,8 +864,8 @@ Shorthand method for justified align.
 
 
 ```python linenums="582"
-    def on(self, state) -> Style:
-        selector = self.selector.on(state)
+    def on(self, state: str = None, **attrs) -> Style:
+        selector = self.selector.on(state, **attrs)
         style = self._children.get(selector.css(), Style(selector))
         self._children[selector.css()] = style
         return style
