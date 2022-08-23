@@ -634,9 +634,9 @@ class Style:
         for name, duration, timing, iter, direction in self._animation_configs:
             names.append(name)
             durations.append(str(duration))
-            timings.append(timing)
-            iterations.append(iter)
-            directions.append(direction)
+            timings.append(str(timing))
+            iterations.append(str(iter))
+            directions.append(str(direction))
 
         self.rule("animation-name", ", ".join(names))
         self.rule("animation-duration", ", ".join(durations))

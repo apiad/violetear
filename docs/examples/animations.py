@@ -1,5 +1,5 @@
 from violetear import StyleSheet
-from violetear.color import blue, gray, green, red
+from violetear.color import Colors, blue, gray, green, red
 from violetear.animation import Animation
 from violetear.style import Style
 from violetear.units import pc, px, sec
