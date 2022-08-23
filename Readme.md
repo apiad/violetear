@@ -25,6 +25,7 @@ Using a general-purpose programming language to generate CSS we can obtain the b
 - [Manipulate magnitudes and colors](https://apiad.net/violetear/examples/color-spaces) to create custom color palettes.
 - [Generate minimal CSS files](#) including only the subset of rules that are used in a given template.
 - [Create complex layouts using flexbox and grid](https://apiad.net/violetear/examples/fluid-grid) programatically with very few lines of code.
+- [Generate a semantic design system on-the-fly](https://apiad.net/violetear/examples/semantic-inputs) complete with typographic styles and different buttons classes.
 - [Define transitions and animations](https://apiad.net/violetear/examples/animations) in a modular way.
 
 And much more... When you combine a full-flegded programming language with powerful abstractions and carefully designed APIs, your imagination is the only limit.
