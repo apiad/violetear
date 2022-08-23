@@ -68,7 +68,7 @@ class Color:
 
 ```python linenums="46"
     def saturated(self, saturation: float) -> Color:
-        h, _, v = self.hsv()
+        h, _, v = hsv(self)
         return hsv(h, saturation, v, alpha=self.a)
 ```
 

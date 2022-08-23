@@ -53,7 +53,7 @@ class Color:
     # #### `Color.saturated`
 
     def saturated(self, saturation: float) -> Color:
-        h, _, v = self.hsv()
+        h, _, v = hsv(self)
         return hsv(h, saturation, v, alpha=self.a)
 
     # #### `Color.lit`
