@@ -37,7 +37,7 @@ for cls, color in zip(["", ".primary", ".success", ".warning", ".error", ".info"
 
     btn_style = sheet.select(f".btn{cls}").background(color).color(text_color)
     btn_style.on("hover").background(color.brighter(0.1)).color(accent_color)
-    btn_style.on("active").background(color.darker(0.1)).color(accent_color)
+    btn_style.on("active").background(color.dimmer(0.1)).color(accent_color)
 
 if __name__ == "__main__":
     sheet.render("semantic-inputs.css")
