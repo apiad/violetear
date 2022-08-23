@@ -292,118 +292,199 @@ summary {
 
 /* End of modern-normalize.css */
 
-.menu {
-    display: flex;
-    flex-direction: row;
-    gap: 10px;
-    padding: 10px;
+body {
+    max-width: 768px;
+    margin: auto;
 }
 
-.menu-item {
-    padding: 5px;
-    border-width: 0.1rem;
-    border-color: rgba(127,127,127,1.0);
-    background-color: rgba(178,178,178,1.0);
-    text-decoration: none;
-    font-weight: 600;
-    transition-property: background-color, color, transform;
-    transition-duration: 150ms, 300ms, 150ms;
-    transition-timing-function: linear, linear, ease-in-out;
-    transition-delay: 0ms, 0ms, 150ms;
+.text {
+    color: rgba(51,51,51,1.0);
 }
 
-.menu-item:hover {
+.btn {
+    cursor: pointer;
+    border-radius: 0.25rem;
+    box-shadow: 2px 2px 4px 0px rgba(0,0,0,0.2);
+}
+
+.text.xs {
+    font-size: 0.8rem;
+}
+
+.btn.xs {
+    font-size: 0.8rem;
+    padding-left: 0.8rem;
+    padding-right: 0.8rem;
+    padding-top: 0.4rem;
+    padding-bottom: 0.4rem;
+}
+
+.text.sm {
+    font-size: 1.15rem;
+}
+
+.btn.sm {
+    font-size: 1.15rem;
+    padding-left: 1.0rem;
+    padding-right: 1.0rem;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+}
+
+.text.md {
+    font-size: 1.5rem;
+}
+
+.btn.md {
+    font-size: 1.5rem;
+    padding-left: 1.2rem;
+    padding-right: 1.2rem;
+    padding-top: 0.6rem;
+    padding-bottom: 0.6rem;
+}
+
+.text.lg {
+    font-size: 1.85rem;
+}
+
+.btn.lg {
+    font-size: 1.85rem;
+    padding-left: 1.4rem;
+    padding-right: 1.4rem;
+    padding-top: 0.7rem;
+    padding-bottom: 0.7rem;
+}
+
+.text.xl {
+    font-size: 2.2rem;
+}
+
+.btn.xl {
+    font-size: 2.2rem;
+    padding-left: 1.6rem;
+    padding-right: 1.6rem;
+    padding-top: 0.8rem;
+    padding-bottom: 0.8rem;
+}
+
+.text.normal {
+    color: rgba(51,51,51,1.0);
+}
+
+.btn.normal {
     background-color: rgba(229,229,229,1.0);
-    color: rgba(255,0,0,1.0);
-    transform: scaleX(1.1) scaleY(1.1) translateY(5px);
+    color: rgba(25,25,25,1.0);
 }
 
-.marquee {
-    height: 500px;
-    overflow: hidden;
-    padding: 20px;
+.btn.normal:hover {
+    background-color: rgba(234,234,234,1.0);
+    color: rgba(0,0,0,1.0);
 }
 
-p {
-    font-size: 22px;
-    font-weight: 100;
-    position: relative;
-    animation-name: text-up;
-    animation-duration: 10s;
-    animation-timing-function: linear;
-    animation-iteration-count: infinite;
-    animation-direction: normal;
+.btn.normal:active {
+    background-color: rgba(206,206,206,1.0);
+    color: rgba(0,0,0,1.0);
+    box-shadow: 0px 0px 2px 1px rgba(0,0,0,0.2);
 }
 
-.playground {
-    width: 100.0%;
-    height: 300px;
-    overflow: hidden;
-    margin-top: 20px;
-    padding-right: 50px;
-    padding-bottom: 50px;
-    background-color: rgba(242,242,242,1.0);
+.text.primary {
+    color: rgba(0,0,102,1.0);
 }
 
-.ball {
-    width: 50px;
-    height: 50px;
-    border-radius: 50px;
-    background-color: rgba(255,153,153,1.0);
-    position: relative;
-    text-align: center;
-    font-size: 40px;
-    animation-name: _a0, _a1;
-    animation-duration: 5s, 2s;
-    animation-timing-function: linear, linear;
-    animation-iteration-count: infinite, infinite;
-    animation-direction: alternate, alternate;
+.btn.primary {
+    background-color: rgba(0,0,153,1.0);
+    color: rgba(204,204,254,1.0);
 }
 
-@keyframes _a0 {
-    0.0%  {
-        left: 0.0%;
-    }
-
-    100.0%  {
-        left: 100.0%;
-    }
-
+.btn.primary:hover {
+    background-color: rgba(51,51,173,1.0);
+    color: rgba(255,255,255,1.0);
 }
 
-@keyframes _a1 {
-    0.0%  {
-        top: 0.0%;
-    }
-
-    100.0%  {
-        top: 100.0%;
-    }
-
+.btn.primary:active {
+    background-color: rgba(0,0,137,1.0);
+    color: rgba(255,255,255,1.0);
+    box-shadow: 0px 0px 2px 1px rgba(0,0,0,0.2);
 }
 
-@keyframes text-up {
-    0.0%  {
-        top: 500px;
-    }
-
-    25.0%  {
-        color: rgba(0,153,0,1.0);
-    }
-
-    50.0%  {
-        color: rgba(0,0,153,1.0);
-        font-weight: 900;
-    }
-
-    75.0%  {
-        color: rgba(153,0,0,1.0);
-    }
-
-    100.0%  {
-        top: -500px;
-    }
-
+.text.success {
+    color: rgba(0,102,0,1.0);
 }
 
-/* Generated 7 styles */
+.btn.success {
+    background-color: rgba(0,153,0,1.0);
+    color: rgba(204,254,204,1.0);
+}
+
+.btn.success:hover {
+    background-color: rgba(51,173,51,1.0);
+    color: rgba(255,255,255,1.0);
+}
+
+.btn.success:active {
+    background-color: rgba(0,137,0,1.0);
+    color: rgba(255,255,255,1.0);
+    box-shadow: 0px 0px 2px 1px rgba(0,0,0,0.2);
+}
+
+.text.warning {
+    color: rgba(102,66,0,1.0);
+}
+
+.btn.warning {
+    background-color: rgba(255,183,50,1.0);
+    color: rgba(51,33,0,1.0);
+}
+
+.btn.warning:hover {
+    background-color: rgba(255,197,91,1.0);
+    color: rgba(0,0,0,1.0);
+}
+
+.btn.warning:active {
+    background-color: rgba(229,164,44,1.0);
+    color: rgba(0,0,0,1.0);
+    box-shadow: 0px 0px 2px 1px rgba(0,0,0,0.2);
+}
+
+.text.error {
+    color: rgba(102,0,0,1.0);
+}
+
+.btn.error {
+    background-color: rgba(153,0,0,1.0);
+    color: rgba(254,204,204,1.0);
+}
+
+.btn.error:hover {
+    background-color: rgba(173,51,51,1.0);
+    color: rgba(255,255,255,1.0);
+}
+
+.btn.error:active {
+    background-color: rgba(137,0,0,1.0);
+    color: rgba(255,255,255,1.0);
+    box-shadow: 0px 0px 2px 1px rgba(0,0,0,0.2);
+}
+
+.text.info {
+    color: rgba(0,101,102,1.0);
+}
+
+.btn.info {
+    background-color: rgba(0,203,204,1.0);
+    color: rgba(0,50,51,1.0);
+}
+
+.btn.info:hover {
+    background-color: rgba(51,213,214,1.0);
+    color: rgba(0,0,0,1.0);
+}
+
+.btn.info:active {
+    background-color: rgba(0,182,183,1.0);
+    color: rgba(0,0,0,1.0);
+    box-shadow: 0px 0px 2px 1px rgba(0,0,0,0.2);
+}
+
+/* Generated 37 styles */

@@ -24,19 +24,19 @@ def px(x: int):
 
 
 def pt(x: float):
-    return Unit(x, "pt")
+    return Unit(round(x, 3), "pt")
 
 
 def em(x: float):
-    return Unit(x, "em")
+    return Unit(round(x, 3), "em")
 
 
 def rem(x: float):
-    return Unit(x, "rem")
+    return Unit(round(x, 3), "rem")
 
 
 def fr(x: float):
-    return Unit(x, "fr")
+    return Unit(round(x, 2), "fr")
 
 
 def pc(x: float):

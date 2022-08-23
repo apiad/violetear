@@ -9,7 +9,7 @@ sheet.select("body").width(max=768).margin("auto")
 font_sizes = Unit.scale(rem, 0.8, 2.2, 5)
 padding_sizes = Unit.scale(rem, 0.4, 0.8, 5)
 
-base_text = sheet.select('.text').color(Colors.Black.lit(0.2))
+base_text = sheet.select(".text").color(Colors.Black.lit(0.2))
 
 base_btn = (
     sheet.select(".btn")

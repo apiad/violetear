@@ -11,15 +11,15 @@ def px(x: int):
 
 
 def pt(x: float):
-    return Unit(round(x, 2), "pt")
+    return Unit(round(x, 3), "pt")
 
 
 def em(x: float):
-    return Unit(round(x, 2), "em")
+    return Unit(round(x, 3), "em")
 
 
 def rem(x: float):
-    return Unit(round(x, 2), "rem")
+    return Unit(round(x, 3), "rem")
 
 
 def fr(x: float):
