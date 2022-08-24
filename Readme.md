@@ -8,9 +8,9 @@
 
 `violetear` is a minimalist CSS generator in Python. You write Python code and obtain a CSS definition, that you can either render to a file and serve statically, inject dynamically into your HTML, or use as inline styles directly in your markup.
 
-> 📕 [Read the User Guide](https://apiad.net/violetear/guide)
+> 📕 [Read the User Guide](https://apiad.net/violetear/guide/)
 >
-> 🎁 [Browse examples](https://apiad.net/violetear/examples)
+> 🎁 [Browse examples](https://apiad.net/violetear/examples/)
 
 ## Why?
 
@@ -150,9 +150,9 @@ Or you can automatically add the corresponding selector attributes to a given ta
 
 To learn more, you can:
 
-- Read the introductory [user guide](https://apiad.net/violetear/guide) that showcases the main functionalities of the library.
-- Browse the [examples](https://apiad.net/violetear/examples) to see concrete and detailed use cases.
-- Read the [fully annotated API](https://apiad.net/violetear/api/violetear) to understand the inner workings of the library.
+- Read the introductory [user guide](https://apiad.net/violetear/guide/) that showcases the main functionalities of the library.
+- Browse the [examples](https://apiad.net/violetear/examples/) to see concrete and detailed use cases.
+- Read the [fully annotated API](https://apiad.net/violetear/api/violetear/) to understand the inner workings of the library.
 
 ## Contribution
 
