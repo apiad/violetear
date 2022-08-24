@@ -6,9 +6,9 @@
 [![Tests](https://github.com/apiad/violetear/actions/workflows/tests.yml/badge.svg)](https://github.com/apiad/violetear/actions/workflows/tests.yml)
 [![Documentation](https://github.com/apiad/violetear/actions/workflows/docs.yml/badge.svg)](https://apiad.net/violetear)
 
-> A minimalist CSS generator
-
 `violetear` is a minimalist CSS generator in Python. You write Python code and obtain a CSS definition, that you can either render to a file and serve statically, inject dynamically into your HTML, or use as inline styles directly in your markup.
+
+> 📕 [Read the full documentation online](https://apiad.net/violetear)
 
 ## Why?
 
