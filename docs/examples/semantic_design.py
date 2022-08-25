@@ -12,30 +12,34 @@ from violetear import StyleSheet
 from violetear.color import Colors
 from violetear.units import Unit, rem
 
-# As usual, we start with an empty stylesheet (except for normalization styles):
+# As usual, we start with an empty stylesheet (except for normalization styles).
+
+sheet = StyleSheet(normalize=True)  # :hl:
+sheet.select("body").width(max=768).margin("auto")  # :ref:body_style:
 
 # Then, we style our `body` with a proper size and margin to get some space.
 # This has nothing to do with our design system, it's just to make the example page look better.
 
-sheet = StyleSheet(normalize=True)
-sheet.select("body").width(max=768).margin("auto")
+# :hl:body_style:
 
 # ## Basic styles
 
 # We will begin by styling our `text` class with slightly lighter gray color.
 
-base_text = sheet.select(".text").color(Colors.Black.lit(0.2))
+base_text = sheet.select(".text").color(Colors.Black.lit(0.2))  # :hl:
+
+base_btn = (
+    sheet.select(".btn")
+    .rule("cursor", "pointer")  # :ref:base_btn:
+    .rounded()  # :ref:base_btn:
+    .shadow(Colors.Black.transparent(0.2), x=2, y=2, blur=4)  # :ref:base_btn:
+    .transition(duration=50)  # :ref:transition:
+)
 
 # And our `btn` class with a basic button-like style including a pointer cursor,
 # rounded corners, and a light shadow.
 
-base_btn = (
-    sheet.select(".btn")
-    .rule("cursor", "pointer")  # :hl:
-    .rounded()  # :hl:
-    .shadow(Colors.Black.transparent(0.2), x=2, y=2, blur=4)  # :hl:
-    .transition(duration=50)  # :ref:transition:
-)
+# :hl:base_btn:
 
 # With `transition` we also activate animated transitions with a very short
 # duration (`50ms`). Check the [animations](../animations/) example for more details on this method.
@@ -93,9 +97,7 @@ colors = [
 
 # With these definitions we can create all our color styles in single loop.
 
-for cls, color in zip(
-    ["normal", "primary", "success", "warning", "error", "info"], colors
-):
+for cls, color in zip("normal primary success warning error info".split(), colors):
 
     # First, the text style will simply define the color for each `.text.<cls>` selector.
     # For example, `.text.primary` will get a dark blue color.
@@ -125,21 +127,15 @@ for cls, color in zip(
 
     btn_style = sheet.select(f".btn.{cls}").background(color).color(text_color)  # :hl:
     hover = (
-        btn_style.on("hover")  # :ref:hover_style:
+        btn_style.on("hover")
         .background(color.lighter(0.2))  # :ref:hover_style:
         .color(accent_color)  # :ref:hover_style:
     )
     active = (
         btn_style.on("active")
+        .color(accent_color)  # :ref:active_style:
         .background(color.darker(0.1))  # :ref:active_style:
-        .color(accent_color)
-        .shadow(
-            color.lit(0.2).transparent(0.2), # :ref:active_style:
-            x=0, # :ref:active_style:
-            y=0, # :ref:active_style:
-            blur=2, # :ref:active_style:
-            spread=1,  # :ref:active_style:
-        )
+        .shadow(color.lit(0.2).transparent(0.2), x=0, y=0, blur=2, spread=1)  # :ref:active_style:
     )
 
     # The on-hover style will change to a slightly lighter version of the background color,
