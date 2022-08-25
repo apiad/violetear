@@ -38,11 +38,40 @@ sheet.select("body").width(max=768).margin("auto")
 
 ## Basic styles
 
+If you look at the HTML document, you'll notice we have some basic typography that we want
+to style with class `text`, as well as some buttons with class `btn`.
+
+```html linenums="9" title="semantic-design.html"
+<!--- ... --->
+<body>
+    <div>
+        <h1>Typography</h1>
+
+        <h2>Text sizes</h2>
+        <div class="text xs normal">Tiny text</div>
+        <div class="text sm normal">Small text</div>
+        <div class="text md normal">Medium text</div>
+        <div class="text lg normal">Large text</div>
+        <div class="text xl normal">Huge text</div>
+<!--- ... --->
+```
+
+```html linenums="30"
+<!--- ... --->
+        <h2>Button sizes</h2>
+        <button class="btn xs normal">Tiny</button>
+        <button class="btn sm normal">Small</button>
+        <button class="btn md normal">Medium</button>
+        <button class="btn lg normal">Large</button>
+        <button class="btn xl normal">Huge</button>
+<!--- ... --->
+```
+
 We will begin by styling our `text` class with slightly lighter gray color.
 
 
 
-```python linenums="19" hl_lines="1" title="semantic_design.py"
+```python linenums="31" hl_lines="1" title="semantic_design.py"
 base_text = sheet.select(".text").color(Colors.Black.lit(0.2))  
 
 base_btn = (
@@ -59,7 +88,7 @@ rounded corners, and a light shadow.
 
 
 
-```python linenums="19" hl_lines="5 6 7" title="semantic_design.py"
+```python linenums="31" hl_lines="5 6 7" title="semantic_design.py"
 base_text = sheet.select(".text").color(Colors.Black.lit(0.2))  
 
 base_btn = (
@@ -77,7 +106,7 @@ duration (`50ms`). Check the [animations](../animations/) example for more detai
 
 
 
-```python linenums="19" hl_lines="8" title="semantic_design.py"
+```python linenums="31" hl_lines="8" title="semantic_design.py"
 base_text = sheet.select(".text").color(Colors.Black.lit(0.2))  
 
 base_btn = (
@@ -101,7 +130,7 @@ First, we will create a scale of `rem` 5 values.
 
 
 
-```python linenums="40" title="semantic_design.py"
+```python linenums="52" title="semantic_design.py"
 font_sizes = Unit.scale(rem, 0.8, 2.2, 5)
 ```
 
@@ -110,7 +139,7 @@ at once:
 
 
 
-```python linenums="43" hl_lines="1" title="semantic_design.py"
+```python linenums="55" hl_lines="1" title="semantic_design.py"
 for cls, font in zip(["xs", "sm", "md", "lg", "xl"], font_sizes):  
     text_size = sheet.select(f".text.{cls}").font(size=font)  
     pd = font / 4  
@@ -127,7 +156,7 @@ For example, selector `.text.xs` will have a font size of `0.8rem` and selector
 
 
 
-```python linenums="43" hl_lines="2" title="semantic_design.py"
+```python linenums="55" hl_lines="2" title="semantic_design.py"
 for cls, font in zip(["xs", "sm", "md", "lg", "xl"], font_sizes):  
     text_size = sheet.select(f".text.{cls}").font(size=font)  
     pd = font / 4  
@@ -144,7 +173,7 @@ and set both the font size and the padding.
 
 
 
-```python linenums="43" hl_lines="3 6 7" title="semantic_design.py"
+```python linenums="55" hl_lines="3 6 7" title="semantic_design.py"
 for cls, font in zip(["xs", "sm", "md", "lg", "xl"], font_sizes):  
     text_size = sheet.select(f".text.{cls}").font(size=font)  
     pd = font / 4  
@@ -164,7 +193,7 @@ These will be the background colors of our semantic button classes.
 
 
 
-```python linenums="62" title="semantic_design.py"
+```python linenums="74" title="semantic_design.py"
 colors = [
     Colors.White.lit(0.9),
     Colors.Blue.lit(0.3),
@@ -179,7 +208,7 @@ With these definitions we can create all our color styles in single loop.
 
 
 
-```python linenums="71" title="semantic_design.py"
+```python linenums="83" title="semantic_design.py"
 for cls, color in zip("normal primary success warning error info".split(), colors):
 ```
 
@@ -192,7 +221,7 @@ each color:
 
 
 
-```python linenums="77" title="semantic_design.py"
+```python linenums="89" title="semantic_design.py"
     text_style = sheet.select(f".text.{cls}").color(color.lit(0.2))
 ```
 
@@ -202,7 +231,7 @@ between a darker and a lighter version of the background color.
 
 
 
-```python linenums="81" title="semantic_design.py"
+```python linenums="93" title="semantic_design.py"
     if color.lightness < 0.4:
         text_color = color.lit(0.9)
         accent_color = Colors.White
@@ -219,7 +248,7 @@ foreground and background colors to each semantic class.
 
 
 
-```python linenums="91" hl_lines="1" title="semantic_design.py"
+```python linenums="103" hl_lines="1" title="semantic_design.py"
     btn_style = sheet.select(f".btn.{cls}").background(color).color(text_color)  
     hover = (
         btn_style.on("hover")
@@ -240,7 +269,7 @@ This will have the nice effect of lighting up or button a bit.
 
 
 
-```python linenums="91" hl_lines="4 5" title="semantic_design.py"
+```python linenums="103" hl_lines="4 5" title="semantic_design.py"
     btn_style = sheet.select(f".btn.{cls}").background(color).color(text_color)  
     hover = (
         btn_style.on("hover")
@@ -261,7 +290,7 @@ so that it sits directly under the button, given the impression that it was inde
 
 
 
-```python linenums="91" hl_lines="9 10 11" title="semantic_design.py"
+```python linenums="103" hl_lines="9 10 11" title="semantic_design.py"
     btn_style = sheet.select(f".btn.{cls}").background(color).color(text_color)  
     hover = (
         btn_style.on("hover")
@@ -281,7 +310,7 @@ All that's left is just to render the CSS file.
 
 
 
-```python linenums="111" title="semantic_design.py"
+```python linenums="123" title="semantic_design.py"
 if __name__ == "__main__":
     sheet.render("semantic-design.css")
 ```

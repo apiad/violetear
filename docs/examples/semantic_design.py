@@ -24,6 +24,22 @@ sheet.select("body").width(max=768).margin("auto")  # :ref:body_style:
 
 # ## Basic styles
 
+# If you look at the HTML document, you'll notice we have some basic typography that we want
+# to style with class `text`, as well as some buttons with class `btn`.
+
+# ```html linenums="9" title="semantic-design.html"
+# <!--- ... --->
+# :include:10:19:semantic-design.html:
+# <!--- ... --->
+# ```
+
+# ```html linenums="30"
+# <!--- ... --->
+# :include:31:36:semantic-design.html:
+# <!--- ... --->
+# ```
+
+
 # We will begin by styling our `text` class with slightly lighter gray color.
 
 base_text = sheet.select(".text").color(Colors.Black.lit(0.2))  # :hl:
