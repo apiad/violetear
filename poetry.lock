@@ -168,7 +168,7 @@ i18n = ["babel (>=2.9.0)"]
 
 [[package]]
 name = "mkdocs-material"
-version = "8.4.0"
+version = "8.4.1"
 description = "Documentation that simply works"
 category = "dev"
 optional = false

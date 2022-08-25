@@ -20,10 +20,7 @@ items.transition("background-color").on("hover").background(gray(0.9))
 items.transition("color", 300).on("hover").color(red(0.5))
 
 items.transition(
-    property="transform",
-    duration=150,
-    timing="ease-in-out",
-    delay=150,
+    property="transform", duration=150, timing="ease-in-out", delay=150,
 ).on("hover").scale(1.1).translate(y=5)
 
 sheet.select(".marquee").height(500).rules(overflow="hidden").padding(20)

@@ -63,7 +63,7 @@ nav:
     - Welcome: examples/index.md
     - Color spaces: examples/color-spaces.md
     - Fluid grid: examples/flex-grid.md
-    - Semantic design: examples/semantic-design.md
+    - Semantic design: examples/semantic_design.md
     - Animations: examples/animations.md
   - API:
     - violetear: api/violetear.md
@@ -75,6 +75,7 @@ nav:
     - violetear.units: api/violetear.units.md
     - violetear.media: api/violetear.media.md
     - violetear.presets: api/violetear.presets.md
+    - violetear.types: api/violetear.types.md
     - violetear.helpers: api/violetear.helpers.md
 
 watch:

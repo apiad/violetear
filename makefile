@@ -1,11 +1,17 @@
 .PHONY: format
 format:
-	black .
+	black violetear
 
-.PHONY: format
+.PHONY: test
 test:
+	black --check violetear
+	pytest --doctest-modules violetear tests
+
+.PHONY: test-loop
+test-loop:
 	black --check .
 	pytest --doctest-modules violetear tests
+
 
 .PHONY: docs
 docs: examples

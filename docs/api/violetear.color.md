@@ -297,7 +297,7 @@ def hex(*args, **kwargs):
         code = args[0]
         alpha = kwargs.pop("alpha", 1.0)
 
-        if code.startswith("#"):
+        if code.startswith("#")
             code = code[1:]
 
         if len(code) == 3:

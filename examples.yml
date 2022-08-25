@@ -1,0 +1,6 @@
+highlights: true
+inline: true
+linenums: true
+sources:
+  docs/examples/*.py: docs/examples/*.md
+title: true
