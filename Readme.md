@@ -6,9 +6,11 @@
 [![Tests](https://github.com/apiad/violetear/actions/workflows/tests.yml/badge.svg)](https://github.com/apiad/violetear/actions/workflows/tests.yml)
 [![Documentation](https://github.com/apiad/violetear/actions/workflows/docs.yml/badge.svg)](https://apiad.net/violetear)
 
-> A minimalist CSS generator
-
 `violetear` is a minimalist CSS generator in Python. You write Python code and obtain a CSS definition, that you can either render to a file and serve statically, inject dynamically into your HTML, or use as inline styles directly in your markup.
+
+> 📕 [Read the User Guide](https://apiad.net/violetear/guide/)
+>
+> 🎁 [Browse examples](https://apiad.net/violetear/examples/)
 
 ## Why?
 
@@ -22,11 +24,11 @@ Using a general-purpose programming language to generate CSS we can obtain the b
 
 - [Create CSS styles from Python code](https://apiad.net/violetear/guide/#simple-styling) using a fluent, fully documented API that covers the most common rules.
 - [Generate CSS stylesheets programatically](https://apiad.net/violetear/guide/#creating-styles-programatically), which means you can create several related styles with ease using loops and parameters.
-- [Manipulate magnitudes and colors](https://apiad.net/violetear/examples/color-spaces) to create custom scales and color palettes.
+- [Manipulate magnitudes and colors](https://apiad.net/violetear/examples/color-spaces/) to create custom scales and color palettes.
 - [Generate minimal CSS files](#) including only the subset of rules that are used in a given template.
-- [Create complex layouts using flexbox and grid](https://apiad.net/violetear/examples/flex-grid) programatically with very few lines of code.
-- [Generate a semantic design system on-the-fly](https://apiad.net/violetear/examples/semantic-design) complete with typographic styles and different buttons classes.
-- [Define transitions and animations](https://apiad.net/violetear/examples/animations) in a modular way.
+- [Create complex layouts using flexbox and grid](https://apiad.net/violetear/examples/flex-grid/) programatically with very few lines of code.
+- [Generate a semantic design system on-the-fly](https://apiad.net/violetear/examples/semantic-design/) complete with typographic styles and different buttons classes.
+- [Define transitions and animations](https://apiad.net/violetear/examples/animations/) in a modular way.
 
 And much more... When you combine a full-flegded programming language with powerful abstractions and carefully designed APIs, your imagination is the only limit.
 
@@ -148,9 +150,9 @@ Or you can automatically add the corresponding selector attributes to a given ta
 
 To learn more, you can:
 
-- Read the introductory [user guide](https://apiad.net/violetear/guide) that showcases the main functionalities of the library.
-- Browse the [examples](https://apiad.net/violetear/examples) to see concrete and detailed use cases.
-- Read the [fully annotated API](https://apiad.net/violetear/api/violetear) to understand the inner workings of the library.
+- Read the introductory [user guide](https://apiad.net/violetear/guide/) that showcases the main functionalities of the library.
+- Browse the [examples](https://apiad.net/violetear/examples/) to see concrete and detailed use cases.
+- Read the [fully annotated API](https://apiad.net/violetear/api/violetear/) to understand the inner workings of the library.
 
 ## Contribution
 
