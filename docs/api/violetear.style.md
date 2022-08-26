@@ -15,7 +15,7 @@ These are for typing our methods:
 
 
 ```python linenums="6"
-from typing import List, Tuple, Union, TYPE_CHECKING
+from typing import Any, Callable, List, Tuple, Union, TYPE_CHECKING
 ```
 
 These ones are internal to `violetear`:
@@ -66,7 +66,7 @@ that allow chained invocation to quickly build a complex style.
 ```python linenums="29"
 class Style:
     def __init__(
-        self, selector: Union[str, Selector] = None, *, parent: Style = None
+        self, selector: Union[str, Selector] = None, *, parent: Style = None, owner=None
     ) -> None:
 ```
 
@@ -88,11 +88,11 @@ class Style:
             selector = Selector.parse(selector)
 
         self.selector = selector
-        self._rules = {}
         self._parent = parent
+        self._rules = {}
         self._children = {}
-        self._transitions = []
         self._transforms = {}
+        self._transitions = []
         self._animations = set()
         self._animation_configs = []
 ```
@@ -891,10 +891,10 @@ Shorthand method for justified align.
 
 ```python linenums="595"
     def css(self, inline: bool = False) -> str:
-        separator = "" if inline else "\n"
+        separator = "; " if inline else "\n"
 
         rules = separator.join(
-            f"{attr}: {value};" for attr, value in self._rules.items()
+            f"{attr}: {value}" for attr, value in self._rules.items()
         )
 
         if inline:
@@ -922,12 +922,12 @@ Shorthand method for justified align.
         return self.selector.markup()
 ```
 
-#### `Style.__str__`
+#### `Style.__bool__`
 
 
 
 ```python linenums="614"
-    def __str__(self):
-        return self.markup()
+    def __bool__(self):
+        return len(self._rules) > 0
 ```
 

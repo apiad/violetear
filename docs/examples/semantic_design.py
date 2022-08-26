@@ -28,15 +28,15 @@ sheet.select("body").width(max=768).margin("auto")  # :ref:body_style:
 # to style with class `text`, as well as some buttons with class `btn`.
 
 # ```html linenums="9" title="semantic-design.html"
-# <!--- ... --->
+# ...
 # :include:10:19:semantic-design.html:
-# <!--- ... --->
+# ...
 # ```
 
 # ```html linenums="30"
-# <!--- ... --->
+# ...
 # :include:31:36:semantic-design.html:
-# <!--- ... --->
+# ...
 # ```
 
 
@@ -165,7 +165,5 @@ for cls, color in zip("normal primary success warning error info".split(), color
 
     # :hl:active_style:
 
-# All that's left is just to render the CSS file.
-
-if __name__ == "__main__":
+if __name__ == "__main__": # :skip:
     sheet.render("semantic-design.css")

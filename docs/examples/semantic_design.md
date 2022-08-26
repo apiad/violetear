@@ -42,7 +42,7 @@ If you look at the HTML document, you'll notice we have some basic typography th
 to style with class `text`, as well as some buttons with class `btn`.
 
 ```html linenums="9" title="semantic-design.html"
-<!--- ... --->
+...
 <body>
     <div>
         <h1>Typography</h1>
@@ -53,18 +53,18 @@ to style with class `text`, as well as some buttons with class `btn`.
         <div class="text md normal">Medium text</div>
         <div class="text lg normal">Large text</div>
         <div class="text xl normal">Huge text</div>
-<!--- ... --->
+...
 ```
 
 ```html linenums="30"
-<!--- ... --->
+...
         <h2>Button sizes</h2>
         <button class="btn xs normal">Tiny</button>
         <button class="btn sm normal">Small</button>
         <button class="btn md normal">Medium</button>
         <button class="btn lg normal">Large</button>
         <button class="btn xl normal">Huge</button>
-<!--- ... --->
+...
 ```
 
 We will begin by styling our `text` class with slightly lighter gray color.
@@ -305,13 +305,4 @@ so that it sits directly under the button, given the impression that it was inde
     )
 ```
 
-
-All that's left is just to render the CSS file.
-
-
-
-```python linenums="123" title="semantic_design.py"
-if __name__ == "__main__":
-    sheet.render("semantic-design.css")
-```
 

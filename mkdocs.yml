@@ -66,6 +66,7 @@ nav:
     - Semantic design: examples/semantic_design.md
     - Utilities: examples/utilities.md
     - Animations: examples/animations.md
+    - Markup: examples/markup.md
   - API:
     - violetear: api/violetear.md
     - violetear.stylesheet: api/violetear.stylesheet.md
