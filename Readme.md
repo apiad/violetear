@@ -30,7 +30,7 @@ Using a general-purpose programming language to generate CSS we can obtain the b
 - [Generate a semantic design system on-the-fly](https://apiad.net/violetear/examples/semantic-design/) complete with typographic styles and different buttons classes.
 - [Generate hundreds of utility classes](https://apiad.net/violetear/examples/utilities/) easily and completely customizable.
 - [Define transitions and animations](https://apiad.net/violetear/examples/animations/) in a modular way.
-- [Generate HTML markup](https://apiad.net/violetear/examples/animations/) for quick prototypes to test your styles.
+- [Generate HTML markup](https://apiad.net/violetear/examples/markup/) for quick prototypes to test your styles.
 
 And much more... When you combine a full-flegded programming language with powerful abstractions and carefully designed APIs, your imagination is the only limit.
 
