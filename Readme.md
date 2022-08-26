@@ -184,6 +184,10 @@ Right now `violetear` is in pre-release mode, which means the API is completely 
 - [x] States
 - [x] Media queries
 
+**v0.11.1**
+
+- Tiny bug fixes
+
 **v0.11.0**
 
 - Access colors by name, and get the name of existing colors.
