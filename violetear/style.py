@@ -691,14 +691,10 @@ class Style:
     # #### `Style.css`
 
     def css(self, inline: bool = False) -> str:
-        separator = "; " if inline else "\n"
-
-        rules = separator.join(
-            f"{attr}: {value}" for attr, value in self._rules.items()
-        )
-
         if inline:
-            return rules
+            return "; ".join(f"{attr}: {value}" for attr, value in self._rules.items())
+
+        rules = "\n".join(f"{attr}: {value};" for attr, value in self._rules.items())
 
         selector = self.selector.css() if self.selector is not None else ""
         return f"{selector} {{\n{textwrap.indent(rules, 4*' ')}\n}}"

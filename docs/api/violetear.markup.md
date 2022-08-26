@@ -15,6 +15,7 @@ from typing import Any, Callable, List
 
 import textwrap
 from violetear.style import Style
+from violetear.stylesheet import StyleSheet
 
 
 class Markup(abc.ABC):
@@ -167,6 +168,18 @@ class Page(Markup):
         self.lang = lang
         self.head = Head(**head_kwargs)
         self.body = Body()
+        self.styles = []
+
+    def style(self, sheet:StyleSheet, inline:bool=False, name:str=None) -> Page:
+        if not inline and name is None:
+            raise ValueError("Need a name when inline is false")
+
+        if inline:
+            self.styles.append(sheet)
+        else:
+            self.head.styles.append((sheet, name))
+
+        return self
 
     def _render(self, fp, indent: int):
         self._write_line(fp, "<!DOCTYPE html>")
@@ -180,6 +193,7 @@ class Head(Markup):
     def __init__(self, charset: str = "UTF-8", title: str = "") -> None:
         self.charset = charset
         self.title = title
+        self.styles = []
 
     def _render(self, fp, indent: int):
         self._write_line(fp, "<head>", indent)
@@ -193,6 +207,11 @@ class Head(Markup):
             indent + 1,
         )
         self._write_line(fp, f"<title>{self.title}</title>", indent + 1)
+
+        for sheet, name in self.styles:
+            self._write_line(fp, f"<link rel=\"stylesheet\" href=\"{name}\">", indent+1)
+            sheet.render(name)
+
         self._write_line(fp, "</head>", indent)
 
 

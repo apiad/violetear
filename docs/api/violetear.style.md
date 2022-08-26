@@ -891,14 +891,10 @@ Shorthand method for justified align.
 
 ```python linenums="595"
     def css(self, inline: bool = False) -> str:
-        separator = "; " if inline else "\n"
-
-        rules = separator.join(
-            f"{attr}: {value}" for attr, value in self._rules.items()
-        )
-
         if inline:
-            return rules
+            return "; ".join(f"{attr}: {value}" for attr, value in self._rules.items())
+
+        rules = "\n".join(f"{attr}: {value};" for attr, value in self._rules.items())
 
         selector = self.selector.css() if self.selector is not None else ""
         return f"{selector} {{\n{textwrap.indent(rules, 4*' ')}\n}}"
@@ -908,7 +904,7 @@ Shorthand method for justified align.
 
 
 
-```python linenums="608"
+```python linenums="604"
     def inline(self) -> str:
         return f'style="{self.css(inline=True)}"'
 ```
@@ -917,7 +913,7 @@ Shorthand method for justified align.
 
 
 
-```python linenums="611"
+```python linenums="607"
     def markup(self) -> str:
         return self.selector.markup()
 ```
@@ -926,7 +922,7 @@ Shorthand method for justified align.
 
 
 
-```python linenums="614"
+```python linenums="610"
     def __bool__(self):
         return len(self._rules) > 0
 ```

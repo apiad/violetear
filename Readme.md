@@ -30,6 +30,7 @@ Using a general-purpose programming language to generate CSS we can obtain the b
 - [Generate a semantic design system on-the-fly](https://apiad.net/violetear/examples/semantic-design/) complete with typographic styles and different buttons classes.
 - [Generate hundreds of utility classes](https://apiad.net/violetear/examples/utilities/) easily and completely customizable.
 - [Define transitions and animations](https://apiad.net/violetear/examples/animations/) in a modular way.
+- [Generate HTML markup](https://apiad.net/violetear/examples/animations/) for quick prototypes to test your styles.
 
 And much more... When you combine a full-flegded programming language with powerful abstractions and carefully designed APIs, your imagination is the only limit.
 
@@ -147,6 +148,29 @@ Or you can automatically add the corresponding selector attributes to a given ta
 <h2 class="subtitle">Subtitle</h2>
 ```
 
+The cherry on the top is a simple but expressive fluent API for generating HTML that is fully
+compatible with `violetear`'s styling API. You can use it to create quick prototypes, style demo pages, etc.
+
+```python
+from violetear.markup import Page
+
+page = Page(title="Example")
+
+page.body.create("div", "container") \
+.styled(lambda s: s.margin("auto").width(max=768)) \
+.create("ul") \
+.styled(lambda s: s.padding(5, bottom=10)) \
+.spawn(
+    5,
+    "li",
+    classes="item",
+    text=lambda i: f"The {i+1}th element",
+    style=lambda i: Style().color(Colors.Blue.shade(i / 5)),
+)
+
+page.render("page.html")
+```
+
 ## Documentation
 
 To learn more, you can:
@@ -177,12 +201,17 @@ Right now `violetear` is in pre-release mode, which means the API is completely 
 - [ ] Dynamic generation of CSS based on HTML parsing as well as attribute lookup
 - [ ] Parameterized presets for relevant design systems
 - [ ] Transitions and animations with helper methods to create timing curves
+- [x] Generate simple HTML markups with a fluent API
 - [x] Grid and flexbox styles
 - [x] Definitions for all CSS colors
 - [x] Creating and manipulating color palettes
 - [x] Creating scales in any unit
 - [x] States
 - [x] Media queries
+
+**v0.12.0**
+
+- Support for generating HTML in the `violetear.markup` namespace.
 
 **v0.11.1**
 

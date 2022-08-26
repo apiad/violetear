@@ -21,8 +21,15 @@
 from violetear.color import Colors
 from violetear.markup import Element, Page
 from violetear.style import Style
+from violetear.stylesheet import StyleSheet
 
 page = Page(title="Example: Markup - violetear")
+
+# We can also add stylesheets to our page that will be rendered either inline or as separate files.
+
+sheet = StyleSheet(normalize=True)
+
+page.style(sheet, inline=False, name="markup.css")
 
 if __name__ == "__main__":  # :skip:
     page.render("markup.html")
@@ -70,7 +77,7 @@ if __name__ == "__main__":  # :skip:
 # As you might expect, this is the HTML file you get.
 
 # ```html title="markup.html" linenums="1"
-# :include:1:26:markup.html:
+# :include:1:27:markup.html:
 # ...
 # ```
 
@@ -115,9 +122,9 @@ if __name__ == "__main__":  # :skip:
 
 # Take a look to the newly created tags.
 
-# ```html title="markup.html" linenums="28"
+# ```html title="markup.html" linenums="29"
 # ...
-# :include:29:47:markup.html:
+# :include:30:48:markup.html:
 # ...
 # ```
 
@@ -156,12 +163,11 @@ div = (
 
 # So here's the result.
 
-# ```html title="markup.html" linenums="47"
+# ```html title="markup.html" linenums="48"
 # ...
-# :include:48:66:markup.html:
+# :include:49:67:markup.html:
 # ...
 # ```
-
 
 if __name__ == "__main__":  # :skip:
     page.render("markup.html")
