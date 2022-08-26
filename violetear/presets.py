@@ -1,14 +1,11 @@
 from __future__ import annotations
-from email.generator import Generator
 from inspect import isgenerator
 
-from typing import Any, Callable, Dict, List, Union
-import typing
-from importlib_metadata import functools, itertools
-from rich import inspect
+from typing import Any, Callable, Dict, List
+import itertools
 from violetear.color import Color, Colors
 from violetear.stylesheet import StyleSheet
-from violetear.units import Unit, rem
+from violetear.units import Unit
 
 # ## Flex-based grid system
 
