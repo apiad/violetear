@@ -8,9 +8,9 @@
 
 `violetear` is a minimalist CSS generator in Python. You write Python code and obtain a CSS definition, that you can either render to a file and serve statically, inject dynamically into your HTML, or use as inline styles directly in your markup.
 
-> 📕 [Read the User Guide](https://apiad.net/violetear/guide/)
->
-> 🎁 [Browse examples](https://apiad.net/violetear/examples/)
+> - 📕 [Read the User Guide](https://apiad.net/violetear/guide/)
+> - 🎁 [Browse examples](https://apiad.net/violetear/examples/)
+> - 🛠️ [Check the API](https://apiad.net/violetear/api/violetear/)
 
 ## Why?
 
