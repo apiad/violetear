@@ -178,7 +178,6 @@ class UtilitySystem(StyleSheet):
                 variant = "-".join(str(x) for x in variant)
 
             self.select(f".{cls}-{variant}").rule(rule, str(value))
-            print(cls, variant, rule, value)
 
         return self
 
