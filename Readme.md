@@ -28,6 +28,7 @@ Using a general-purpose programming language to generate CSS we can obtain the b
 - [Generate minimal CSS files](#) including only the subset of rules that are used in a given template.
 - [Create complex layouts using flexbox and grid](https://apiad.net/violetear/examples/flex-grid/) programatically with very few lines of code.
 - [Generate a semantic design system on-the-fly](https://apiad.net/violetear/examples/semantic-design/) complete with typographic styles and different buttons classes.
+- [Generate hundreds of utility classes](https://apiad.net/violetear/examples/utilities/) easily and completely customizable.
 - [Define transitions and animations](https://apiad.net/violetear/examples/animations/) in a modular way.
 
 And much more... When you combine a full-flegded programming language with powerful abstractions and carefully designed APIs, your imagination is the only limit.
@@ -182,6 +183,14 @@ Right now `violetear` is in pre-release mode, which means the API is completely 
 - [x] Creating scales in any unit
 - [x] States
 - [x] Media queries
+
+**v0.11.0**
+
+- Access colors by name, and get the name of existing colors.
+- Improve color interpolation.
+- Add utility system preset.
+- Improve documentation.
+- Improve testing.
 
 **v0.10.4**
 

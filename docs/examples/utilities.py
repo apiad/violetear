@@ -32,23 +32,25 @@ labels = "xs sm md lg xl".split()
 # Once we have all definitions in place, we can create all 5 classes with a single loop.
 
 for size, label in zip(sizes, labels):
-    sheet.select(f".text.{label}").font(size=size)
+    sheet.select(f".text-{label}").font(size=size)
 
 # Take a look at our [generated CSS](./utilities.css) and you'll see our newly created classes.
 
 # ```css linenums="295" title="utilites.css"
 # :include:295:313:utilities.css:
+# ...
 # ```
 
 # Similary, we can define font weight style (`font-100`, ..., `font-900`) with a single loop:
 
-for weight in range(100, 1000, 100):
-    sheet.select(f".font-{weight}").font(weight=weight)
+for weight in range(1, 10):
+    sheet.select(f".font-{weight}").font(weight=weight*100)
 
 # And you can confirm that the 9 corresponding classes were created.
 
 # ```css linenums="315" title="utilites.css"
 # :include:315:350:utilities.css:
+# ...
 # ```
 
 # ## Defining color classes
@@ -70,6 +72,7 @@ for color in Colors.basic_palette():
 
 # ```css linenums="831" title="utilites.css"
 # :include:831:869:utilities.css:
+# ...
 # ```
 
 # ## Defining utility classes with presets
@@ -100,6 +103,7 @@ sheet.extend(
 
 # ```css linenums="991" title="utilites.css"
 # :include:991:1005:utilities.css:
+# ...
 # ```
 
 # In a slightly more advanced use case you can pass an additional set of values to match the variants.
@@ -112,6 +116,7 @@ sheet.extend(
 
 # ```css linenums="991" title="utilites.css"
 # :include:1007:1049:utilities.css:
+# ...
 # ```
 
 # You can also pass a callable to create the variant values on-the-fly:
@@ -124,6 +129,7 @@ sheet.extend(
 
 # ```css linenums="991" title="utilites.css"
 # :include:1051:1069:utilities.css:
+# ...
 # ```
 
 # If you pass a list of lists for variants, you'll get the cartesian product of all variants.
@@ -133,7 +139,7 @@ sheet.extend(
     UtilitySystem().define(
         "background-color",
         "bg",
-        [Colors.basic_palette(), range(1, 11)],
+        [Colors.basic_palette(), range(1, 10)],
         fn=lambda color, value: color.shade(value / 10),
         variant_name=lambda color, value: f"{color.name.lower()}-{value*100}",
     )
@@ -141,19 +147,34 @@ sheet.extend(
 
 # And just like that we created 16 * 9 background color utility classes.
 
-# ```css linenums="991" title="utilites.css"
-# :include:1671:1689:utilities.css:
+# ```css linenums="1611" title="utilites.css"
+# :include:1611:1629:utilities.css:
+# ...
 # ```
 
 sheet.extend(
     UtilitySystem().define_many(
-        "margin",
-        "left right top bottom".split(),
-        "ml mr mt mb".split(),
-        range(0, 11),
-        Unit.scale(rem, 0, 4.0, 11),
+        rule="margin",
+        subrules="left right top bottom".split(),
+        clss="ml mr mt mb".split(),
+        variants=range(0, 11),
+        values=Unit.scale(rem, 0, 4.0, 11),
     )
 )
+
+# ```css linenums="1691" title="utilites.css"
+# :include:1691:1713:utilities.css:
+# ...
+# ```
+
+# ??? warning "CSS files can get big quickly!"
+#     You can easily see how quickly this approach leads to huge CSS files.
+#     As convenient as it is to generate hundreds of tiny classes on-the-fly,
+#     you will probably end up using less than 1% of those classes in any single file.
+#
+#     Fortunately, `violetear` has a few ways to render only the styles you use in a
+#     a specific HTML file.
+#     Read the [relevant section of the user guide](/violetear/guide/#minimizing-the-css-file) for more details.
 
 # And finally we render the CSS file.
 

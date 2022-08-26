@@ -181,6 +181,7 @@ class UtilitySystem(StyleSheet):
                 variant = "-".join(str(x) for x in variant)
 
             self.select(f".{cls}-{variant}").rule(rule, str(value))
+            print(cls, variant, rule, value)
 
         return self
 
@@ -194,9 +195,17 @@ class UtilitySystem(StyleSheet):
         fn: Callable = None,
         variant_name: Callable = None,
     ):
+        variants = list(variants)
+        values = list(values)
+
         for subrule, cls in zip(subrules, clss):
             self.define(
-                f"{rule}-{subrule}", cls, variants, values, fn, variant_name
+                rule=f"{rule}-{subrule}",
+                cls=cls,
+                variants=variants,
+                values=values,
+                fn=fn,
+                variant_name=variant_name,
             )
 
         return self

@@ -43,81 +43,83 @@ Once we have all definitions in place, we can create all 5 classes with a single
 
 ```python linenums="24" title="utilities.py"
 for size, label in zip(sizes, labels):
-    sheet.select(f".text.{label}").font(size=size)
+    sheet.select(f".text-{label}").font(size=size)
 ```
 
 Take a look at our [generated CSS](./utilities.css) and you'll see our newly created classes.
 
 ```css linenums="295" title="utilites.css"
-.text.xs {
+.text-xs {
     font-size: 0.8rem;
 }
 
-.text.sm {
+.text-sm {
     font-size: 1.35rem;
 }
 
-.text.md {
+.text-md {
     font-size: 1.9rem;
 }
 
-.text.lg {
+.text-lg {
     font-size: 2.45rem;
 }
 
-.text.xl {
+.text-xl {
     font-size: 3.0rem;
 }
+...
 ```
 
 Similary, we can define font weight style (`font-100`, ..., `font-900`) with a single loop:
 
 
 
-```python linenums="31" title="utilities.py"
-for weight in range(100, 1000, 100):
-    sheet.select(f".font-{weight}").font(weight=weight)
+```python linenums="32" title="utilities.py"
+for weight in range(1, 10):
+    sheet.select(f".font-{weight}").font(weight=weight*100)
 ```
 
 And you can confirm that the 9 corresponding classes were created.
 
 ```css linenums="315" title="utilites.css"
-.font-100 {
+.font-1 {
     font-weight: 100;
 }
 
-.font-200 {
+.font-2 {
     font-weight: 200;
 }
 
-.font-300 {
+.font-3 {
     font-weight: 300;
 }
 
-.font-400 {
+.font-4 {
     font-weight: 400;
 }
 
-.font-500 {
+.font-5 {
     font-weight: 500;
 }
 
-.font-600 {
+.font-6 {
     font-weight: 600;
 }
 
-.font-700 {
+.font-7 {
     font-weight: 700;
 }
 
-.font-800 {
+.font-8 {
     font-weight: 800;
 }
 
-.font-900 {
+.font-9 {
     font-weight: 900;
 }
 
+...
 ```
 
 ## Defining color classes
@@ -127,7 +129,7 @@ of utilities for manipulating colors.
 
 
 
-```python linenums="40" title="utilities.py"
+```python linenums="42" title="utilities.py"
 from violetear.color import Colors
 ```
 
@@ -135,7 +137,7 @@ Let's start by creating the 9 variants of each of the basic colors.
 
 
 
-```python linenums="42" title="utilities.py"
+```python linenums="44" title="utilities.py"
 for color in Colors.basic_palette():
     sheet.select(f".{color.name.lower()}").color(color)
 
@@ -185,6 +187,7 @@ Again, check the CSS file and you'll lots and lots of color styles.
 .blue-900 {
     color: rgba(204,204,254,1.0);
 }
+...
 ```
 
 ## Defining utility classes with presets
@@ -198,7 +201,7 @@ that helps you create these clases.
 
 
 
-```python linenums="58" title="utilities.py"
+```python linenums="61" title="utilities.py"
 from violetear.presets import UtilitySystem
 ```
 
@@ -209,7 +212,7 @@ For example, here's how you define all `font-weight` variants.
 
 
 
-```python linenums="62" title="utilities.py"
+```python linenums="65" title="utilities.py"
 sheet.extend(
     UtilitySystem().define(
         rule="font-weight",
@@ -237,13 +240,14 @@ And this is the result:
 .weight-bolder {
     font-weight: bolder;
 }
+...
 ```
 
 In a slightly more advanced use case you can pass an additional set of values to match the variants.
 
 
 
-```python linenums="74" title="utilities.py"
+```python linenums="78" title="utilities.py"
 sheet.extend(
     UtilitySystem().define("padding", "p", range(0, 11), Unit.scale(rem, 0, 4.0, 11))
 )
@@ -295,13 +299,14 @@ And here's how those rules look alike.
 .p-10 {
     padding: 4.0rem;
 }
+...
 ```
 
 You can also pass a callable to create the variant values on-the-fly:
 
 
 
-```python linenums="82" title="utilities.py"
+```python linenums="87" title="utilities.py"
 sheet.extend(
     UtilitySystem().define(
         "box-shadow", "shadow", range(1, 6), fn=lambda v: f"{v}px {v}px {v/2}rem gray"
@@ -329,6 +334,7 @@ sheet.extend(
 .shadow-5 {
     box-shadow: 5px 5px 2.5rem gray;
 }
+...
 ```
 
 If you pass a list of lists for variants, you'll get the cartesian product of all variants.
@@ -336,12 +342,12 @@ Additionally, you can pass a `variant_name` callable to define the name of the v
 
 
 
-```python linenums="92" title="utilities.py"
+```python linenums="98" title="utilities.py"
 sheet.extend(
     UtilitySystem().define(
         "background-color",
         "bg",
-        [Colors.basic_palette(), range(1, 11)],
+        [Colors.basic_palette(), range(1, 10)],
         fn=lambda color, value: color.shade(value / 10),
         variant_name=lambda color, value: f"{color.name.lower()}-{value*100}",
     )
@@ -350,7 +356,7 @@ sheet.extend(
 
 And just like that we created 16 * 9 background color utility classes.
 
-```css linenums="991" title="utilites.css"
+```css linenums="1611" title="utilites.css"
 .bg-purple-100 {
     background-color: rgba(25,0,25,1.0);
 }
@@ -370,27 +376,64 @@ And just like that we created 16 * 9 background color utility classes.
 .bg-purple-500 {
     background-color: rgba(128,0,128,1.0);
 }
+...
 ```
 
 
 
-```python linenums="105" title="utilities.py"
+```python linenums="112" title="utilities.py"
 sheet.extend(
     UtilitySystem().define_many(
-        "margin",
-        "left right top bottom".split(),
-        "ml mr mt mb".split(),
-        range(0, 11),
-        Unit.scale(rem, 0, 4.0, 11),
+        rule="margin",
+        subrules="left right top bottom".split(),
+        clss="ml mr mt mb".split(),
+        variants=range(0, 11),
+        values=Unit.scale(rem, 0, 4.0, 11),
     )
 )
 ```
+
+```css linenums="1691" title="utilites.css"
+.mr-0 {
+    margin-right: 0rem;
+}
+
+.mr-1 {
+    margin-right: 0.4rem;
+}
+
+.mr-2 {
+    margin-right: 0.8rem;
+}
+
+.mr-3 {
+    margin-right: 1.2rem;
+}
+
+.mr-4 {
+    margin-right: 1.6rem;
+}
+
+.mr-5 {
+    margin-right: 2.0rem;
+}
+...
+```
+
+??? warning "CSS files can get big quickly!"
+    You can easily see how quickly this approach leads to huge CSS files.
+    As convenient as it is to generate hundreds of tiny classes on-the-fly,
+    you will probably end up using less than 1% of those classes in any single file.
+
+    Fortunately, `violetear` has a few ways to render only the styles you use in a
+    a specific HTML file.
+    Read the [relevant section of the user guide](/violetear/guide/#minimizing-the-css-file) for more details.
 
 And finally we render the CSS file.
 
 
 
-```python linenums="115" title="utilities.py"
+```python linenums="134" title="utilities.py"
 if __name__ == "__main__":
     sheet.render("utilities.css")
 ```
