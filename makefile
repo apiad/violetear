@@ -29,3 +29,4 @@ examples:
 	(cd docs/examples && python color_spaces.py)
 	(cd docs/examples && python flex_grid.py)
 	(cd docs/examples && python semantic_design.py)
+	(cd docs/examples && python utilities.py)

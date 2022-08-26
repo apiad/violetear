@@ -34,6 +34,16 @@ class Color:
     def __repr__(self):
         return f"Color({self.r},{self.g},{self.b}, alpha={self.a})"
 
+    def __eq__(self, __o: object) -> bool:
+        return isinstance(__o, Color) and repr(self) == repr(__o)
+
+    def __hash__(self) -> int:
+        return hash(repr(self))
+
+    @property
+    def name(self) -> str:
+        return Colors.get_name(self)
+
     @property
     def lightness(self):
         return hls(self)[1]
@@ -117,6 +127,21 @@ class Color:
         result = [s + (e - s) * percent for s, e in zip(start_values, end_values)]
 
         return space(*result)
+
+    # #### `Color.shade`
+
+    def shade(self, value: float) -> Color:
+        middle = self
+
+        if value < 0.5:
+            # 0..0.5 -> 1 ... 0
+            return middle.darker(1 - 2 * value)
+
+        if value > 0.5:
+            # 0.5..1 -> 0 ... 1
+            return middle.lighter(2 * value - 1)
+
+        return middle
 
     # #### `Color.palette`
 
@@ -250,28 +275,28 @@ def hex(*args, **kwargs):
 
 
 def red(lightness: float = 1.0) -> Color:
-    return Colors.Red.lit(lightness)
+    return Colors.Red.shade(lightness)
 
 
 # #### `green`
 
 
 def green(lightness: float = 1.0) -> Color:
-    return Colors.Green.lit(lightness)
+    return Colors.Green.shade(lightness)
 
 
 # #### `blue`
 
 
 def blue(lightness: float = 1.0) -> Color:
-    return Colors.Blue.lit(lightness)
+    return Colors.Blue.shade(lightness)
 
 
 # #### `gray`
 
 
 def gray(lightness: float = 0.5) -> Color:
-    return Colors.Gray.lit(lightness)
+    return Colors.Gray.shade(lightness)
 
 
 # ## The `Colors` class
@@ -291,8 +316,22 @@ class Colors:
     by name (`Colors['Fuchsia']`).
     """
 
-    def __getitem__(self, key):
-        return getattr(Colors, key)
+    __color_names = {}
+    __colors = {}
+
+    @classmethod
+    def get(cls, key) -> Color:
+        return cls.__colors[key]
+
+    @classmethod
+    def get_name(cls, color: Color) -> str:
+        return Colors.__color_names.get(color)
+
+    @classmethod
+    def define_color(cls, color: Color, name: str):
+        cls.__color_names[color] = name
+        cls.__colors[name] = color
+        cls.__colors[name.lower()] = color
 
     # ### Basic web colors
     White = hex("#ffffff")
@@ -745,3 +784,10 @@ class Colors:
             "black",
             "extra",
         ]
+
+
+for name in dir(Colors):
+    obj = getattr(Colors, name)
+
+    if isinstance(obj, Color):
+        Colors.define_color(obj, name)

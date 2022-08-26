@@ -292,118 +292,376 @@ summary {
 
 /* End of modern-normalize.css */
 
-.menu {
-    display: flex;
-    flex-direction: row;
-    gap: 10px;
-    padding: 10px;
+.text.xs {
+    font-size: 0.8rem;
 }
 
-.menu-item {
-    padding: 5px;
-    border-width: 0.1rem;
-    border-color: rgba(128,128,128,1.0);
-    background-color: rgba(178,178,178,1.0);
-    text-decoration: none;
-    font-weight: 600;
-    transition-property: background-color, color, transform;
-    transition-duration: 150ms, 300ms, 150ms;
-    transition-timing-function: linear, linear, ease-in-out;
-    transition-delay: 0ms, 0ms, 150ms;
+.text.sm {
+    font-size: 1.35rem;
 }
 
-.menu-item:hover {
-    background-color: rgba(229,229,229,1.0);
-    color: rgba(255,0,0,1.0);
-    transform: scaleX(1.1) scaleY(1.1) translateY(5px);
+.text.md {
+    font-size: 1.9rem;
 }
 
-.marquee {
-    height: 500px;
-    overflow: hidden;
-    padding: 20px;
+.text.lg {
+    font-size: 2.45rem;
 }
 
-p {
-    font-size: 22px;
+.text.xl {
+    font-size: 3.0rem;
+}
+
+.font-100 {
     font-weight: 100;
-    position: relative;
-    animation-name: text-up;
-    animation-duration: 10s;
-    animation-timing-function: linear;
-    animation-iteration-count: infinite;
-    animation-direction: normal;
 }
 
-.playground {
-    width: 100.0%;
-    height: 300px;
-    overflow: hidden;
-    margin-top: 20px;
-    padding-right: 50px;
-    padding-bottom: 50px;
-    background-color: rgba(242,242,242,1.0);
+.font-200 {
+    font-weight: 200;
 }
 
-.ball {
-    width: 50px;
-    height: 50px;
-    border-radius: 50px;
-    background-color: rgba(255,153,153,1.0);
-    position: relative;
-    text-align: center;
-    font-size: 40px;
-    animation-name: _a0, _a1;
-    animation-duration: 5s, 2s;
-    animation-timing-function: linear, linear;
-    animation-iteration-count: infinite, infinite;
-    animation-direction: alternate, alternate;
+.font-300 {
+    font-weight: 300;
 }
 
-@keyframes _a0 {
-    0.0%  {
-        left: 0.0%;
-    }
-
-    100.0%  {
-        left: 100.0%;
-    }
-
+.font-400 {
+    font-weight: 400;
 }
 
-@keyframes _a1 {
-    0.0%  {
-        top: 0.0%;
-    }
-
-    100.0%  {
-        top: 100.0%;
-    }
-
+.font-500 {
+    font-weight: 500;
 }
 
-@keyframes text-up {
-    0.0%  {
-        top: 500px;
-    }
-
-    25.0%  {
-        color: rgba(0,76,0,1.0);
-    }
-
-    50.0%  {
-        color: rgba(0,0,153,1.0);
-        font-weight: 900;
-    }
-
-    75.0%  {
-        color: rgba(153,0,0,1.0);
-    }
-
-    100.0%  {
-        top: -500px;
-    }
-
+.font-600 {
+    font-weight: 600;
 }
 
-/* Generated 7 styles */
+.font-700 {
+    font-weight: 700;
+}
+
+.font-800 {
+    font-weight: 800;
+}
+
+.font-900 {
+    font-weight: 900;
+}
+
+.white {
+    color: rgba(255,255,255,1.0);
+}
+
+.white-100 {
+    color: rgba(25,25,25,1.0);
+}
+
+.white-200 {
+    color: rgba(51,51,51,1.0);
+}
+
+.white-300 {
+    color: rgba(76,76,76,1.0);
+}
+
+.white-400 {
+    color: rgba(102,102,102,1.0);
+}
+
+.white-500 {
+    color: rgba(127,127,127,1.0);
+}
+
+.white-600 {
+    color: rgba(153,153,153,1.0);
+}
+
+.white-700 {
+    color: rgba(178,178,178,1.0);
+}
+
+.white-800 {
+    color: rgba(204,204,204,1.0);
+}
+
+.white-900 {
+    color: rgba(229,229,229,1.0);
+}
+
+.silver {
+    color: rgba(192,192,192,1.0);
+}
+
+.gray {
+    color: rgba(128,128,128,1.0);
+}
+
+.black {
+    color: rgba(0,0,0,1.0);
+}
+
+.red {
+    color: rgba(255,0,0,1.0);
+}
+
+.red-100 {
+    color: rgba(51,0,0,1.0);
+}
+
+.red-200 {
+    color: rgba(102,0,0,1.0);
+}
+
+.red-300 {
+    color: rgba(153,0,0,1.0);
+}
+
+.red-400 {
+    color: rgba(204,0,0,1.0);
+}
+
+.red-500 {
+    color: rgba(255,0,0,1.0);
+}
+
+.red-600 {
+    color: rgba(255,50,50,1.0);
+}
+
+.red-700 {
+    color: rgba(255,101,101,1.0);
+}
+
+.red-800 {
+    color: rgba(255,153,153,1.0);
+}
+
+.red-900 {
+    color: rgba(254,204,204,1.0);
+}
+
+.maroon {
+    color: rgba(128,0,0,1.0);
+}
+
+.yellow {
+    color: rgba(255,255,0,1.0);
+}
+
+.yellow-100 {
+    color: rgba(50,51,0,1.0);
+}
+
+.yellow-200 {
+    color: rgba(101,102,0,1.0);
+}
+
+.yellow-300 {
+    color: rgba(152,153,0,1.0);
+}
+
+.yellow-400 {
+    color: rgba(203,204,0,1.0);
+}
+
+.yellow-500 {
+    color: rgba(254,255,0,1.0);
+}
+
+.yellow-600 {
+    color: rgba(254,255,50,1.0);
+}
+
+.yellow-700 {
+    color: rgba(254,255,101,1.0);
+}
+
+.yellow-800 {
+    color: rgba(254,255,153,1.0);
+}
+
+.yellow-900 {
+    color: rgba(254,254,204,1.0);
+}
+
+.olive {
+    color: rgba(128,128,0,1.0);
+}
+
+.lime {
+    color: rgba(0,255,0,1.0);
+}
+
+.lime-100 {
+    color: rgba(0,51,0,1.0);
+}
+
+.lime-200 {
+    color: rgba(0,102,0,1.0);
+}
+
+.lime-300 {
+    color: rgba(0,153,0,1.0);
+}
+
+.lime-400 {
+    color: rgba(0,204,0,1.0);
+}
+
+.lime-500 {
+    color: rgba(0,255,0,1.0);
+}
+
+.lime-600 {
+    color: rgba(50,255,50,1.0);
+}
+
+.lime-700 {
+    color: rgba(101,255,101,1.0);
+}
+
+.lime-800 {
+    color: rgba(153,255,153,1.0);
+}
+
+.lime-900 {
+    color: rgba(204,254,204,1.0);
+}
+
+.green {
+    color: rgba(0,128,0,1.0);
+}
+
+.cyan {
+    color: rgba(0,255,255,1.0);
+}
+
+.cyan-100 {
+    color: rgba(0,50,51,1.0);
+}
+
+.cyan-200 {
+    color: rgba(0,101,102,1.0);
+}
+
+.cyan-300 {
+    color: rgba(0,152,153,1.0);
+}
+
+.cyan-400 {
+    color: rgba(0,203,204,1.0);
+}
+
+.cyan-500 {
+    color: rgba(0,254,255,1.0);
+}
+
+.cyan-600 {
+    color: rgba(50,254,255,1.0);
+}
+
+.cyan-700 {
+    color: rgba(101,254,255,1.0);
+}
+
+.cyan-800 {
+    color: rgba(153,254,255,1.0);
+}
+
+.cyan-900 {
+    color: rgba(204,254,254,1.0);
+}
+
+.teal {
+    color: rgba(0,128,128,1.0);
+}
+
+.blue {
+    color: rgba(0,0,255,1.0);
+}
+
+.blue-100 {
+    color: rgba(0,0,51,1.0);
+}
+
+.blue-200 {
+    color: rgba(0,0,102,1.0);
+}
+
+.blue-300 {
+    color: rgba(0,0,153,1.0);
+}
+
+.blue-400 {
+    color: rgba(0,0,204,1.0);
+}
+
+.blue-500 {
+    color: rgba(0,0,255,1.0);
+}
+
+.blue-600 {
+    color: rgba(50,50,255,1.0);
+}
+
+.blue-700 {
+    color: rgba(101,101,255,1.0);
+}
+
+.blue-800 {
+    color: rgba(153,153,255,1.0);
+}
+
+.blue-900 {
+    color: rgba(204,204,254,1.0);
+}
+
+.navy {
+    color: rgba(0,0,128,1.0);
+}
+
+.magenta {
+    color: rgba(255,0,255,1.0);
+}
+
+.magenta-100 {
+    color: rgba(51,0,50,1.0);
+}
+
+.magenta-200 {
+    color: rgba(102,0,101,1.0);
+}
+
+.magenta-300 {
+    color: rgba(153,0,152,1.0);
+}
+
+.magenta-400 {
+    color: rgba(204,0,203,1.0);
+}
+
+.magenta-500 {
+    color: rgba(255,0,254,1.0);
+}
+
+.magenta-600 {
+    color: rgba(255,50,254,1.0);
+}
+
+.magenta-700 {
+    color: rgba(255,101,254,1.0);
+}
+
+.magenta-800 {
+    color: rgba(255,153,254,1.0);
+}
+
+.magenta-900 {
+    color: rgba(254,204,254,1.0);
+}
+
+.purple {
+    color: rgba(128,0,128,1.0);
+}
+
+/* Generated 93 styles */

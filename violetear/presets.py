@@ -1,6 +1,11 @@
 from __future__ import annotations
+from email.generator import Generator
+from inspect import isgenerator
 
-from typing import Dict
+from typing import Any, Callable, Dict, List, Union
+import typing
+from importlib_metadata import functools, itertools
+from rich import inspect
 from violetear.color import Color, Colors
 from violetear.stylesheet import StyleSheet
 from violetear.units import Unit, rem
@@ -126,5 +131,72 @@ class SemanticDesign(StyleSheet):
     def all(self) -> SemanticDesign:
         self.typography()
         self.buttons()
+
+        return self
+
+
+# ## Utility system
+
+
+class UtilitySystem(StyleSheet):
+    def __init__(self) -> None:
+        super().__init__()
+
+    def define(
+        self,
+        rule: str,
+        cls: str,
+        variants: List[str],
+        values: List[Any] = None,
+        fn: Callable = None,
+        variant_name: Callable = None,
+    ):
+        if isinstance(variants[0], (list, tuple)) or isgenerator(variants[0]):
+            variants = list(itertools.product(*variants))
+
+        if values is None:
+            values = variants
+
+        if fn is not None:
+            fn_values = []
+
+            for value in values:
+                if isinstance(value, tuple):
+                    result = fn(*value)
+                else:
+                    result = fn(value)
+
+                fn_values.append(result)
+
+            values = fn_values
+
+        for variant, value in zip(variants, values):
+            if variant_name is not None:
+                if isinstance(variant, tuple):
+                    variant = variant_name(*variant)
+                else:
+                    variant = variant_name(variant)
+
+            elif isinstance(variant, tuple):
+                variant = "-".join(str(x) for x in variant)
+
+            self.select(f".{cls}-{variant}").rule(rule, str(value))
+
+        return self
+
+    def define_many(
+        self,
+        rule: str,
+        subrules: List[str],
+        clss: List[str],
+        variants: List[str],
+        values: List[Any] = None,
+        fn: Callable = None,
+        variant_name: Callable = None,
+    ):
+        for subrule, cls in zip(subrules, clss):
+            self.define(
+                f"{rule}-{subrule}", cls, variants, values, fn, variant_name
+            )
 
         return self

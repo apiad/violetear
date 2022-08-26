@@ -319,7 +319,7 @@ body {
 }
 
 .red>.shade-1 {
-    background-color: rgba(51,0,0,1.0);
+    background-color: rgba(50,0,0,1.0);
     border-width: 0.1rem;
     border-color: rgba(102,102,102,1.0);
 }
@@ -367,7 +367,7 @@ body {
 }
 
 .red>.shade-9 {
-    background-color: rgba(254,204,204,1.0);
+    background-color: rgba(255,204,204,1.0);
     border-width: 0.1rem;
     border-color: rgba(102,102,102,1.0);
 }
@@ -385,55 +385,55 @@ body {
 }
 
 .green>.shade-1 {
-    background-color: rgba(0,51,0,1.0);
+    background-color: rgba(0,25,0,1.0);
     border-width: 0.1rem;
     border-color: rgba(102,102,102,1.0);
 }
 
 .green>.shade-2 {
-    background-color: rgba(0,102,0,1.0);
+    background-color: rgba(0,51,0,1.0);
     border-width: 0.1rem;
     border-color: rgba(102,102,102,1.0);
 }
 
 .green>.shade-3 {
-    background-color: rgba(0,153,0,1.0);
+    background-color: rgba(0,76,0,1.0);
     border-width: 0.1rem;
     border-color: rgba(102,102,102,1.0);
 }
 
 .green>.shade-4 {
-    background-color: rgba(0,204,0,1.0);
+    background-color: rgba(0,102,0,1.0);
     border-width: 0.1rem;
     border-color: rgba(102,102,102,1.0);
 }
 
 .green>.shade-5 {
-    background-color: rgba(0,255,0,1.0);
+    background-color: rgba(0,128,0,1.0);
     border-width: 0.1rem;
     border-color: rgba(102,102,102,1.0);
 }
 
 .green>.shade-6 {
-    background-color: rgba(50,255,50,1.0);
+    background-color: rgba(50,153,50,1.0);
     border-width: 0.1rem;
     border-color: rgba(102,102,102,1.0);
 }
 
 .green>.shade-7 {
-    background-color: rgba(101,255,101,1.0);
+    background-color: rgba(101,178,101,1.0);
     border-width: 0.1rem;
     border-color: rgba(102,102,102,1.0);
 }
 
 .green>.shade-8 {
-    background-color: rgba(153,255,153,1.0);
+    background-color: rgba(153,204,153,1.0);
     border-width: 0.1rem;
     border-color: rgba(102,102,102,1.0);
 }
 
 .green>.shade-9 {
-    background-color: rgba(204,254,204,1.0);
+    background-color: rgba(204,229,204,1.0);
     border-width: 0.1rem;
     border-color: rgba(102,102,102,1.0);
 }
@@ -451,7 +451,7 @@ body {
 }
 
 .blue>.shade-1 {
-    background-color: rgba(0,0,51,1.0);
+    background-color: rgba(0,0,50,1.0);
     border-width: 0.1rem;
     border-color: rgba(102,102,102,1.0);
 }
@@ -499,7 +499,7 @@ body {
 }
 
 .blue>.shade-9 {
-    background-color: rgba(204,204,254,1.0);
+    background-color: rgba(204,204,255,1.0);
     border-width: 0.1rem;
     border-color: rgba(102,102,102,1.0);
 }
@@ -541,7 +541,7 @@ body {
 }
 
 .gray>.shade-5 {
-    background-color: rgba(127,127,127,1.0);
+    background-color: rgba(128,128,128,1.0);
     border-width: 0.1rem;
     border-color: rgba(102,102,102,1.0);
 }
