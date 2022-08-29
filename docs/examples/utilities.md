@@ -50,23 +50,23 @@ Take a look at our [generated CSS](./utilities.css) and you'll see our newly cre
 
 ```css linenums="295" title="utilites.css"
 .text-xs {
-    font-size: 0.8rem
+    font-size: 0.8rem;
 }
 
 .text-sm {
-    font-size: 1.35rem
+    font-size: 1.35rem;
 }
 
 .text-md {
-    font-size: 1.9rem
+    font-size: 1.9rem;
 }
 
 .text-lg {
-    font-size: 2.45rem
+    font-size: 2.45rem;
 }
 
 .text-xl {
-    font-size: 3.0rem
+    font-size: 3.0rem;
 }
 ...
 ```
@@ -84,39 +84,39 @@ And you can confirm that the 9 corresponding classes were created.
 
 ```css linenums="315" title="utilites.css"
 .font-1 {
-    font-weight: 100
+    font-weight: 100;
 }
 
 .font-2 {
-    font-weight: 200
+    font-weight: 200;
 }
 
 .font-3 {
-    font-weight: 300
+    font-weight: 300;
 }
 
 .font-4 {
-    font-weight: 400
+    font-weight: 400;
 }
 
 .font-5 {
-    font-weight: 500
+    font-weight: 500;
 }
 
 .font-6 {
-    font-weight: 600
+    font-weight: 600;
 }
 
 .font-7 {
-    font-weight: 700
+    font-weight: 700;
 }
 
 .font-8 {
-    font-weight: 800
+    font-weight: 800;
 }
 
 .font-9 {
-    font-weight: 900
+    font-weight: 900;
 }
 
 ...
@@ -149,43 +149,43 @@ Again, check the CSS file and you'll lots and lots of color styles.
 
 ```css linenums="831" title="utilites.css"
 .blue {
-    color: rgba(0,0,255,1.0)
+    color: rgba(0,0,255,1.0);
 }
 
 .blue-100 {
-    color: rgba(0,0,51,1.0)
+    color: rgba(0,0,51,1.0);
 }
 
 .blue-200 {
-    color: rgba(0,0,102,1.0)
+    color: rgba(0,0,102,1.0);
 }
 
 .blue-300 {
-    color: rgba(0,0,153,1.0)
+    color: rgba(0,0,153,1.0);
 }
 
 .blue-400 {
-    color: rgba(0,0,204,1.0)
+    color: rgba(0,0,204,1.0);
 }
 
 .blue-500 {
-    color: rgba(0,0,255,1.0)
+    color: rgba(0,0,255,1.0);
 }
 
 .blue-600 {
-    color: rgba(50,50,255,1.0)
+    color: rgba(50,50,255,1.0);
 }
 
 .blue-700 {
-    color: rgba(101,101,255,1.0)
+    color: rgba(101,101,255,1.0);
 }
 
 .blue-800 {
-    color: rgba(153,153,255,1.0)
+    color: rgba(153,153,255,1.0);
 }
 
 .blue-900 {
-    color: rgba(204,204,254,1.0)
+    color: rgba(204,204,254,1.0);
 }
 ...
 ```
@@ -226,19 +226,19 @@ And this is the result:
 
 ```css linenums="991" title="utilites.css"
 .weight-lighter {
-    font-weight: lighter
+    font-weight: lighter;
 }
 
 .weight-normal {
-    font-weight: normal
+    font-weight: normal;
 }
 
 .weight-bold {
-    font-weight: bold
+    font-weight: bold;
 }
 
 .weight-bolder {
-    font-weight: bolder
+    font-weight: bolder;
 }
 ...
 ```
@@ -257,47 +257,47 @@ And here's how those rules look alike.
 
 ```css linenums="991" title="utilites.css"
 .p-0 {
-    padding: 0rem
+    padding: 0rem;
 }
 
 .p-1 {
-    padding: 0.4rem
+    padding: 0.4rem;
 }
 
 .p-2 {
-    padding: 0.8rem
+    padding: 0.8rem;
 }
 
 .p-3 {
-    padding: 1.2rem
+    padding: 1.2rem;
 }
 
 .p-4 {
-    padding: 1.6rem
+    padding: 1.6rem;
 }
 
 .p-5 {
-    padding: 2.0rem
+    padding: 2.0rem;
 }
 
 .p-6 {
-    padding: 2.4rem
+    padding: 2.4rem;
 }
 
 .p-7 {
-    padding: 2.8rem
+    padding: 2.8rem;
 }
 
 .p-8 {
-    padding: 3.2rem
+    padding: 3.2rem;
 }
 
 .p-9 {
-    padding: 3.6rem
+    padding: 3.6rem;
 }
 
 .p-10 {
-    padding: 4.0rem
+    padding: 4.0rem;
 }
 ...
 ```
@@ -316,23 +316,23 @@ sheet.extend(
 
 ```css linenums="991" title="utilites.css"
 .shadow-1 {
-    box-shadow: 1px 1px 0.5rem gray
+    box-shadow: 1px 1px 0.5rem gray;
 }
 
 .shadow-2 {
-    box-shadow: 2px 2px 1.0rem gray
+    box-shadow: 2px 2px 1.0rem gray;
 }
 
 .shadow-3 {
-    box-shadow: 3px 3px 1.5rem gray
+    box-shadow: 3px 3px 1.5rem gray;
 }
 
 .shadow-4 {
-    box-shadow: 4px 4px 2.0rem gray
+    box-shadow: 4px 4px 2.0rem gray;
 }
 
 .shadow-5 {
-    box-shadow: 5px 5px 2.5rem gray
+    box-shadow: 5px 5px 2.5rem gray;
 }
 ...
 ```
@@ -358,23 +358,23 @@ And just like that we created 16 * 9 background color utility classes.
 
 ```css linenums="1611" title="utilites.css"
 .bg-purple-100 {
-    background-color: rgba(25,0,25,1.0)
+    background-color: rgba(25,0,25,1.0);
 }
 
 .bg-purple-200 {
-    background-color: rgba(51,0,51,1.0)
+    background-color: rgba(51,0,51,1.0);
 }
 
 .bg-purple-300 {
-    background-color: rgba(76,0,76,1.0)
+    background-color: rgba(76,0,76,1.0);
 }
 
 .bg-purple-400 {
-    background-color: rgba(102,0,102,1.0)
+    background-color: rgba(102,0,102,1.0);
 }
 
 .bg-purple-500 {
-    background-color: rgba(128,0,128,1.0)
+    background-color: rgba(128,0,128,1.0);
 }
 ...
 ```
@@ -395,27 +395,27 @@ sheet.extend(
 
 ```css linenums="1691" title="utilites.css"
 .mr-0 {
-    margin-right: 0rem
+    margin-right: 0rem;
 }
 
 .mr-1 {
-    margin-right: 0.4rem
+    margin-right: 0.4rem;
 }
 
 .mr-2 {
-    margin-right: 0.8rem
+    margin-right: 0.8rem;
 }
 
 .mr-3 {
-    margin-right: 1.2rem
+    margin-right: 1.2rem;
 }
 
 .mr-4 {
-    margin-right: 1.6rem
+    margin-right: 1.6rem;
 }
 
 .mr-5 {
-    margin-right: 2.0rem
+    margin-right: 2.0rem;
 }
 ...
 ```

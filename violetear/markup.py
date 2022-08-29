@@ -1,12 +1,13 @@
 from __future__ import annotations
 
 import abc
-from ast import Call
 import io
 from pathlib import Path
-from typing import Any, Callable, List
+from typing import Any, Callable, List, Union
 
 import textwrap
+from typing_extensions import Self
+from attr import attr
 from violetear.style import Style
 from violetear.stylesheet import StyleSheet
 
@@ -57,6 +58,7 @@ class Element(Markup):
         id: str = None,
         style: Style = None,
         parent: Element = None,
+        **attrs: str,
     ) -> None:
         self.tag = tag
         self.id = id
@@ -69,6 +71,7 @@ class Element(Markup):
         self.content = list(content)
         self.style = style or Style()
         self._parent = parent
+        self._attrs = attrs
 
     def _render(self, fp, indent: int):
         parts = [self.tag]
@@ -82,6 +85,9 @@ class Element(Markup):
 
         if self.style:
             parts.append(self.style.inline())
+
+        for key, value in self._attrs.items():
+            parts.append(f'{key}="{str(value)}"')
 
         tag_line = " ".join(parts)
 
@@ -97,9 +103,15 @@ class Element(Markup):
 
         self._write_line(fp, f"</{self.tag}>", indent)
 
-    def add(self, element: Element) -> Element:
+    def add(self, element: Element) -> Self:
         element._parent = self
         self.content.append(element)
+        return self
+
+    def extend(self, *elements: Element) -> Self:
+        for el in elements:
+            self.add(el)
+
         return self
 
     def create(
@@ -122,7 +134,7 @@ class Element(Markup):
         id: str = None,
         style: Style = None,
         text: str = None,
-    ) -> Element:
+    ) -> Self:
         for i in range(count):
             if callable(classes):
                 _classes = classes(i)
@@ -148,7 +160,7 @@ class Element(Markup):
 
         return self
 
-    def styled(self, fn: Callable[[Style]]) -> Element:
+    def styled(self, fn: Callable[[Style]]) -> Self:
         fn(self.style)
         return self
 
@@ -156,14 +168,26 @@ class Element(Markup):
         return self._parent
 
 
-class Page(Markup):
+class Component(Element, abc.ABC):
+    def __init__(self) -> None:
+        super().__init__(tag=None)
+
+    @abc.abstractmethod
+    def compose(self) -> Element:
+        pass
+
+    def _render(self, fp, indent: int):
+        self.compose()._render(fp, indent)
+
+
+class Document(Markup):
     def __init__(self, lang: str = "en", **head_kwargs) -> None:
         self.lang = lang
         self.head = Head(**head_kwargs)
         self.body = Body()
         self.styles = []
 
-    def style(self, sheet: StyleSheet, inline: bool = False, name: str = None) -> Page:
+    def style(self, sheet: StyleSheet, inline: bool = False, name: str = None) -> Document:
         if not inline and name is None:
             raise ValueError("Need a name when inline is false")
 

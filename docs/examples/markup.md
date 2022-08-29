@@ -15,29 +15,26 @@ your styles.
 
 ## Basic setup
 
-Everything starts from the `Page` class.
+Everything starts from the `Document` class.
 At this point you can define a title.
 
 
 
 ```python linenums="16" title="markup.py"
-from violetear.color import Colors
-from violetear.markup import Element, Page
-from violetear.style import Style
+from violetear.markup import Element, Document
 from violetear.stylesheet import StyleSheet
 
-page = Page(title="Example: Markup - violetear")
+doc = Document(title="Example: Markup - violetear")
 ```
 
 We can also add stylesheets to our page that will be rendered either inline or as separate files.
 
 
 
-```python linenums="23" title="markup.py"
+```python linenums="21" title="markup.py"
 sheet = StyleSheet(normalize=True)
 
-page.style(sheet, inline=False, name="markup.css")
-
+doc.style(sheet, inline=False, name="markup.css")
 ```
 
 Just with this let's take a look at the resulting HTML file.
@@ -64,16 +61,16 @@ You can manually create `Element` instances and add them to the body.
 
 
 
-```python linenums="38" title="markup.py"
-page.body.add(Element("h1", classes=["title"], text="This is a header"))
+```python linenums="33" title="markup.py"
+doc.body.add(Element("h1", classes=["title"], text="This is a header"))
 ```
 
 Elements can have child elements.
 
 
 
-```python linenums="40" title="markup.py"
-page.body.add(
+```python linenums="35" title="markup.py"
+doc.body.add(
     Element(
         "ul",
         Element("li", text="First item"),
@@ -87,15 +84,18 @@ And you can add inline styles using the `Style` class, in all its fluent glory!
 
 
 
-```python linenums="49" title="markup.py"
-page.body.add(
+```python linenums="44" title="markup.py"
+from violetear.style import Style
+from violetear.color import Colors
+
+
+doc.body.add(
     Element(
         "span",
         text="A styled text!",
         style=Style().font(14).color(Colors.Red),
     )
 )
-
 ```
 
 As you might expect, this is the HTML file you get.
@@ -142,8 +142,8 @@ A common pattern is to chain `Style` method calls.
 
 
 
-```python linenums="70" title="markup.py"
-page.body.create("div", "container", id="main").style.margin("auto").width(max=768)
+```python linenums="66" title="markup.py"
+doc.body.create("div", "container", id="main").style.margin("auto").width(max=768)
 ```
 
 However, this pattern breaks the fluent API because it returns the `Style` instance.
@@ -155,9 +155,9 @@ For example, we can create a div and style it.
 
 
 
-```python linenums="76" hl_lines="2 3" title="markup.py"
+```python linenums="72" hl_lines="2 3" title="markup.py"
 ul = (
-    page.body.create("div", "container fluid")  
+    doc.body.create("div", "container fluid")  
     .styled(lambda s: s.margin("auto").width(max=768))  
     .create("ul")  
     .styled(lambda s: s.padding(5, bottom=10))  
@@ -171,9 +171,9 @@ Then chain another call to create a `ul` and style it:
 
 
 
-```python linenums="76" hl_lines="4 5" title="markup.py"
+```python linenums="72" hl_lines="4 5" title="markup.py"
 ul = (
-    page.body.create("div", "container fluid")  
+    doc.body.create("div", "container fluid")  
     .styled(lambda s: s.margin("auto").width(max=768))  
     .create("ul")  
     .styled(lambda s: s.padding(5, bottom=10))  
@@ -188,9 +188,9 @@ And then we can just keep building from the `ul` element.
 
 
 
-```python linenums="76" hl_lines="8 9" title="markup.py"
+```python linenums="72" hl_lines="8 9" title="markup.py"
 ul = (
-    page.body.create("div", "container fluid")  
+    doc.body.create("div", "container fluid")  
     .styled(lambda s: s.margin("auto").width(max=768))  
     .create("ul")  
     .styled(lambda s: s.padding(5, bottom=10))  
@@ -232,20 +232,20 @@ to break the flow, by using `spawn` to create multiple children.
 
 
 
-```python linenums="99" hl_lines="6" title="markup.py"
+```python linenums="93" hl_lines="4" title="markup.py"
 div = (
-    page.body.create("div", "container")
-    .styled(lambda s: s.margin("auto").width(max=768))
+    doc.body.create("div", "container")
     .create("ul")
-    .styled(lambda s: s.padding(5, bottom=10))
     .spawn(  
         5,  
         "li",  
-        classes="item", 
-        text=lambda i: f"The {i+1}th element", 
-        style=lambda i: Style().color(Colors.Blue.shade(i / 5)), 
+        classes="item",  
+        text=lambda i: f"The {i+1}th element",  
+        style=lambda i: Style().color(Colors.Blue.shade(i / 5)),  
     )
-    .parent() 
+    .styled(lambda s: s.padding(5, bottom=10))  
+    .parent()  
+    .styled(lambda s: s.margin("auto").width(max=768))  
 )
 ```
 
@@ -254,20 +254,20 @@ along with the tag.
 
 
 
-```python linenums="99" hl_lines="7 8" title="markup.py"
+```python linenums="93" hl_lines="5 6" title="markup.py"
 div = (
-    page.body.create("div", "container")
-    .styled(lambda s: s.margin("auto").width(max=768))
+    doc.body.create("div", "container")
     .create("ul")
-    .styled(lambda s: s.padding(5, bottom=10))
     .spawn(  
         5,  
         "li",  
-        classes="item", 
-        text=lambda i: f"The {i+1}th element", 
-        style=lambda i: Style().color(Colors.Blue.shade(i / 5)), 
+        classes="item",  
+        text=lambda i: f"The {i+1}th element",  
+        style=lambda i: Style().color(Colors.Blue.shade(i / 5)),  
     )
-    .parent() 
+    .styled(lambda s: s.padding(5, bottom=10))  
+    .parent()  
+    .styled(lambda s: s.margin("auto").width(max=768))  
 )
 ```
 
@@ -276,49 +276,75 @@ And you can pass either direct values or callables to compute the values for the
 
 
 
-```python linenums="99" hl_lines="9 10 11" title="markup.py"
+```python linenums="93" hl_lines="7 8 9" title="markup.py"
 div = (
-    page.body.create("div", "container")
-    .styled(lambda s: s.margin("auto").width(max=768))
+    doc.body.create("div", "container")
     .create("ul")
-    .styled(lambda s: s.padding(5, bottom=10))
     .spawn(  
         5,  
         "li",  
-        classes="item", 
-        text=lambda i: f"The {i+1}th element", 
-        style=lambda i: Style().color(Colors.Blue.shade(i / 5)), 
+        classes="item",  
+        text=lambda i: f"The {i+1}th element",  
+        style=lambda i: Style().color(Colors.Blue.shade(i / 5)),  
     )
-    .parent() 
+    .styled(lambda s: s.padding(5, bottom=10))  
+    .parent()  
+    .styled(lambda s: s.margin("auto").width(max=768))  
 )
 ```
 
 
 Finally, contrary to the `create` method which returns the newly created element,
-the `spawn` method returns the same element on which you call it, in this case, the `ul`.
-We can then use `parent` to navigate up and continue chaining method calls.
+the `spawn` method returns the same element on which you call it, in this case, the `ul`,
+which we then proceed to style.
 
 
 
-```python linenums="99" hl_lines="13" title="markup.py"
+```python linenums="93" hl_lines="11" title="markup.py"
 div = (
-    page.body.create("div", "container")
-    .styled(lambda s: s.margin("auto").width(max=768))
+    doc.body.create("div", "container")
     .create("ul")
-    .styled(lambda s: s.padding(5, bottom=10))
     .spawn(  
         5,  
         "li",  
-        classes="item", 
-        text=lambda i: f"The {i+1}th element", 
-        style=lambda i: Style().color(Colors.Blue.shade(i / 5)), 
+        classes="item",  
+        text=lambda i: f"The {i+1}th element",  
+        style=lambda i: Style().color(Colors.Blue.shade(i / 5)),  
     )
-    .parent() 
+    .styled(lambda s: s.padding(5, bottom=10))  
+    .parent()  
+    .styled(lambda s: s.margin("auto").width(max=768))  
 )
 ```
 
 
-So here's the result.
+We can then use `parent` to navigate up and continue chaining method calls,
+for example, to style the first `div` element we created.
+
+
+
+```python linenums="93" hl_lines="12 13" title="markup.py"
+div = (
+    doc.body.create("div", "container")
+    .create("ul")
+    .spawn(  
+        5,  
+        "li",  
+        classes="item",  
+        text=lambda i: f"The {i+1}th element",  
+        style=lambda i: Style().color(Colors.Blue.shade(i / 5)),  
+    )
+    .styled(lambda s: s.padding(5, bottom=10))  
+    .parent()  
+    .styled(lambda s: s.margin("auto").width(max=768))  
+)
+```
+
+
+Notice how we went down the tree creating and then up the tree styling.
+In the same way, we could have called `style` just after each `create`.
+
+Here's the result.
 
 ```html title="markup.html" linenums="48"
 ...
@@ -343,4 +369,325 @@ So here's the result.
     </div>
 ...
 ```
+
+## Defining and using components
+
+So far we've been using the basic API which lets you create any type of HTML element.
+However, this API can quickly become repetitive as you add similar markup for similar concepts.
+If you want to create custom abstractions, like a menu, which may consitst of several
+markup elements (a <div> with a <ul> inside, several `span`s, etc.,),
+things can easily become convoluted.
+
+One simple solution is to encapsulate your custom markup logic in a function, something like:
+
+```python
+def menu(*items):
+    return (
+        Element("div")
+        .create("ul")
+        .spawn(len(items), "li", text=lambda i: items[i])
+        .parent()
+    )
+```
+
+And then use it like:
+
+```python
+doc.body.add(menu("Home", "Products", "Pricing", "Abouts"))
+```
+
+And while this works, it is a bit ugly for a couple of reasons.
+First, you need to remember to add that `parent()` at the end to make sure to return
+the `div` and not the `ul`, and as soon as you start complicating your markup logic a bit
+it is highly likely that you will return the wrong element a few items.
+
+But the main reason is that even though we encapsulated the concept of a menu,
+we didn't *abstracted* it.
+The minute we invoke the encapsulated functionality we lost the menu abstraction and
+we are left with a regular `div` with an `ul` and a bunch of `li`s inside.
+
+For example, if you want to add a new item to your menu after created, what can you do?
+There is no real abstraction of a menu that you can reference and modify.
+What you want, of course, is a `Menu` class that you can instantiate and add
+to a `Document`, manipulate at your will, and only on render time
+expand it into the actual markup elements.
+
+We can achieve that by inheriting from the `Component` class.
+
+<a name="ref:Menu"></a>
+
+```python linenums="161" hl_lines="1 4" title="markup.py"
+from violetear.markup import Component  
+
+
+class Menu(Component):  
+    def __init__(self, **entries: str) -> None:
+        super().__init__()
+        self.entries = dict(**entries)  
+
+    def compose(self) -> Element:  
+        return Element(
+            "div",
+            Element(
+                "ul",
+                *[
+                    Element("li", classes="menu-item").add(
+                        Element("a", text=key, href=value)
+                    )
+                    for key, value in self.entries.items()
+                ],
+            ),
+            classes="menu",
+        )
+```
+
+Which we can instantiate as usual and add to our document:
+
+
+
+```python linenums="184" title="markup.py"
+menu = Menu(
+    Home="/",
+    Products="/products",
+    Pricing="/pricing",
+    About="/about-us",
+)
+
+doc.body.add(menu)
+```
+
+But if we modify the menu before rendering, it will work.
+We can manipulate the abstraction directly, not the underlying HTML markup that
+only will exist at render time.
+
+
+
+```python linenums="195" title="markup.py"
+menu.entries["Services"] = "/services"
+```
+
+Here's the end result:
+
+```html title="markup.py" linenums="67"
+...
+    <div class="menu">
+        <ul>
+            <li class="menu-item">
+                <a href="/">
+                    Home
+                </a>
+            </li>
+            <li class="menu-item">
+                <a href="/products">
+                    Products
+                </a>
+            </li>
+            <li class="menu-item">
+                <a href="/pricing">
+                    Pricing
+                </a>
+            </li>
+            <li class="menu-item">
+                <a href="/about-us">
+                    About
+                </a>
+            </li>
+            <li class="menu-item">
+                <a href="/services">
+                    Services
+                </a>
+            </li>
+        </ul>
+    </div>
+...
+```
+
+The magic happens in two places. First, when we create the `Menu` instance,
+we pass the items as a mapping and store it in the instance.
+
+<a name="ref:Menu"></a>
+
+```python linenums="161" hl_lines="7" title="markup.py"
+from violetear.markup import Component  
+
+
+class Menu(Component):  
+    def __init__(self, **entries: str) -> None:
+        super().__init__()
+        self.entries = dict(**entries)  
+
+    def compose(self) -> Element:  
+        return Element(
+            "div",
+            Element(
+                "ul",
+                *[
+                    Element("li", classes="menu-item").add(
+                        Element("a", text=key, href=value)
+                    )
+                    for key, value in self.entries.items()
+                ],
+            ),
+            classes="menu",
+        )
+```
+
+
+And then in the `compose` method we simply build our markup as desired using
+the fluent API, the regular `add` method, the constructor syntax, etc.
+
+<a name="ref:Menu"></a>
+
+```python linenums="161" hl_lines="9" title="markup.py"
+from violetear.markup import Component  
+
+
+class Menu(Component):  
+    def __init__(self, **entries: str) -> None:
+        super().__init__()
+        self.entries = dict(**entries)  
+
+    def compose(self) -> Element:  
+        return Element(
+            "div",
+            Element(
+                "ul",
+                *[
+                    Element("li", classes="menu-item").add(
+                        Element("a", text=key, href=value)
+                    )
+                    for key, value in self.entries.items()
+                ],
+            ),
+            classes="menu",
+        )
+```
+
+
+Now, if this still looks a bit ugly to you, we can make it even better.
+Part of the problem is that the menu items are themselves another abstraction
+that we are using implicitly. Let's make it explicit.
+
+<a name="ref:MenuItem"></a>
+
+```python linenums="211" title="markup.py"
+class MenuItem(Component):
+    def __init__(self, name, href) -> None:
+        super().__init__()
+        self.name = name
+        self.href = href
+
+    def compose(self) -> Element:
+        return Element(
+            "li", Element("a", text=self.name, href=self.href), classes="menu-item"
+        )
+```
+
+And then we can redefine our `Menu` class to make explicit use of these items:
+
+<a name="ref:Menu"></a>
+
+```python linenums="222" title="markup.py"
+class Menu(Component):
+    def __init__(self, **entries) -> None:
+        super().__init__()
+        self.content.extend(
+            MenuItem(name=key, href=value)  
+            for key, value in entries.items()  
+        )
+
+    def compose(self) -> Element:
+        return Element(
+            "div", Element("ul", *self.content), classes="menu"  
+        )
+```
+
+On render time, `compose` will be called recursively on all children `Components`,
+so can safely mix `Component`s and regular `Element`s and everything will work out just fine.
+
+Thus, now we can on the constructor create child elements of type `MenuItem`,
+and make sure to inject them at the right location in the markup we build at `compose`.
+
+<a name="ref:Menu"></a>
+
+```python linenums="222" hl_lines="5 6 11" title="markup.py"
+class Menu(Component):
+    def __init__(self, **entries) -> None:
+        super().__init__()
+        self.content.extend(
+            MenuItem(name=key, href=value)  
+            for key, value in entries.items()  
+        )
+
+    def compose(self) -> Element:
+        return Element(
+            "div", Element("ul", *self.content), classes="menu"  
+        )
+```
+
+
+It doesn't seem like we've gained much with this pattern but now we have made our `Menu`
+abstraction fully compatible with the `Element` API, so we can do things like freely
+mixing `Menu` and `MenuItem` with regular `Element`s  for ultimate flexibility
+plus maximum expresivity.
+
+
+
+```python linenums="243" hl_lines="6" title="markup.py"
+doc.body.add(
+    Menu().extend(
+        MenuItem("Home", "/"),
+        MenuItem("Pricing", "/pricing"),
+        MenuItem("Products", "/products"),
+        Element("div", classes="divider"),  
+        MenuItem("About", "/about-us"),
+    )
+)
+```
+
+> The `extend` method just calls `add` for each item.
+
+And the generated HTML blends perfectly the markup generated from the `compose` methods
+with the explicit markup.
+
+```html title="markup.html" linenums="96" hl_lines="19 20"
+...
+    <div class="menu">
+        <ul>
+            <li class="menu-item">
+                <a href="/">
+                    Home
+                </a>
+            </li>
+            <li class="menu-item">
+                <a href="/pricing">
+                    Pricing
+                </a>
+            </li>
+            <li class="menu-item">
+                <a href="/products">
+                    Products
+                </a>
+            </li>
+            <div class="divider">
+            </div>
+            <li class="menu-item">
+                <a href="/about-us">
+                    About
+                </a>
+            </li>
+        </ul>
+    </div>
+...
+```
+
+??? note "Unopinionated to its core"
+    Remember that `violetear` is totally unopinionated.
+    We will never dictate how you have to structure your HTML or CSS.
+    We simply give you the tools to build whatever abstraction you prefer.
+
+    If you want to hack a simple HTML over a weekend you can use the fluent API
+    and get away with it.
+    If you're building something durable enough to deserve a complete design
+    system with custom components, `violetear` can help you there as well.
 
