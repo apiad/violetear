@@ -175,7 +175,7 @@ div = (
 # So far we've been using the basic API which lets you create any type of HTML element.
 # However, this API can quickly become repetitive as you add similar markup for similar concepts.
 # If you want to create custom abstractions, like a menu, which may consitst of several
-# markup elements (a <div> with a <ul> inside, several `span`s, etc.,),
+# markup elements (a `div` with a `ul` inside, several `span`s, etc.,),
 # things can easily become convoluted.
 
 # One simple solution is to encapsulate your custom markup logic in a function, something like:
