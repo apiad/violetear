@@ -187,7 +187,9 @@ class Document(Markup):
         self.body = Body()
         self.styles = []
 
-    def style(self, sheet: StyleSheet, inline: bool = False, name: str = None) -> Document:
+    def style(
+        self, sheet: StyleSheet, inline: bool = False, name: str = None
+    ) -> Document:
         if not inline and name is None:
             raise ValueError("Need a name when inline is false")
 
