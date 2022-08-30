@@ -369,6 +369,8 @@ def menu(*items):
     )
 ```
 
+> :information_source: The `root` method returns the top-most element in a hierarchy, i.e., the `div` in this case.
+
 And then use it like:
 
 ```python
@@ -390,7 +392,7 @@ We can achieve that by inheriting from the `Component` class.
 
 <a name="ref:Menu"></a>
 
-```python linenums="157" hl_lines="1 4" title="markup.py"
+```python linenums="158" hl_lines="1 4" title="markup.py"
 from violetear.markup import Component  
 
 
@@ -399,7 +401,7 @@ class Menu(Component):
         super().__init__()
         self.entries = dict(**entries)  
 
-    def compose(self) -> Element:
+    def compose(self, content) -> Element:
         return (
             Element("div")  
             .classes("menu")  
@@ -418,7 +420,7 @@ Which we can instantiate as usual and add to our document:
 
 
 
-```python linenums="179" title="markup.py"
+```python linenums="180" title="markup.py"
 menu = Menu(
     Home="/",
     Products="/products",
@@ -435,7 +437,7 @@ only will exist at render time.
 
 
 
-```python linenums="190" title="markup.py"
+```python linenums="191" title="markup.py"
 menu.entries["Services"] = "/services"
 ```
 
@@ -480,7 +482,7 @@ we pass the items as a mapping and store it in the instance.
 
 <a name="ref:Menu"></a>
 
-```python linenums="157" hl_lines="7" title="markup.py"
+```python linenums="158" hl_lines="7" title="markup.py"
 from violetear.markup import Component  
 
 
@@ -489,7 +491,7 @@ class Menu(Component):
         super().__init__()
         self.entries = dict(**entries)  
 
-    def compose(self) -> Element:
+    def compose(self, content) -> Element:
         return (
             Element("div")  
             .classes("menu")  
@@ -510,7 +512,7 @@ the fluent API, the regular `add` method, the constructor syntax, etc.
 
 <a name="ref:Menu"></a>
 
-```python linenums="157" hl_lines="11 12 13 14 15 16 17 18 19 20" title="markup.py"
+```python linenums="158" hl_lines="11 12 13 14 15 16 17 18 19 20" title="markup.py"
 from violetear.markup import Component  
 
 
@@ -519,7 +521,7 @@ class Menu(Component):
         super().__init__()
         self.entries = dict(**entries)  
 
-    def compose(self) -> Element:
+    def compose(self, content) -> Element:
         return (
             Element("div")  
             .classes("menu")  
@@ -534,6 +536,12 @@ class Menu(Component):
         )
 ```
 
+
+In case you didn't notice, instead of `spawn(len(self.entries), ...)` we invoked it
+as `spaw(self.entries, ...)`, that is, passing directly an iterator instead of a number.
+In this case, `violetear` will create one element for item in the iterator,
+and will associate the corresponding item with the element.
+Then, when you call `each` you'll get that item as the first parameter of your lambda function.
 
 ??? question "Aren't we missing a `root()`?"
 
@@ -552,55 +560,52 @@ that we are using implicitly. Let's make it explicit.
 
 <a name="ref:MenuItem"></a>
 
-```python linenums="216" title="markup.py"
+```python linenums="222" title="markup.py"
 class MenuItem(Component):
     def __init__(self, name, href) -> None:
         super().__init__()
         self.name = name
         self.href = href
 
-    def compose(self) -> Element:
+    def compose(self, content) -> Element:
         return Element(
             "li", Element("a", text=self.name, href=self.href), classes="menu-item"
         )
 ```
 
-And then we can redefine our `Menu` class to make explicit use of these items:
+And then we can redefine our `Menu` class to strip away the item management.
 
 <a name="ref:Menu"></a>
 
-```python linenums="227" title="markup.py"
+```python linenums="233" title="markup.py"
 class Menu(Component):
-    def __init__(self, **entries) -> None:
-        super().__init__()
-        self.extend(
-            MenuItem(name=key, href=value)  
-            for key, value in entries.items()  
+    def compose(self, content) -> Element:
+        return (
+            Element("div")
+            .classes("menu")
+            .create("ul")  
+            .extend(content)  
         )
-
-    def compose(self) -> Element:
-        return Element("div").classes("menu").create("ul").extend(*self._content)
 ```
 
 On render time, `compose` will be called recursively on all children `Components`,
 so can safely mix `Component`s and regular `Element`s and everything will work out just fine.
 
-Thus, now we can create child elements of type `MenuItem` on the constructor
-and make sure to inject them at the right location in the markup we build at `compose`.
+Thus, now we  create the child elements of type `MenuItem` explicitly
+and make sure to inject them at the right location in the markup we build at `compose`,
+using the `content` parameter that we've been ignoring so far.
 
 <a name="ref:Menu"></a>
 
-```python linenums="227" hl_lines="5 6" title="markup.py"
+```python linenums="233" hl_lines="6 7" title="markup.py"
 class Menu(Component):
-    def __init__(self, **entries) -> None:
-        super().__init__()
-        self.extend(
-            MenuItem(name=key, href=value)  
-            for key, value in entries.items()  
+    def compose(self, content) -> Element:
+        return (
+            Element("div")
+            .classes("menu")
+            .create("ul")  
+            .extend(content)  
         )
-
-    def compose(self) -> Element:
-        return Element("div").classes("menu").create("ul").extend(*self._content)
 ```
 
 
@@ -609,9 +614,12 @@ abstraction fully compatible with the `Element` API, so we can do things like fr
 mixing `Menu` and `MenuItem` with regular `Element`s  for ultimate flexibility
 plus maximum expresivity.
 
+For example, here we design a menu with an explicit div with class `"divider"` in-between
+the actual menu items.
 
 
-```python linenums="246" hl_lines="6" title="markup.py"
+
+```python linenums="253" hl_lines="6" title="markup.py"
 doc.body.add(
     Menu().extend(
         MenuItem("Home", "/"),
@@ -623,7 +631,7 @@ doc.body.add(
 )
 ```
 
-> The `extend` method just calls `add` for each item.
+> :information_source: The `extend` method just calls `add` for each item.
 
 And the generated HTML blends perfectly the markup generated from the `compose` methods
 with the explicit markup.
@@ -668,4 +676,16 @@ with the explicit markup.
     and get away with it.
     If you're building something durable enough to deserve a complete design
     system with custom components, `violetear` can help you there as well.
+
+Finally, both the `create` and `spawn` methods accept a `Component` derivative class instead
+of a tag name, in which case it will instantiate the passed class.
+
+
+
+```python linenums="281" title="markup.py"
+menu = doc.body.create(Menu)
+```
+
+The advantage is that the type checker will infer `Menu` as the type for the variable `menu`,
+helping you in subsequent chained method calls.
 

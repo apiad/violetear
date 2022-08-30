@@ -4,6 +4,7 @@ from inspect import isgenerator
 from typing import Any, Callable, Dict, List
 import itertools
 from violetear.color import Color, Colors
+from violetear.style import Style
 from violetear.stylesheet import StyleSheet
 from violetear.units import Unit
 
@@ -141,67 +142,37 @@ class UtilitySystem(StyleSheet):
 
     def define(
         self,
-        rule: str,
-        cls: str,
+        *,
         variants: List[str],
+        rule: Callable[[Style, Any]],
+        clss: str = "",
         values: List[Any] = None,
-        fn: Callable = None,
-        variant_name: Callable = None,
+        name: Callable = None,
     ):
+        variants = list(variants)
+
         if isinstance(variants[0], (list, tuple)) or isgenerator(variants[0]):
             variants = list(itertools.product(*variants))
+        else:
+            variants = [[v] for v in variants]
 
         if values is None:
             values = variants
+        else:
+            values = list(values)
 
-        if fn is not None:
-            fn_values = []
+            if isinstance(values[0], (list, tuple)) or isgenerator(values[0]):
+                values = list(itertools.product(*values))
+            else:
+                values = [[v] for v in values]
 
-            for value in values:
-                if isinstance(value, tuple):
-                    result = fn(*value)
-                else:
-                    result = fn(value)
+        if name is None:
 
-                fn_values.append(result)
-
-            values = fn_values
+            def name(*variant):
+                return "-".join(map(str, [clss] + list(variant)))
 
         for variant, value in zip(variants, values):
-            if variant_name is not None:
-                if isinstance(variant, tuple):
-                    variant = variant_name(*variant)
-                else:
-                    variant = variant_name(variant)
-
-            elif isinstance(variant, tuple):
-                variant = "-".join(str(x) for x in variant)
-
-            self.select(f".{cls}-{variant}").rule(rule, str(value))
-
-        return self
-
-    def define_many(
-        self,
-        rule: str,
-        subrules: List[str],
-        clss: List[str],
-        variants: List[str],
-        values: List[Any] = None,
-        fn: Callable = None,
-        variant_name: Callable = None,
-    ):
-        variants = list(variants)
-        values = list(values)
-
-        for subrule, cls in zip(subrules, clss):
-            self.define(
-                rule=f"{rule}-{subrule}",
-                cls=cls,
-                variants=variants,
-                values=values,
-                fn=fn,
-                variant_name=variant_name,
-            )
+            style = self.select(f".{name(*variant)}")
+            rule(style, *value)
 
         return self

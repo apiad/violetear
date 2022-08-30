@@ -3,7 +3,7 @@ from __future__ import annotations
 import abc
 import io
 from pathlib import Path
-from typing import Any, Callable, Iterable, List, Tuple, Union
+from typing import Any, Callable, Iterable, List, Tuple, Type, TypeVar, Union, overload
 
 import textwrap
 from typing_extensions import Self
@@ -46,6 +46,9 @@ class Markup(abc.ABC):
             value += "\n"
 
         fp.write(value)
+
+
+TElement = TypeVar("TElement", bound="Element")
 
 
 class Element(Markup):
@@ -140,11 +143,23 @@ class Element(Markup):
 
         return self
 
+    @overload
+    def create(self, tag: str) -> Element:
+        pass
+
+    @overload
+    def create(self, clss: Type[TElement]) -> TElement:
+        pass
+
     def create(
         self,
-        tag: str,
-    ) -> Element:
-        element = Element(tag)
+        tag,
+    ):
+        if isinstance(tag, str):
+            element = Element(tag)
+        else:
+            element = tag()
+
         self.add(element)
         return element
 
@@ -180,11 +195,11 @@ class Component(Element, abc.ABC):
         super().__init__(tag=None)
 
     @abc.abstractmethod
-    def compose(self) -> Element:
+    def compose(self, content) -> Element:
         pass
 
     def _render(self, fp, indent: int):
-        self.compose().root()._render(fp, indent)
+        self.compose(self._content).root()._render(fp, indent)
 
 
 class ElementSet:

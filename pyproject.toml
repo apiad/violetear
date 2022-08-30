@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "violetear"
-version = "0.12.2"
+version = "0.12.3"
 description = "A minimalist CSS generator"
 authors = ["Alejandro Piad <apiad@apiad.net>"]
 license = "MIT"

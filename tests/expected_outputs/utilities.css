@@ -1049,775 +1049,780 @@ summary {
 }
 
 .shadow-1 {
-    box-shadow: 1px 1px 0.5rem gray;
+    color: rgba(0,0,0,1.0);
+    box-shadow: 1px 1px 1px 0.5rem rgba(0,0,0,1.0);
 }
 
 .shadow-2 {
-    box-shadow: 2px 2px 1.0rem gray;
+    color: rgba(0,0,0,1.0);
+    box-shadow: 2px 2px 2px 1.0rem rgba(0,0,0,1.0);
 }
 
 .shadow-3 {
-    box-shadow: 3px 3px 1.5rem gray;
+    color: rgba(0,0,0,1.0);
+    box-shadow: 3px 3px 3px 1.5rem rgba(0,0,0,1.0);
 }
 
 .shadow-4 {
-    box-shadow: 4px 4px 2.0rem gray;
+    color: rgba(0,0,0,1.0);
+    box-shadow: 4px 4px 4px 2.0rem rgba(0,0,0,1.0);
 }
 
 .shadow-5 {
-    box-shadow: 5px 5px 2.5rem gray;
+    color: rgba(0,0,0,1.0);
+    box-shadow: 5px 5px 5px 2.5rem rgba(0,0,0,1.0);
 }
 
 .bg-white-100 {
-    background-color: rgba(50,50,50,1.0);
+    color: rgba(50,50,50,1.0);
 }
 
 .bg-white-200 {
-    background-color: rgba(102,102,102,1.0);
+    color: rgba(102,102,102,1.0);
 }
 
 .bg-white-300 {
-    background-color: rgba(153,153,153,1.0);
+    color: rgba(153,153,153,1.0);
 }
 
 .bg-white-400 {
-    background-color: rgba(204,204,204,1.0);
+    color: rgba(204,204,204,1.0);
 }
 
 .bg-white-500 {
-    background-color: rgba(255,255,255,1.0);
+    color: rgba(255,255,255,1.0);
 }
 
 .bg-white-600 {
-    background-color: rgba(255,255,255,1.0);
+    color: rgba(255,255,255,1.0);
 }
 
 .bg-white-700 {
-    background-color: rgba(255,255,255,1.0);
+    color: rgba(255,255,255,1.0);
 }
 
 .bg-white-800 {
-    background-color: rgba(255,255,255,1.0);
+    color: rgba(255,255,255,1.0);
 }
 
 .bg-white-900 {
-    background-color: rgba(255,255,255,1.0);
+    color: rgba(255,255,255,1.0);
 }
 
 .bg-silver-100 {
-    background-color: rgba(38,38,38,1.0);
+    color: rgba(38,38,38,1.0);
 }
 
 .bg-silver-200 {
-    background-color: rgba(76,76,76,1.0);
+    color: rgba(76,76,76,1.0);
 }
 
 .bg-silver-300 {
-    background-color: rgba(115,115,115,1.0);
+    color: rgba(115,115,115,1.0);
 }
 
 .bg-silver-400 {
-    background-color: rgba(153,153,153,1.0);
+    color: rgba(153,153,153,1.0);
 }
 
 .bg-silver-500 {
-    background-color: rgba(192,192,192,1.0);
+    color: rgba(192,192,192,1.0);
 }
 
 .bg-silver-600 {
-    background-color: rgba(204,204,204,1.0);
+    color: rgba(204,204,204,1.0);
 }
 
 .bg-silver-700 {
-    background-color: rgba(217,217,217,1.0);
+    color: rgba(217,217,217,1.0);
 }
 
 .bg-silver-800 {
-    background-color: rgba(229,229,229,1.0);
+    color: rgba(229,229,229,1.0);
 }
 
 .bg-silver-900 {
-    background-color: rgba(242,242,242,1.0);
+    color: rgba(242,242,242,1.0);
 }
 
 .bg-gray-100 {
-    background-color: rgba(25,25,25,1.0);
+    color: rgba(25,25,25,1.0);
 }
 
 .bg-gray-200 {
-    background-color: rgba(51,51,51,1.0);
+    color: rgba(51,51,51,1.0);
 }
 
 .bg-gray-300 {
-    background-color: rgba(76,76,76,1.0);
+    color: rgba(76,76,76,1.0);
 }
 
 .bg-gray-400 {
-    background-color: rgba(102,102,102,1.0);
+    color: rgba(102,102,102,1.0);
 }
 
 .bg-gray-500 {
-    background-color: rgba(128,128,128,1.0);
+    color: rgba(128,128,128,1.0);
 }
 
 .bg-gray-600 {
-    background-color: rgba(153,153,153,1.0);
+    color: rgba(153,153,153,1.0);
 }
 
 .bg-gray-700 {
-    background-color: rgba(178,178,178,1.0);
+    color: rgba(178,178,178,1.0);
 }
 
 .bg-gray-800 {
-    background-color: rgba(204,204,204,1.0);
+    color: rgba(204,204,204,1.0);
 }
 
 .bg-gray-900 {
-    background-color: rgba(229,229,229,1.0);
+    color: rgba(229,229,229,1.0);
 }
 
 .bg-black-100 {
-    background-color: rgba(0,0,0,1.0);
+    color: rgba(0,0,0,1.0);
 }
 
 .bg-black-200 {
-    background-color: rgba(0,0,0,1.0);
+    color: rgba(0,0,0,1.0);
 }
 
 .bg-black-300 {
-    background-color: rgba(0,0,0,1.0);
+    color: rgba(0,0,0,1.0);
 }
 
 .bg-black-400 {
-    background-color: rgba(0,0,0,1.0);
+    color: rgba(0,0,0,1.0);
 }
 
 .bg-black-500 {
-    background-color: rgba(0,0,0,1.0);
+    color: rgba(0,0,0,1.0);
 }
 
 .bg-black-600 {
-    background-color: rgba(50,50,50,1.0);
+    color: rgba(50,50,50,1.0);
 }
 
 .bg-black-700 {
-    background-color: rgba(101,101,101,1.0);
+    color: rgba(101,101,101,1.0);
 }
 
 .bg-black-800 {
-    background-color: rgba(153,153,153,1.0);
+    color: rgba(153,153,153,1.0);
 }
 
 .bg-black-900 {
-    background-color: rgba(204,204,204,1.0);
+    color: rgba(204,204,204,1.0);
 }
 
 .bg-red-100 {
-    background-color: rgba(50,0,0,1.0);
+    color: rgba(50,0,0,1.0);
 }
 
 .bg-red-200 {
-    background-color: rgba(102,0,0,1.0);
+    color: rgba(102,0,0,1.0);
 }
 
 .bg-red-300 {
-    background-color: rgba(153,0,0,1.0);
+    color: rgba(153,0,0,1.0);
 }
 
 .bg-red-400 {
-    background-color: rgba(204,0,0,1.0);
+    color: rgba(204,0,0,1.0);
 }
 
 .bg-red-500 {
-    background-color: rgba(255,0,0,1.0);
+    color: rgba(255,0,0,1.0);
 }
 
 .bg-red-600 {
-    background-color: rgba(255,50,50,1.0);
+    color: rgba(255,50,50,1.0);
 }
 
 .bg-red-700 {
-    background-color: rgba(255,101,101,1.0);
+    color: rgba(255,101,101,1.0);
 }
 
 .bg-red-800 {
-    background-color: rgba(255,153,153,1.0);
+    color: rgba(255,153,153,1.0);
 }
 
 .bg-red-900 {
-    background-color: rgba(255,204,204,1.0);
+    color: rgba(255,204,204,1.0);
 }
 
 .bg-maroon-100 {
-    background-color: rgba(25,0,0,1.0);
+    color: rgba(25,0,0,1.0);
 }
 
 .bg-maroon-200 {
-    background-color: rgba(51,0,0,1.0);
+    color: rgba(51,0,0,1.0);
 }
 
 .bg-maroon-300 {
-    background-color: rgba(76,0,0,1.0);
+    color: rgba(76,0,0,1.0);
 }
 
 .bg-maroon-400 {
-    background-color: rgba(102,0,0,1.0);
+    color: rgba(102,0,0,1.0);
 }
 
 .bg-maroon-500 {
-    background-color: rgba(128,0,0,1.0);
+    color: rgba(128,0,0,1.0);
 }
 
 .bg-maroon-600 {
-    background-color: rgba(153,50,50,1.0);
+    color: rgba(153,50,50,1.0);
 }
 
 .bg-maroon-700 {
-    background-color: rgba(178,101,101,1.0);
+    color: rgba(178,101,101,1.0);
 }
 
 .bg-maroon-800 {
-    background-color: rgba(204,153,153,1.0);
+    color: rgba(204,153,153,1.0);
 }
 
 .bg-maroon-900 {
-    background-color: rgba(229,204,204,1.0);
+    color: rgba(229,204,204,1.0);
 }
 
 .bg-yellow-100 {
-    background-color: rgba(50,50,0,1.0);
+    color: rgba(50,50,0,1.0);
 }
 
 .bg-yellow-200 {
-    background-color: rgba(102,102,0,1.0);
+    color: rgba(102,102,0,1.0);
 }
 
 .bg-yellow-300 {
-    background-color: rgba(153,153,0,1.0);
+    color: rgba(153,153,0,1.0);
 }
 
 .bg-yellow-400 {
-    background-color: rgba(204,204,0,1.0);
+    color: rgba(204,204,0,1.0);
 }
 
 .bg-yellow-500 {
-    background-color: rgba(255,255,0,1.0);
+    color: rgba(255,255,0,1.0);
 }
 
 .bg-yellow-600 {
-    background-color: rgba(255,255,50,1.0);
+    color: rgba(255,255,50,1.0);
 }
 
 .bg-yellow-700 {
-    background-color: rgba(255,255,101,1.0);
+    color: rgba(255,255,101,1.0);
 }
 
 .bg-yellow-800 {
-    background-color: rgba(255,255,153,1.0);
+    color: rgba(255,255,153,1.0);
 }
 
 .bg-yellow-900 {
-    background-color: rgba(255,255,204,1.0);
+    color: rgba(255,255,204,1.0);
 }
 
 .bg-olive-100 {
-    background-color: rgba(25,25,0,1.0);
+    color: rgba(25,25,0,1.0);
 }
 
 .bg-olive-200 {
-    background-color: rgba(51,51,0,1.0);
+    color: rgba(51,51,0,1.0);
 }
 
 .bg-olive-300 {
-    background-color: rgba(76,76,0,1.0);
+    color: rgba(76,76,0,1.0);
 }
 
 .bg-olive-400 {
-    background-color: rgba(102,102,0,1.0);
+    color: rgba(102,102,0,1.0);
 }
 
 .bg-olive-500 {
-    background-color: rgba(128,128,0,1.0);
+    color: rgba(128,128,0,1.0);
 }
 
 .bg-olive-600 {
-    background-color: rgba(153,153,50,1.0);
+    color: rgba(153,153,50,1.0);
 }
 
 .bg-olive-700 {
-    background-color: rgba(178,178,101,1.0);
+    color: rgba(178,178,101,1.0);
 }
 
 .bg-olive-800 {
-    background-color: rgba(204,204,153,1.0);
+    color: rgba(204,204,153,1.0);
 }
 
 .bg-olive-900 {
-    background-color: rgba(229,229,204,1.0);
+    color: rgba(229,229,204,1.0);
 }
 
 .bg-lime-100 {
-    background-color: rgba(0,50,0,1.0);
+    color: rgba(0,50,0,1.0);
 }
 
 .bg-lime-200 {
-    background-color: rgba(0,102,0,1.0);
+    color: rgba(0,102,0,1.0);
 }
 
 .bg-lime-300 {
-    background-color: rgba(0,153,0,1.0);
+    color: rgba(0,153,0,1.0);
 }
 
 .bg-lime-400 {
-    background-color: rgba(0,204,0,1.0);
+    color: rgba(0,204,0,1.0);
 }
 
 .bg-lime-500 {
-    background-color: rgba(0,255,0,1.0);
+    color: rgba(0,255,0,1.0);
 }
 
 .bg-lime-600 {
-    background-color: rgba(50,255,50,1.0);
+    color: rgba(50,255,50,1.0);
 }
 
 .bg-lime-700 {
-    background-color: rgba(101,255,101,1.0);
+    color: rgba(101,255,101,1.0);
 }
 
 .bg-lime-800 {
-    background-color: rgba(153,255,153,1.0);
+    color: rgba(153,255,153,1.0);
 }
 
 .bg-lime-900 {
-    background-color: rgba(204,255,204,1.0);
+    color: rgba(204,255,204,1.0);
 }
 
 .bg-green-100 {
-    background-color: rgba(0,25,0,1.0);
+    color: rgba(0,25,0,1.0);
 }
 
 .bg-green-200 {
-    background-color: rgba(0,51,0,1.0);
+    color: rgba(0,51,0,1.0);
 }
 
 .bg-green-300 {
-    background-color: rgba(0,76,0,1.0);
+    color: rgba(0,76,0,1.0);
 }
 
 .bg-green-400 {
-    background-color: rgba(0,102,0,1.0);
+    color: rgba(0,102,0,1.0);
 }
 
 .bg-green-500 {
-    background-color: rgba(0,128,0,1.0);
+    color: rgba(0,128,0,1.0);
 }
 
 .bg-green-600 {
-    background-color: rgba(50,153,50,1.0);
+    color: rgba(50,153,50,1.0);
 }
 
 .bg-green-700 {
-    background-color: rgba(101,178,101,1.0);
+    color: rgba(101,178,101,1.0);
 }
 
 .bg-green-800 {
-    background-color: rgba(153,204,153,1.0);
+    color: rgba(153,204,153,1.0);
 }
 
 .bg-green-900 {
-    background-color: rgba(204,229,204,1.0);
+    color: rgba(204,229,204,1.0);
 }
 
 .bg-cyan-100 {
-    background-color: rgba(0,50,50,1.0);
+    color: rgba(0,50,50,1.0);
 }
 
 .bg-cyan-200 {
-    background-color: rgba(0,102,102,1.0);
+    color: rgba(0,102,102,1.0);
 }
 
 .bg-cyan-300 {
-    background-color: rgba(0,153,153,1.0);
+    color: rgba(0,153,153,1.0);
 }
 
 .bg-cyan-400 {
-    background-color: rgba(0,204,204,1.0);
+    color: rgba(0,204,204,1.0);
 }
 
 .bg-cyan-500 {
-    background-color: rgba(0,255,255,1.0);
+    color: rgba(0,255,255,1.0);
 }
 
 .bg-cyan-600 {
-    background-color: rgba(50,255,255,1.0);
+    color: rgba(50,255,255,1.0);
 }
 
 .bg-cyan-700 {
-    background-color: rgba(101,255,255,1.0);
+    color: rgba(101,255,255,1.0);
 }
 
 .bg-cyan-800 {
-    background-color: rgba(153,255,255,1.0);
+    color: rgba(153,255,255,1.0);
 }
 
 .bg-cyan-900 {
-    background-color: rgba(204,255,255,1.0);
+    color: rgba(204,255,255,1.0);
 }
 
 .bg-teal-100 {
-    background-color: rgba(0,25,25,1.0);
+    color: rgba(0,25,25,1.0);
 }
 
 .bg-teal-200 {
-    background-color: rgba(0,51,51,1.0);
+    color: rgba(0,51,51,1.0);
 }
 
 .bg-teal-300 {
-    background-color: rgba(0,76,76,1.0);
+    color: rgba(0,76,76,1.0);
 }
 
 .bg-teal-400 {
-    background-color: rgba(0,102,102,1.0);
+    color: rgba(0,102,102,1.0);
 }
 
 .bg-teal-500 {
-    background-color: rgba(0,128,128,1.0);
+    color: rgba(0,128,128,1.0);
 }
 
 .bg-teal-600 {
-    background-color: rgba(50,153,153,1.0);
+    color: rgba(50,153,153,1.0);
 }
 
 .bg-teal-700 {
-    background-color: rgba(101,178,178,1.0);
+    color: rgba(101,178,178,1.0);
 }
 
 .bg-teal-800 {
-    background-color: rgba(153,204,204,1.0);
+    color: rgba(153,204,204,1.0);
 }
 
 .bg-teal-900 {
-    background-color: rgba(204,229,229,1.0);
+    color: rgba(204,229,229,1.0);
 }
 
 .bg-blue-100 {
-    background-color: rgba(0,0,50,1.0);
+    color: rgba(0,0,50,1.0);
 }
 
 .bg-blue-200 {
-    background-color: rgba(0,0,102,1.0);
+    color: rgba(0,0,102,1.0);
 }
 
 .bg-blue-300 {
-    background-color: rgba(0,0,153,1.0);
+    color: rgba(0,0,153,1.0);
 }
 
 .bg-blue-400 {
-    background-color: rgba(0,0,204,1.0);
+    color: rgba(0,0,204,1.0);
 }
 
 .bg-blue-500 {
-    background-color: rgba(0,0,255,1.0);
+    color: rgba(0,0,255,1.0);
 }
 
 .bg-blue-600 {
-    background-color: rgba(50,50,255,1.0);
+    color: rgba(50,50,255,1.0);
 }
 
 .bg-blue-700 {
-    background-color: rgba(101,101,255,1.0);
+    color: rgba(101,101,255,1.0);
 }
 
 .bg-blue-800 {
-    background-color: rgba(153,153,255,1.0);
+    color: rgba(153,153,255,1.0);
 }
 
 .bg-blue-900 {
-    background-color: rgba(204,204,255,1.0);
+    color: rgba(204,204,255,1.0);
 }
 
 .bg-navy-100 {
-    background-color: rgba(0,0,25,1.0);
+    color: rgba(0,0,25,1.0);
 }
 
 .bg-navy-200 {
-    background-color: rgba(0,0,51,1.0);
+    color: rgba(0,0,51,1.0);
 }
 
 .bg-navy-300 {
-    background-color: rgba(0,0,76,1.0);
+    color: rgba(0,0,76,1.0);
 }
 
 .bg-navy-400 {
-    background-color: rgba(0,0,102,1.0);
+    color: rgba(0,0,102,1.0);
 }
 
 .bg-navy-500 {
-    background-color: rgba(0,0,128,1.0);
+    color: rgba(0,0,128,1.0);
 }
 
 .bg-navy-600 {
-    background-color: rgba(50,50,153,1.0);
+    color: rgba(50,50,153,1.0);
 }
 
 .bg-navy-700 {
-    background-color: rgba(101,101,178,1.0);
+    color: rgba(101,101,178,1.0);
 }
 
 .bg-navy-800 {
-    background-color: rgba(153,153,204,1.0);
+    color: rgba(153,153,204,1.0);
 }
 
 .bg-navy-900 {
-    background-color: rgba(204,204,229,1.0);
+    color: rgba(204,204,229,1.0);
 }
 
 .bg-magenta-100 {
-    background-color: rgba(50,0,50,1.0);
+    color: rgba(50,0,50,1.0);
 }
 
 .bg-magenta-200 {
-    background-color: rgba(102,0,102,1.0);
+    color: rgba(102,0,102,1.0);
 }
 
 .bg-magenta-300 {
-    background-color: rgba(153,0,153,1.0);
+    color: rgba(153,0,153,1.0);
 }
 
 .bg-magenta-400 {
-    background-color: rgba(204,0,204,1.0);
+    color: rgba(204,0,204,1.0);
 }
 
 .bg-magenta-500 {
-    background-color: rgba(255,0,255,1.0);
+    color: rgba(255,0,255,1.0);
 }
 
 .bg-magenta-600 {
-    background-color: rgba(255,50,255,1.0);
+    color: rgba(255,50,255,1.0);
 }
 
 .bg-magenta-700 {
-    background-color: rgba(255,101,255,1.0);
+    color: rgba(255,101,255,1.0);
 }
 
 .bg-magenta-800 {
-    background-color: rgba(255,153,255,1.0);
+    color: rgba(255,153,255,1.0);
 }
 
 .bg-magenta-900 {
-    background-color: rgba(255,204,255,1.0);
+    color: rgba(255,204,255,1.0);
 }
 
 .bg-purple-100 {
-    background-color: rgba(25,0,25,1.0);
+    color: rgba(25,0,25,1.0);
 }
 
 .bg-purple-200 {
-    background-color: rgba(51,0,51,1.0);
+    color: rgba(51,0,51,1.0);
 }
 
 .bg-purple-300 {
-    background-color: rgba(76,0,76,1.0);
+    color: rgba(76,0,76,1.0);
 }
 
 .bg-purple-400 {
-    background-color: rgba(102,0,102,1.0);
+    color: rgba(102,0,102,1.0);
 }
 
 .bg-purple-500 {
-    background-color: rgba(128,0,128,1.0);
+    color: rgba(128,0,128,1.0);
 }
 
 .bg-purple-600 {
-    background-color: rgba(153,50,153,1.0);
+    color: rgba(153,50,153,1.0);
 }
 
 .bg-purple-700 {
-    background-color: rgba(178,101,178,1.0);
+    color: rgba(178,101,178,1.0);
 }
 
 .bg-purple-800 {
-    background-color: rgba(204,153,204,1.0);
+    color: rgba(204,153,204,1.0);
 }
 
 .bg-purple-900 {
-    background-color: rgba(229,204,229,1.0);
+    color: rgba(229,204,229,1.0);
 }
 
-.ml-0 {
-    margin-left: 0rem;
+.pl-0 {
+    padding-left: 0.0rem;
 }
 
-.ml-1 {
-    margin-left: 0.4rem;
+.pl-1 {
+    padding-left: 0.4rem;
 }
 
-.ml-2 {
-    margin-left: 0.8rem;
+.pl-2 {
+    padding-left: 0.8rem;
 }
 
-.ml-3 {
-    margin-left: 1.2rem;
+.pl-3 {
+    padding-left: 1.2rem;
 }
 
-.ml-4 {
-    margin-left: 1.6rem;
+.pl-4 {
+    padding-left: 1.6rem;
 }
 
-.ml-5 {
-    margin-left: 2.0rem;
+.pl-5 {
+    padding-left: 2.0rem;
 }
 
-.ml-6 {
-    margin-left: 2.4rem;
+.pl-6 {
+    padding-left: 2.4rem;
 }
 
-.ml-7 {
-    margin-left: 2.8rem;
+.pl-7 {
+    padding-left: 2.8rem;
 }
 
-.ml-8 {
-    margin-left: 3.2rem;
+.pl-8 {
+    padding-left: 3.2rem;
 }
 
-.ml-9 {
-    margin-left: 3.6rem;
+.pl-9 {
+    padding-left: 3.6rem;
 }
 
-.ml-10 {
-    margin-left: 4.0rem;
+.pl-10 {
+    padding-left: 4.0rem;
 }
 
-.mr-0 {
-    margin-right: 0rem;
+.pr-0 {
+    padding-right: 0.0rem;
 }
 
-.mr-1 {
-    margin-right: 0.4rem;
+.pr-1 {
+    padding-right: 0.4rem;
 }
 
-.mr-2 {
-    margin-right: 0.8rem;
+.pr-2 {
+    padding-right: 0.8rem;
 }
 
-.mr-3 {
-    margin-right: 1.2rem;
+.pr-3 {
+    padding-right: 1.2rem;
 }
 
-.mr-4 {
-    margin-right: 1.6rem;
+.pr-4 {
+    padding-right: 1.6rem;
 }
 
-.mr-5 {
-    margin-right: 2.0rem;
+.pr-5 {
+    padding-right: 2.0rem;
 }
 
-.mr-6 {
-    margin-right: 2.4rem;
+.pr-6 {
+    padding-right: 2.4rem;
 }
 
-.mr-7 {
-    margin-right: 2.8rem;
+.pr-7 {
+    padding-right: 2.8rem;
 }
 
-.mr-8 {
-    margin-right: 3.2rem;
+.pr-8 {
+    padding-right: 3.2rem;
 }
 
-.mr-9 {
-    margin-right: 3.6rem;
+.pr-9 {
+    padding-right: 3.6rem;
 }
 
-.mr-10 {
-    margin-right: 4.0rem;
+.pr-10 {
+    padding-right: 4.0rem;
 }
 
-.mt-0 {
-    margin-top: 0rem;
+.pt-0 {
+    padding-top: 0.0rem;
 }
 
-.mt-1 {
-    margin-top: 0.4rem;
+.pt-1 {
+    padding-top: 0.4rem;
 }
 
-.mt-2 {
-    margin-top: 0.8rem;
+.pt-2 {
+    padding-top: 0.8rem;
 }
 
-.mt-3 {
-    margin-top: 1.2rem;
+.pt-3 {
+    padding-top: 1.2rem;
 }
 
-.mt-4 {
-    margin-top: 1.6rem;
+.pt-4 {
+    padding-top: 1.6rem;
 }
 
-.mt-5 {
-    margin-top: 2.0rem;
+.pt-5 {
+    padding-top: 2.0rem;
 }
 
-.mt-6 {
-    margin-top: 2.4rem;
+.pt-6 {
+    padding-top: 2.4rem;
 }
 
-.mt-7 {
-    margin-top: 2.8rem;
+.pt-7 {
+    padding-top: 2.8rem;
 }
 
-.mt-8 {
-    margin-top: 3.2rem;
+.pt-8 {
+    padding-top: 3.2rem;
 }
 
-.mt-9 {
-    margin-top: 3.6rem;
+.pt-9 {
+    padding-top: 3.6rem;
 }
 
-.mt-10 {
-    margin-top: 4.0rem;
+.pt-10 {
+    padding-top: 4.0rem;
 }
 
-.mb-0 {
-    margin-bottom: 0rem;
+.pb-0 {
+    padding-bottom: 0.0rem;
 }
 
-.mb-1 {
-    margin-bottom: 0.4rem;
+.pb-1 {
+    padding-bottom: 0.4rem;
 }
 
-.mb-2 {
-    margin-bottom: 0.8rem;
+.pb-2 {
+    padding-bottom: 0.8rem;
 }
 
-.mb-3 {
-    margin-bottom: 1.2rem;
+.pb-3 {
+    padding-bottom: 1.2rem;
 }
 
-.mb-4 {
-    margin-bottom: 1.6rem;
+.pb-4 {
+    padding-bottom: 1.6rem;
 }
 
-.mb-5 {
-    margin-bottom: 2.0rem;
+.pb-5 {
+    padding-bottom: 2.0rem;
 }
 
-.mb-6 {
-    margin-bottom: 2.4rem;
+.pb-6 {
+    padding-bottom: 2.4rem;
 }
 
-.mb-7 {
-    margin-bottom: 2.8rem;
+.pb-7 {
+    padding-bottom: 2.8rem;
 }
 
-.mb-8 {
-    margin-bottom: 3.2rem;
+.pb-8 {
+    padding-bottom: 3.2rem;
 }
 
-.mb-9 {
-    margin-bottom: 3.6rem;
+.pb-9 {
+    padding-bottom: 3.6rem;
 }
 
-.mb-10 {
-    margin-bottom: 4.0rem;
+.pb-10 {
+    padding-bottom: 4.0rem;
 }
 
 /* Generated 382 styles */

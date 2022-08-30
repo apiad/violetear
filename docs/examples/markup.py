@@ -188,6 +188,8 @@ div = (
 #     )
 # ```
 
+# > :information_source: The `root` method returns the top-most element in a hierarchy, i.e., the `div` in this case.
+
 # And then use it like:
 
 # ```python
@@ -215,7 +217,7 @@ class Menu(Component):  # :hl:
         super().__init__()
         self.entries = dict(**entries)  # :ref:menu_constructor:
 
-    def compose(self) -> Element:
+    def compose(self, content) -> Element:
         return (
             Element("div")  # :ref:menu_compose:
             .classes("menu")  # :ref:menu_compose:
@@ -265,6 +267,12 @@ menu.entries["Services"] = "/services"
 
 # :hl:menu_compose:
 
+# In case you didn't notice, instead of `spawn(len(self.entries), ...)` we invoked it
+# as `spaw(self.entries, ...)`, that is, passing directly an iterator instead of a number.
+# In this case, `violetear` will create one element for item in the iterator,
+# and will associate the corresponding item with the element.
+# Then, when you call `each` you'll get that item as the first parameter of your lambda function.
+
 # ??? question "Aren't we missing a `root()`?"
 #
 #     If you think we're missing a `root()` call at the end of `compose`
@@ -287,39 +295,41 @@ class MenuItem(Component):
         self.name = name
         self.href = href
 
-    def compose(self) -> Element:
+    def compose(self, content) -> Element:
         return Element(
             "li", Element("a", text=self.name, href=self.href), classes="menu-item"
         )
 
 
-# And then we can redefine our `Menu` class to make explicit use of these items:
+# And then we can redefine our `Menu` class to strip away the item management.
 
 
 class Menu(Component):
-    def __init__(self, **entries) -> None:
-        super().__init__()
-        self.extend(
-            MenuItem(name=key, href=value)  # :ref:menu_item:
-            for key, value in entries.items()  # :ref:menu_item:
+    def compose(self, content) -> Element:
+        return (
+            Element("div")
+            .classes("menu")
+            .create("ul")  # :ref:compose_content:
+            .extend(content)  # :ref:compose_content:
         )
-
-    def compose(self) -> Element:
-        return Element("div").classes("menu").create("ul").extend(*self._content)
 
 
 # On render time, `compose` will be called recursively on all children `Components`,
 # so can safely mix `Component`s and regular `Element`s and everything will work out just fine.
 
-# Thus, now we can create child elements of type `MenuItem` on the constructor
-# and make sure to inject them at the right location in the markup we build at `compose`.
+# Thus, now we  create the child elements of type `MenuItem` explicitly
+# and make sure to inject them at the right location in the markup we build at `compose`,
+# using the `content` parameter that we've been ignoring so far.
 
-# :hl:menu_item:
+# :hl:compose_content:
 
 # It doesn't seem like we've gained much with this pattern but now we have made our `Menu`
 # abstraction fully compatible with the `Element` API, so we can do things like freely
 # mixing `Menu` and `MenuItem` with regular `Element`s  for ultimate flexibility
 # plus maximum expresivity.
+
+# For example, here we design a menu with an explicit div with class `"divider"` in-between
+# the actual menu items.
 
 doc.body.add(
     Menu().extend(
@@ -331,7 +341,7 @@ doc.body.add(
     )
 )
 
-# > The `extend` method just calls `add` for each item.
+# > :information_source: The `extend` method just calls `add` for each item.
 
 # And the generated HTML blends perfectly the markup generated from the `compose` methods
 # with the explicit markup.
@@ -352,6 +362,14 @@ doc.body.add(
 #     If you're building something durable enough to deserve a complete design
 #     system with custom components, `violetear` can help you there as well.
 
+
+# Finally, both the `create` and `spawn` methods accept a `Component` derivative class instead
+# of a tag name, in which case it will instantiate the passed class.
+
+menu = doc.body.create(Menu)
+
+# The advantage is that the type checker will infer `Menu` as the type for the variable `menu`,
+# helping you in subsequent chained method calls.
 
 if __name__ == "__main__":  # :skip:
     doc.render("markup.html")

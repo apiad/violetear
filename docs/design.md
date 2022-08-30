@@ -11,6 +11,10 @@ These are the core principles that guide our design.
 
 `violetear` is a library, not a framework. It will never attempt to dictate the correct way to structure a web application, or even a single HTML or CSS file. In principle, everything that is valid HTML and CSS should be equally feasible to achieve through `violetear`.
 
+## Modular
+
+`violetear` is a set of tools for generating HTML and CSS. You should be able to use any of these tools independently or in unison. For example, you can use the `StyleSheet` and `Document` classes to create full-fledged web pages, you can also use a single `Element` or `Style` instance and inject it into a template.
+
 ## Lightweight
 
 `violetear` aims to have zero dependencies outside Python's standard library. It is a lightweight library that can always be added to any existing project without causing any conflicts with other dependencies.
@@ -21,7 +25,7 @@ These are the core principles that guide our design.
 
 ## Type-safe
 
-`violetear` aims to be fully typed in a way that's compatible with the most common Python type checkers, so you never have to remember a CSS property again.
+`violetear` aims to be fully typed in a way that's compatible with the most common Python type checkers. Also, type annotations should be leveraged to provide the best developer experience possible when using a sufficiently sophisticated editor.
 
 ## Comprehensive
 

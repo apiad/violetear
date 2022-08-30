@@ -209,6 +209,10 @@ Right now `violetear` is in pre-release mode, which means the API is completely 
 - [x] States
 - [x] Media queries
 
+**v.0.12.3**
+
+- Refactor utility system.
+
 **v.0.12.2**
 
 - Refactor markup classes.
