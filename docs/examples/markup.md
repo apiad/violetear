@@ -140,14 +140,7 @@ method calls such as styling options.
 
 A common pattern is to chain `Style` method calls.
 
-
-
-```python linenums="66" title="markup.py"
-doc.body.create("div", "container", id="main").style.margin("auto").width(max=768)
-```
-
-However, this pattern breaks the fluent API because it returns the `Style` instance.
-To stay in flow, we can use the `styled` method that receives a callable to be applied
+To stay in flow, we can use the `style` method that receives a callable to be applied
 to the internal style, but returns the current element, so you can obtain a reference to
 last element created for further method calls.
 
@@ -155,32 +148,32 @@ For example, we can create a div and style it.
 
 
 
-```python linenums="72" hl_lines="2 3" title="markup.py"
+```python linenums="70" hl_lines="2 3" title="markup.py"
 ul = (
-    doc.body.create("div", "container fluid")  
-    .styled(lambda s: s.margin("auto").width(max=768))  
+    doc.body.create("div")  
+    .style(Style().margin("auto").width(max=768))  
     .create("ul")  
-    .styled(lambda s: s.padding(5, bottom=10))  
+    .style(Style().padding(5, bottom=10))  
 )
 
 for i in range(5):  
-    ul.create("li", text=f"The {i+1}th element!")  
+    ul.create("li").text(f"The {i+1}th element!")  
 ```
 
 Then chain another call to create a `ul` and style it:
 
 
 
-```python linenums="72" hl_lines="4 5" title="markup.py"
+```python linenums="70" hl_lines="4 5" title="markup.py"
 ul = (
-    doc.body.create("div", "container fluid")  
-    .styled(lambda s: s.margin("auto").width(max=768))  
+    doc.body.create("div")  
+    .style(Style().margin("auto").width(max=768))  
     .create("ul")  
-    .styled(lambda s: s.padding(5, bottom=10))  
+    .style(Style().padding(5, bottom=10))  
 )
 
 for i in range(5):  
-    ul.create("li", text=f"The {i+1}th element!")  
+    ul.create("li").text(f"The {i+1}th element!")  
 ```
 
 
@@ -188,24 +181,24 @@ And then we can just keep building from the `ul` element.
 
 
 
-```python linenums="72" hl_lines="8 9" title="markup.py"
+```python linenums="70" hl_lines="8 9" title="markup.py"
 ul = (
-    doc.body.create("div", "container fluid")  
-    .styled(lambda s: s.margin("auto").width(max=768))  
+    doc.body.create("div")  
+    .style(Style().margin("auto").width(max=768))  
     .create("ul")  
-    .styled(lambda s: s.padding(5, bottom=10))  
+    .style(Style().padding(5, bottom=10))  
 )
 
 for i in range(5):  
-    ul.create("li", text=f"The {i+1}th element!")  
+    ul.create("li").text(f"The {i+1}th element!")  
 ```
 
 
 Take a look to the newly created tags.
 
-```html title="markup.html" linenums="29"
+```html title="markup.html" linenums="27"
 ...
-    <div class="container fluid" style="margin: auto; max-width: 768px">
+    <div style="margin: auto; max-width: 768px">
         <ul style="padding: 5px; padding-bottom: 10px">
             <li>
                 The 1th element!
@@ -232,111 +225,96 @@ to break the flow, by using `spawn` to create multiple children.
 
 
 
-```python linenums="93" hl_lines="4" title="markup.py"
+```python linenums="91" hl_lines="5" title="markup.py"
 div = (
-    doc.body.create("div", "container")
+    doc.body.create("div")
+    .classes("container")
     .create("ul")
-    .spawn(  
-        5,  
-        "li",  
-        classes="item",  
-        text=lambda i: f"The {i+1}th element",  
-        style=lambda i: Style().color(Colors.Blue.shade(i / 5)),  
+    .spawn(5, "li")  
+    .each(
+        lambda i, item: item.text(f"The {i+1}th element").style(  
+            Style().color(Colors.Blue.shade(i / 5))  
+        )  
     )
-    .styled(lambda s: s.padding(5, bottom=10))  
     .parent()  
-    .styled(lambda s: s.margin("auto").width(max=768))  
+    .style(Style().padding(5, bottom=10))  
+    .parent()  
+    .style(Style().margin("auto").width(max=768))  
 )
 ```
 
 The syntax is very similar to `create` except that it receives a number of items to create
 along with the tag.
 
+This method returns an `ElementSet` with all the created items.
+The `each` method can be used to configure each individual item, receiving both
+the item and its index.
 
 
-```python linenums="93" hl_lines="5 6" title="markup.py"
+
+```python linenums="91" hl_lines="7 8 9" title="markup.py"
 div = (
-    doc.body.create("div", "container")
+    doc.body.create("div")
+    .classes("container")
     .create("ul")
-    .spawn(  
-        5,  
-        "li",  
-        classes="item",  
-        text=lambda i: f"The {i+1}th element",  
-        style=lambda i: Style().color(Colors.Blue.shade(i / 5)),  
+    .spawn(5, "li")  
+    .each(
+        lambda i, item: item.text(f"The {i+1}th element").style(  
+            Style().color(Colors.Blue.shade(i / 5))  
+        )  
     )
-    .styled(lambda s: s.padding(5, bottom=10))  
     .parent()  
-    .styled(lambda s: s.margin("auto").width(max=768))  
+    .style(Style().padding(5, bottom=10))  
+    .parent()  
+    .style(Style().margin("auto").width(max=768))  
 )
 ```
 
 
-And you can pass either direct values or callables to compute the values for the children attributes.
-
-
-
-```python linenums="93" hl_lines="7 8 9" title="markup.py"
-div = (
-    doc.body.create("div", "container")
-    .create("ul")
-    .spawn(  
-        5,  
-        "li",  
-        classes="item",  
-        text=lambda i: f"The {i+1}th element",  
-        style=lambda i: Style().color(Colors.Blue.shade(i / 5)),  
-    )
-    .styled(lambda s: s.padding(5, bottom=10))  
-    .parent()  
-    .styled(lambda s: s.margin("auto").width(max=768))  
-)
-```
-
-
-Finally, contrary to the `create` method which returns the newly created element,
-the `spawn` method returns the same element on which you call it, in this case, the `ul`,
+After finishing styling the children, we need to call `parent` to jump back to the `ul`,
 which we then proceed to style.
 
 
 
-```python linenums="93" hl_lines="11" title="markup.py"
+```python linenums="91" hl_lines="11 12" title="markup.py"
 div = (
-    doc.body.create("div", "container")
+    doc.body.create("div")
+    .classes("container")
     .create("ul")
-    .spawn(  
-        5,  
-        "li",  
-        classes="item",  
-        text=lambda i: f"The {i+1}th element",  
-        style=lambda i: Style().color(Colors.Blue.shade(i / 5)),  
+    .spawn(5, "li")  
+    .each(
+        lambda i, item: item.text(f"The {i+1}th element").style(  
+            Style().color(Colors.Blue.shade(i / 5))  
+        )  
     )
-    .styled(lambda s: s.padding(5, bottom=10))  
     .parent()  
-    .styled(lambda s: s.margin("auto").width(max=768))  
+    .style(Style().padding(5, bottom=10))  
+    .parent()  
+    .style(Style().margin("auto").width(max=768))  
 )
 ```
 
 
-We can then use `parent` to navigate up and continue chaining method calls,
+We can then use `parent` again to navigate up and continue chaining method calls,
 for example, to style the first `div` element we created.
 
 
 
-```python linenums="93" hl_lines="12 13" title="markup.py"
+```python linenums="91" hl_lines="13 14" title="markup.py"
 div = (
-    doc.body.create("div", "container")
+    doc.body.create("div")
+    .classes("container")
     .create("ul")
-    .spawn(  
-        5,  
-        "li",  
-        classes="item",  
-        text=lambda i: f"The {i+1}th element",  
-        style=lambda i: Style().color(Colors.Blue.shade(i / 5)),  
+    .spawn(5, "li")  
+    .each(
+        lambda i, item: item.text(f"The {i+1}th element").style(  
+            Style().color(Colors.Blue.shade(i / 5))  
+        )  
     )
-    .styled(lambda s: s.padding(5, bottom=10))  
     .parent()  
-    .styled(lambda s: s.margin("auto").width(max=768))  
+    .style(Style().padding(5, bottom=10))  
+    .parent()  
+    .style(Style().margin("auto").width(max=768))  
 )
 ```
 
@@ -346,23 +324,23 @@ In the same way, we could have called `style` just after each `create`.
 
 Here's the result.
 
-```html title="markup.html" linenums="48"
+```html title="markup.html" linenums="46"
 ...
     <div class="container" style="margin: auto; max-width: 768px">
         <ul style="padding: 5px; padding-bottom: 10px">
-            <li class="item" style="color: rgba(0,0,0,1.0)">
+            <li style="color: rgba(0,0,0,1.0)">
                 The 1th element
             </li>
-            <li class="item" style="color: rgba(0,0,102,1.0)">
+            <li style="color: rgba(0,0,102,1.0)">
                 The 2th element
             </li>
-            <li class="item" style="color: rgba(0,0,204,1.0)">
+            <li style="color: rgba(0,0,204,1.0)">
                 The 3th element
             </li>
-            <li class="item" style="color: rgba(50,50,255,1.0)">
+            <li style="color: rgba(50,50,255,1.0)">
                 The 4th element
             </li>
-            <li class="item" style="color: rgba(153,153,255,1.0)">
+            <li style="color: rgba(153,153,255,1.0)">
                 The 5th element
             </li>
         </ul>
@@ -385,8 +363,9 @@ def menu(*items):
     return (
         Element("div")
         .create("ul")
-        .spawn(len(items), "li", text=lambda i: items[i])
-        .parent()
+        .spawn(len(items), "li")
+        .each(lambda i, item: item.text(items[i]))
+        .root()
     )
 ```
 
@@ -396,12 +375,7 @@ And then use it like:
 doc.body.add(menu("Home", "Products", "Pricing", "Abouts"))
 ```
 
-And while this works, it is a bit ugly for a couple of reasons.
-First, you need to remember to add that `parent()` at the end to make sure to return
-the `div` and not the `ul`, and as soon as you start complicating your markup logic a bit
-it is highly likely that you will return the wrong element a few items.
-
-But the main reason is that even though we encapsulated the concept of a menu,
+And while this works, it is unsatisfying because even though we encapsulated the concept of a menu,
 we didn't *abstracted* it.
 The minute we invoke the encapsulated functionality we lost the menu abstraction and
 we are left with a regular `div` with an `ul` and a bunch of `li`s inside.
@@ -416,7 +390,7 @@ We can achieve that by inheriting from the `Component` class.
 
 <a name="ref:Menu"></a>
 
-```python linenums="161" hl_lines="1 4" title="markup.py"
+```python linenums="157" hl_lines="1 4" title="markup.py"
 from violetear.markup import Component  
 
 
@@ -425,19 +399,18 @@ class Menu(Component):
         super().__init__()
         self.entries = dict(**entries)  
 
-    def compose(self) -> Element:  
-        return Element(
-            "div",
-            Element(
-                "ul",
-                *[
-                    Element("li", classes="menu-item").add(
-                        Element("a", text=key, href=value)
-                    )
-                    for key, value in self.entries.items()
-                ],
-            ),
-            classes="menu",
+    def compose(self) -> Element:
+        return (
+            Element("div")  
+            .classes("menu")  
+            .create("ul")  
+            .spawn(self.entries, "li")  
+            .each(  
+                lambda key, item: item.classes("menu-item")  
+                .create("a")  
+                .text(key)  
+                .attrs(href=self.entries[key])  
+            )  
         )
 ```
 
@@ -445,7 +418,7 @@ Which we can instantiate as usual and add to our document:
 
 
 
-```python linenums="184" title="markup.py"
+```python linenums="179" title="markup.py"
 menu = Menu(
     Home="/",
     Products="/products",
@@ -462,13 +435,13 @@ only will exist at render time.
 
 
 
-```python linenums="195" title="markup.py"
+```python linenums="190" title="markup.py"
 menu.entries["Services"] = "/services"
 ```
 
 Here's the end result:
 
-```html title="markup.py" linenums="67"
+```html title="markup.py" linenums="65"
 ...
     <div class="menu">
         <ul>
@@ -507,7 +480,7 @@ we pass the items as a mapping and store it in the instance.
 
 <a name="ref:Menu"></a>
 
-```python linenums="161" hl_lines="7" title="markup.py"
+```python linenums="157" hl_lines="7" title="markup.py"
 from violetear.markup import Component  
 
 
@@ -516,19 +489,18 @@ class Menu(Component):
         super().__init__()
         self.entries = dict(**entries)  
 
-    def compose(self) -> Element:  
-        return Element(
-            "div",
-            Element(
-                "ul",
-                *[
-                    Element("li", classes="menu-item").add(
-                        Element("a", text=key, href=value)
-                    )
-                    for key, value in self.entries.items()
-                ],
-            ),
-            classes="menu",
+    def compose(self) -> Element:
+        return (
+            Element("div")  
+            .classes("menu")  
+            .create("ul")  
+            .spawn(self.entries, "li")  
+            .each(  
+                lambda key, item: item.classes("menu-item")  
+                .create("a")  
+                .text(key)  
+                .attrs(href=self.entries[key])  
+            )  
         )
 ```
 
@@ -538,7 +510,7 @@ the fluent API, the regular `add` method, the constructor syntax, etc.
 
 <a name="ref:Menu"></a>
 
-```python linenums="161" hl_lines="9" title="markup.py"
+```python linenums="157" hl_lines="11 12 13 14 15 16 17 18 19 20" title="markup.py"
 from violetear.markup import Component  
 
 
@@ -547,22 +519,32 @@ class Menu(Component):
         super().__init__()
         self.entries = dict(**entries)  
 
-    def compose(self) -> Element:  
-        return Element(
-            "div",
-            Element(
-                "ul",
-                *[
-                    Element("li", classes="menu-item").add(
-                        Element("a", text=key, href=value)
-                    )
-                    for key, value in self.entries.items()
-                ],
-            ),
-            classes="menu",
+    def compose(self) -> Element:
+        return (
+            Element("div")  
+            .classes("menu")  
+            .create("ul")  
+            .spawn(self.entries, "li")  
+            .each(  
+                lambda key, item: item.classes("menu-item")  
+                .create("a")  
+                .text(key)  
+                .attrs(href=self.entries[key])  
+            )  
         )
 ```
 
+
+??? question "Aren't we missing a `root()`?"
+
+    If you think we're missing a `root()` call at the end of `compose`
+    then you're right, we should have it there because the return value
+    of that expression is the `ElementSet` composed of the menu items.
+
+    However, you will *always* end up calling `root()` at the end of
+    your compose because you're always creating a detached element.
+    Hence, in favour of DRYness, we will call `root()` it for you
+    when this component gets rendered.
 
 Now, if this still looks a bit ugly to you, we can make it even better.
 Part of the problem is that the menu items are themselves another abstraction
@@ -570,7 +552,7 @@ that we are using implicitly. Let's make it explicit.
 
 <a name="ref:MenuItem"></a>
 
-```python linenums="211" title="markup.py"
+```python linenums="216" title="markup.py"
 class MenuItem(Component):
     def __init__(self, name, href) -> None:
         super().__init__()
@@ -587,42 +569,38 @@ And then we can redefine our `Menu` class to make explicit use of these items:
 
 <a name="ref:Menu"></a>
 
-```python linenums="222" title="markup.py"
+```python linenums="227" title="markup.py"
 class Menu(Component):
     def __init__(self, **entries) -> None:
         super().__init__()
-        self.content.extend(
+        self.extend(
             MenuItem(name=key, href=value)  
             for key, value in entries.items()  
         )
 
     def compose(self) -> Element:
-        return Element(
-            "div", Element("ul", *self.content), classes="menu"  
-        )
+        return Element("div").classes("menu").create("ul").extend(*self._content)
 ```
 
 On render time, `compose` will be called recursively on all children `Components`,
 so can safely mix `Component`s and regular `Element`s and everything will work out just fine.
 
-Thus, now we can on the constructor create child elements of type `MenuItem`,
+Thus, now we can create child elements of type `MenuItem` on the constructor
 and make sure to inject them at the right location in the markup we build at `compose`.
 
 <a name="ref:Menu"></a>
 
-```python linenums="222" hl_lines="5 6 11" title="markup.py"
+```python linenums="227" hl_lines="5 6" title="markup.py"
 class Menu(Component):
     def __init__(self, **entries) -> None:
         super().__init__()
-        self.content.extend(
+        self.extend(
             MenuItem(name=key, href=value)  
             for key, value in entries.items()  
         )
 
     def compose(self) -> Element:
-        return Element(
-            "div", Element("ul", *self.content), classes="menu"  
-        )
+        return Element("div").classes("menu").create("ul").extend(*self._content)
 ```
 
 
@@ -633,7 +611,7 @@ plus maximum expresivity.
 
 
 
-```python linenums="243" hl_lines="6" title="markup.py"
+```python linenums="246" hl_lines="6" title="markup.py"
 doc.body.add(
     Menu().extend(
         MenuItem("Home", "/"),
@@ -650,7 +628,7 @@ doc.body.add(
 And the generated HTML blends perfectly the markup generated from the `compose` methods
 with the explicit markup.
 
-```html title="markup.html" linenums="96" hl_lines="19 20"
+```html title="markup.html" linenums="94" hl_lines="19 20"
 ...
     <div class="menu">
         <ul>

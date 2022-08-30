@@ -3,11 +3,11 @@ from __future__ import annotations
 import abc
 import io
 from pathlib import Path
-from typing import Any, Callable, List, Union
+from typing import Any, Callable, Iterable, List, Tuple, Union
 
 import textwrap
 from typing_extensions import Self
-from attr import attr
+from violetear.helpers import flatten
 from violetear.style import Style
 from violetear.stylesheet import StyleSheet
 
@@ -54,37 +54,63 @@ class Element(Markup):
         tag: str,
         *content: Element,
         text: str = None,
-        classes: List[str] = None,
+        classes: Union[str, List[str]] = None,
         id: str = None,
         style: Style = None,
         parent: Element = None,
         **attrs: str,
     ) -> None:
-        self.tag = tag
-        self.id = id
-        self.text = text
+        self._tag = tag
+        self._id = id
+        self._text = text
 
         if isinstance(classes, str):
             classes = classes.split()
 
-        self.classes = list(classes or [])
-        self.content = list(content)
-        self.style = style or Style()
+        self._classes = list(classes or [])
+        self._content = []
+
+        self.extend(*content)
+
+        self._style = style or Style()
         self._parent = parent
         self._attrs = attrs
 
+    def id(self, id: str) -> Self:
+        self._id = id
+        return self
+
+    def classes(self, classes: Union[str, List[str]]) -> Self:
+        if isinstance(classes, str):
+            classes = classes.split()
+
+        self._classes = classes
+        return self
+
+    def style(self, style: Style) -> Self:
+        self._style = style
+        return self
+
+    def text(self, text: str) -> Self:
+        self._text = text
+        return self
+
+    def attrs(self, **attrs) -> Element:
+        self._attrs.update(attrs)
+        return self
+
     def _render(self, fp, indent: int):
-        parts = [self.tag]
+        parts = [self._tag]
 
-        if self.id:
-            parts.append(f'id="{self.id}"')
+        if self._id:
+            parts.append(f'id="{self._id}"')
 
-        if self.classes:
-            classes = " ".join(self.classes)
+        if self._classes:
+            classes = " ".join(self._classes)
             parts.append(f'class="{classes}"')
 
-        if self.style:
-            parts.append(self.style.inline())
+        if self._style:
+            parts.append(self._style.inline())
 
         for key, value in self._attrs.items():
             parts.append(f'{key}="{str(value)}"')
@@ -93,23 +119,23 @@ class Element(Markup):
 
         self._write_line(fp, f"<{tag_line}>", indent)
 
-        if self.text:
-            text = textwrap.indent(self.text, (indent + 1) * 4 * " ")
+        if self._text:
+            text = textwrap.indent(self._text, (indent + 1) * 4 * " ")
             fp.write(text)
             fp.write("\n")
 
-        for child in self.content:
+        for child in self._content:
             child._render(fp, indent + 1)
 
-        self._write_line(fp, f"</{self.tag}>", indent)
+        self._write_line(fp, f"</{self._tag}>", indent)
 
     def add(self, element: Element) -> Self:
         element._parent = self
-        self.content.append(element)
+        self._content.append(element)
         return self
 
     def extend(self, *elements: Element) -> Self:
-        for el in elements:
+        for el in flatten(elements):
             self.add(el)
 
         return self
@@ -117,55 +143,36 @@ class Element(Markup):
     def create(
         self,
         tag: str,
-        classes: List[str] = None,
-        id: str = None,
-        style: Style = None,
-        text: str = None,
     ) -> Element:
-        element = Element(tag, classes=classes, id=id, style=style, text=text)
+        element = Element(tag)
         self.add(element)
         return element
 
     def spawn(
         self,
-        count: int,
+        count: Union[int, Iterable],
         tag: str,
-        classes: List[str] = None,
-        id: str = None,
-        style: Style = None,
-        text: str = None,
-    ) -> Self:
-        for i in range(count):
-            if callable(classes):
-                _classes = classes(i)
-            else:
-                _classes = classes
+    ) -> ElementSet:
+        elements = []
 
-            if callable(id):
-                _id = id(i)
-            else:
-                _id = id
+        if isinstance(count, int):
+            count = range(count)
 
-            if callable(style):
-                _style = style(i)
-            else:
-                _style = style
+        for index in count:
+            elements.append((index, self.create(tag)))
 
-            if callable(text):
-                _text = text(i)
-            else:
-                _text = text
-
-            self.create(tag, classes=_classes, id=_id, style=_style, text=_text)
-
-        return self
-
-    def styled(self, fn: Callable[[Style]]) -> Self:
-        fn(self.style)
-        return self
+        return ElementSet(elements, self)
 
     def parent(self) -> Element:
         return self._parent
+
+    def root(self) -> Element:
+        if self._parent is None:
+            return self
+
+        assert self._parent != self
+
+        return self._parent.root()
 
 
 class Component(Element, abc.ABC):
@@ -177,7 +184,28 @@ class Component(Element, abc.ABC):
         pass
 
     def _render(self, fp, indent: int):
-        self.compose()._render(fp, indent)
+        self.compose().root()._render(fp, indent)
+
+
+class ElementSet:
+    def __init__(self, elements: List[Tuple[Any, Element]], parent) -> None:
+        self._elements = elements
+        self._parent = parent
+
+    def __iter__(self):
+        return iter(self._elements)
+
+    def each(self, fn: Callable[[int, Element]]) -> Self:
+        for index, el in self._elements:
+            fn(index, el)
+
+        return self
+
+    def parent(self) -> Element:
+        return self._parent
+
+    def root(self) -> Element:
+        return self._parent.root()
 
 
 class Document(Markup):

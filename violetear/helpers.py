@@ -1,4 +1,5 @@
 from functools import wraps
+from inspect import isgenerator
 
 
 def style_method(function):
@@ -8,3 +9,11 @@ def style_method(function):
         return self
 
     return wrapper
+
+
+def flatten(items):
+    for item in items:
+        if isinstance(item, (list, tuple)) or isgenerator(item):
+            yield from flatten(item)
+        else:
+            yield item

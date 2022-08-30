@@ -86,24 +86,21 @@ doc.body.add(
 
 # A common pattern is to chain `Style` method calls.
 
-doc.body.create("div", "container", id="main").style.margin("auto").width(max=768)
-
-# However, this pattern breaks the fluent API because it returns the `Style` instance.
-# To stay in flow, we can use the `styled` method that receives a callable to be applied
+# To stay in flow, we can use the `style` method that receives a callable to be applied
 # to the internal style, but returns the current element, so you can obtain a reference to
 # last element created for further method calls.
 
 # For example, we can create a div and style it.
 
 ul = (
-    doc.body.create("div", "container fluid")  # :hl:
-    .styled(lambda s: s.margin("auto").width(max=768))  # :hl:
+    doc.body.create("div")  # :hl:
+    .style(Style().margin("auto").width(max=768))  # :hl:
     .create("ul")  # :ref:ul:
-    .styled(lambda s: s.padding(5, bottom=10))  # :ref:ul:
+    .style(Style().padding(5, bottom=10))  # :ref:ul:
 )
 
 for i in range(5):  # :ref:li:
-    ul.create("li", text=f"The {i+1}th element!")  # :ref:li:
+    ul.create("li").text(f"The {i+1}th element!")  # :ref:li:
 
 # Then chain another call to create a `ul` and style it:
 
@@ -115,9 +112,9 @@ for i in range(5):  # :ref:li:
 
 # Take a look to the newly created tags.
 
-# ```html title="markup.html" linenums="29"
+# ```html title="markup.html" linenums="27"
 # ...
-# :include:30:48:markup.html:
+# :include:28:46:markup.html:
 # ...
 # ```
 
@@ -125,36 +122,36 @@ for i in range(5):  # :ref:li:
 # to break the flow, by using `spawn` to create multiple children.
 
 div = (
-    doc.body.create("div", "container")
+    doc.body.create("div")
+    .classes("container")
     .create("ul")
-    .spawn(  # :hl:
-        5,  # :ref:spawn1:
-        "li",  # :ref:spawn1:
-        classes="item",  # :ref:spawn2:
-        text=lambda i: f"The {i+1}th element",  # :ref:spawn2:
-        style=lambda i: Style().color(Colors.Blue.shade(i / 5)),  # :ref:spawn2:
+    .spawn(5, "li")  # :hl:
+    .each(
+        lambda i, item: item.text(f"The {i+1}th element").style(  # :ref:spawn2:
+            Style().color(Colors.Blue.shade(i / 5))  # :ref:spawn2:
+        )  # :ref:spawn2:
     )
-    .styled(lambda s: s.padding(5, bottom=10))  # :ref:ul_style:
+    .parent()  # :ref:ul_style:
+    .style(Style().padding(5, bottom=10))  # :ref:ul_style:
     .parent()  # :ref:parent:
-    .styled(lambda s: s.margin("auto").width(max=768))  # :ref:parent:
+    .style(Style().margin("auto").width(max=768))  # :ref:parent:
 )
 
 # The syntax is very similar to `create` except that it receives a number of items to create
 # along with the tag.
 
-# :hl:spawn1:
-
-# And you can pass either direct values or callables to compute the values for the children attributes.
+# This method returns an `ElementSet` with all the created items.
+# The `each` method can be used to configure each individual item, receiving both
+# the item and its index.
 
 # :hl:spawn2:
 
-# Finally, contrary to the `create` method which returns the newly created element,
-# the `spawn` method returns the same element on which you call it, in this case, the `ul`,
+# After finishing styling the children, we need to call `parent` to jump back to the `ul`,
 # which we then proceed to style.
 
 # :hl:ul_style:
 
-# We can then use `parent` to navigate up and continue chaining method calls,
+# We can then use `parent` again to navigate up and continue chaining method calls,
 # for example, to style the first `div` element we created.
 
 # :hl:parent:
@@ -164,9 +161,9 @@ div = (
 
 # Here's the result.
 
-# ```html title="markup.html" linenums="48"
+# ```html title="markup.html" linenums="46"
 # ...
-# :include:49:67:markup.html:
+# :include:47:65:markup.html:
 # ...
 # ```
 
@@ -185,8 +182,9 @@ div = (
 #     return (
 #         Element("div")
 #         .create("ul")
-#         .spawn(len(items), "li", text=lambda i: items[i])
-#         .parent()
+#         .spawn(len(items), "li")
+#         .each(lambda i, item: item.text(items[i]))
+#         .root()
 #     )
 # ```
 
@@ -196,12 +194,7 @@ div = (
 # doc.body.add(menu("Home", "Products", "Pricing", "Abouts"))
 # ```
 
-# And while this works, it is a bit ugly for a couple of reasons.
-# First, you need to remember to add that `parent()` at the end to make sure to return
-# the `div` and not the `ul`, and as soon as you start complicating your markup logic a bit
-# it is highly likely that you will return the wrong element a few items.
-
-# But the main reason is that even though we encapsulated the concept of a menu,
+# And while this works, it is unsatisfying because even though we encapsulated the concept of a menu,
 # we didn't *abstracted* it.
 # The minute we invoke the encapsulated functionality we lost the menu abstraction and
 # we are left with a regular `div` with an `ul` and a bunch of `li`s inside.
@@ -222,19 +215,18 @@ class Menu(Component):  # :hl:
         super().__init__()
         self.entries = dict(**entries)  # :ref:menu_constructor:
 
-    def compose(self) -> Element:  # :ref:menu_compose:
-        return Element(
-            "div",
-            Element(
-                "ul",
-                *[
-                    Element("li", classes="menu-item").add(
-                        Element("a", text=key, href=value)
-                    )
-                    for key, value in self.entries.items()
-                ],
-            ),
-            classes="menu",
+    def compose(self) -> Element:
+        return (
+            Element("div")  # :ref:menu_compose:
+            .classes("menu")  # :ref:menu_compose:
+            .create("ul")  # :ref:menu_compose:
+            .spawn(self.entries, "li")  # :ref:menu_compose:
+            .each(  # :ref:menu_compose:
+                lambda key, item: item.classes("menu-item")  # :ref:menu_compose:
+                .create("a")  # :ref:menu_compose:
+                .text(key)  # :ref:menu_compose:
+                .attrs(href=self.entries[key])  # :ref:menu_compose:
+            )  # :ref:menu_compose:
         )
 
 
@@ -257,9 +249,9 @@ menu.entries["Services"] = "/services"
 
 # Here's the end result:
 
-# ```html title="markup.py" linenums="67"
+# ```html title="markup.py" linenums="65"
 # ...
-# :include:68:96:markup.html:
+# :include:66:94:markup.html:
 # ...
 # ```
 
@@ -272,6 +264,17 @@ menu.entries["Services"] = "/services"
 # the fluent API, the regular `add` method, the constructor syntax, etc.
 
 # :hl:menu_compose:
+
+# ??? question "Aren't we missing a `root()`?"
+#
+#     If you think we're missing a `root()` call at the end of `compose`
+#     then you're right, we should have it there because the return value
+#     of that expression is the `ElementSet` composed of the menu items.
+#
+#     However, you will *always* end up calling `root()` at the end of
+#     your compose because you're always creating a detached element.
+#     Hence, in favour of DRYness, we will call `root()` it for you
+#     when this component gets rendered.
 
 # Now, if this still looks a bit ugly to you, we can make it even better.
 # Part of the problem is that the menu items are themselves another abstraction
@@ -296,21 +299,19 @@ class MenuItem(Component):
 class Menu(Component):
     def __init__(self, **entries) -> None:
         super().__init__()
-        self.content.extend(
+        self.extend(
             MenuItem(name=key, href=value)  # :ref:menu_item:
             for key, value in entries.items()  # :ref:menu_item:
         )
 
     def compose(self) -> Element:
-        return Element(
-            "div", Element("ul", *self.content), classes="menu"  # :ref:menu_item:
-        )
+        return Element("div").classes("menu").create("ul").extend(*self._content)
 
 
 # On render time, `compose` will be called recursively on all children `Components`,
 # so can safely mix `Component`s and regular `Element`s and everything will work out just fine.
 
-# Thus, now we can on the constructor create child elements of type `MenuItem`,
+# Thus, now we can create child elements of type `MenuItem` on the constructor
 # and make sure to inject them at the right location in the markup we build at `compose`.
 
 # :hl:menu_item:
@@ -335,9 +336,9 @@ doc.body.add(
 # And the generated HTML blends perfectly the markup generated from the `compose` methods
 # with the explicit markup.
 
-# ```html title="markup.html" linenums="96" hl_lines="19 20"
+# ```html title="markup.html" linenums="94" hl_lines="19 20"
 # ...
-# :include:97:122:markup.html:
+# :include:95:120:markup.html:
 # ...
 # ```
 
