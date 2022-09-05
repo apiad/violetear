@@ -34,7 +34,7 @@ We can also add stylesheets to our page that will be rendered either inline or a
 ```python linenums="21" title="markup.py"
 sheet = StyleSheet(normalize=True)
 
-doc.style(sheet, inline=False, name="markup.css")
+doc.style(sheet, inline=False, href="markup.css")
 ```
 
 Just with this let's take a look at the resulting HTML file.
@@ -551,7 +551,7 @@ Then, when you call `each` you'll get that item as the first parameter of your l
 
     However, you will *always* end up calling `root()` at the end of
     your compose because you're always creating a detached element.
-    Hence, in favour of DRYness, we will call `root()` it for you
+    Hence, in favour of DRYness, we will call `root()` for you
     when this component gets rendered.
 
 Now, if this still looks a bit ugly to you, we can make it even better.
@@ -589,7 +589,7 @@ class Menu(Component):
 ```
 
 On render time, `compose` will be called recursively on all children `Components`,
-so can safely mix `Component`s and regular `Element`s and everything will work out just fine.
+so you can safely mix `Component`s and regular `Element`s and everything will work out just fine.
 
 Thus, now we  create the child elements of type `MenuItem` explicitly
 and make sure to inject them at the right location in the markup we build at `compose`,

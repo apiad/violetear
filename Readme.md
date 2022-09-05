@@ -152,23 +152,21 @@ The cherry on the top is a simple but expressive fluent API for generating HTML 
 compatible with `violetear`'s styling API. You can use it to create quick prototypes, style demo pages, etc.
 
 ```python
-from violetear.markup import Page
+from violetear.markup import Document
 
-page = Page(title="Example")
+doc = Document(title="Example")
 
-page.body.create("div", "container") \
-.styled(lambda s: s.margin("auto").width(max=768)) \
+doc.body.create("div", "container") \
+.style(Style().margin("auto").width(max=768)) \
 .create("ul") \
-.styled(lambda s: s.padding(5, bottom=10)) \
-.spawn(
-    5,
-    "li",
-    classes="item",
-    text=lambda i: f"The {i+1}th element",
-    style=lambda i: Style().color(Colors.Blue.shade(i / 5)),
+.style(Style().padding(5, bottom=10)) \
+.spawn(5, "li")
+.each(
+    lambda i, item: item.text(f"The {i+1}th element")
+    .style(Style().color(Colors.Blue.shade(i / 5)))
 )
 
-page.render("page.html")
+doc.render("page.html")
 ```
 
 ## Documentation

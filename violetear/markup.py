@@ -231,15 +231,15 @@ class Document(Markup):
         self.styles = []
 
     def style(
-        self, sheet: StyleSheet, inline: bool = False, name: str = None
+        self, sheet: StyleSheet, inline: bool = False, href: str = None
     ) -> Document:
-        if not inline and name is None:
-            raise ValueError("Need a name when inline is false")
+        if not inline and href is None:
+            raise ValueError("Need an href when inline is false")
 
         if inline:
             self.styles.append(sheet)
         else:
-            self.head.styles.append((sheet, name))
+            self.head.styles.append(href)
 
         return self
 
@@ -270,9 +270,8 @@ class Head(Markup):
         )
         self._write_line(fp, f"<title>{self.title}</title>", indent + 1)
 
-        for sheet, name in self.styles:
-            self._write_line(fp, f'<link rel="stylesheet" href="{name}">', indent + 1)
-            sheet.render(name)
+        for href in self.styles:
+            self._write_line(fp, f'<link rel="stylesheet" href="{href}">', indent + 1)
 
         self._write_line(fp, "</head>", indent)
 
