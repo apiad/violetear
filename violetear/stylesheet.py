@@ -245,6 +245,6 @@ class StyleSheet:
 
     def __getattr__(self, attr) -> Style:
         try:
-            self[attr]
+            return self[attr]
         except KeyError:
             raise AttributeError(attr)
