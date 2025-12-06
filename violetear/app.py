@@ -11,9 +11,9 @@ try:
 except ImportError:
     HAS_SERVER = False
     # Dummy classes for type hinting if dependencies are missing
-    FastAPI = object  # type: ignore
-    APIRouter = object  # type: ignore
-    Request = object  # type: ignore
+    # FastAPI = object  # type: ignore
+    # APIRouter = object  # type: ignore
+    # Request = object  # type: ignore
 
 
 class App:
@@ -26,7 +26,7 @@ class App:
         if not HAS_SERVER:
             raise ImportError(
                 "Violetear Server dependencies are missing. "
-                "Please install them with: uv pip install 'violetear[server]'"
+                "Please install them using `pip install violetear[server]`"
             )
 
         self.title = title
