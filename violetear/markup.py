@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import Any, Callable, Iterable, List, Tuple, Type, TypeVar, Union, overload
 
 import textwrap
-from typing_extensions import Self
+from typing import Self
 from violetear.helpers import flatten
 from violetear.style import Style
 from violetear.stylesheet import StyleSheet
