@@ -8,6 +8,7 @@ import sys
 # Simple check to ensure we don't accidentally run this on the server
 IS_BROWSER = "pyodide" in sys.modules or "emscripten" in sys.platform
 
+
 def hydrate(namespace: dict):
     """
     Scans the DOM for data-py-on-* attributes and binds the
@@ -16,7 +17,7 @@ def hydrate(namespace: dict):
     if not IS_BROWSER:
         return
 
-    from js import document # type: ignore
+    from js import document  # type: ignore
 
     # Phase 3 Implementation placeholder:
     # 1. Query Selector for [data-py-on-*]
