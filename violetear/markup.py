@@ -159,7 +159,7 @@ class Element(Markup):
     def create[T: Element](self, clss: type[T]) -> T:
         pass
 
-    def create[T: Element](
+    def create[T: Element]( # type: ignore
         self,
         tag: str | type[T],
     ) -> T:
