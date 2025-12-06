@@ -12,4 +12,4 @@ from .units import Unit
 from .color import Color
 
 
-__version__ = "0.13.0"
+__version__ = "0.13.1"
