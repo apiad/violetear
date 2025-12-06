@@ -54,11 +54,11 @@ class Color:
 
     @property
     def value(self):
-        return hls(self)[2]
+        return hsv(self)[2]
 
     @property
     def saturation(self):
-        return hsv(self)[2]
+        return hls(self)[2]
 
     # #### `Color.saturated`
 
@@ -157,13 +157,11 @@ class Color:
 
 
 @overload
-def rgb(red: float, green: float, blue: float, /, *, alpha: float = 1.0) -> Color:
-    ...
+def rgb(red: float, green: float, blue: float, /, *, alpha: float = 1.0) -> Color: ...
 
 
 @overload
-def rgb(color: Color, /) -> Tuple[float, float, float]:
-    ...
+def rgb(color: Color, /) -> Tuple[float, float, float]: ...
 
 
 def rgb(*args, **kwargs):
@@ -181,13 +179,13 @@ def rgb(*args, **kwargs):
 
 
 @overload
-def hsv(hue: float, saturation: float, value: float, /, *, alpha: float = 1.0) -> Color:
-    ...
+def hsv(
+    hue: float, saturation: float, value: float, /, *, alpha: float = 1.0
+) -> Color: ...
 
 
 @overload
-def hsv(color: Color, /) -> Tuple[float, float, float]:
-    ...
+def hsv(color: Color, /) -> Tuple[float, float, float]: ...
 
 
 def hsv(*args, **kwargs):
@@ -208,13 +206,11 @@ def hsv(*args, **kwargs):
 @overload
 def hls(
     hue: float, lightness: float, saturation: float, /, *, alpha: float = 1.0
-) -> Color:
-    ...
+) -> Color: ...
 
 
 @overload
-def hls(color: Color, /) -> Tuple[float, float, float]:
-    ...
+def hls(color: Color, /) -> Tuple[float, float, float]: ...
 
 
 def hls(*args, **kwargs):
@@ -233,13 +229,11 @@ def hls(*args, **kwargs):
 
 
 @overload
-def hex(code: str, /, *, alpha: float = 1.0) -> Color:
-    ...
+def hex(code: str, /, *, alpha: float = 1.0) -> Color: ...
 
 
 @overload
-def hex(color: Color, /) -> str:
-    ...
+def hex(color: Color, /) -> str: ...
 
 
 def hex(*args, **kwargs):

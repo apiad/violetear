@@ -1,7 +1,0 @@
-highlights: true
-inline: true
-linenums: true
-sources:
-  violetear/*.py: docs/api/violetear.*.md
-  violetear/__init__.py: docs/api/violetear.md
-title: false

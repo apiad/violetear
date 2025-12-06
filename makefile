@@ -1,33 +1,91 @@
-.PHONY: format
-format:
-	black violetear
-
-.PHONY: test
-test:
-	black --check violetear
-	pytest --doctest-modules violetear tests
-
-.PHONY: test-loop
-test-loop:
-	black --check .
-	pytest --doctest-modules violetear tests
-
+default: test-unit
 
 .PHONY: docs
-docs: examples
-	cp Readme.md docs/index.md
-	mkdocs build
+docs:
+	cd docs && quarto publish gh-pages
 
-.PHONY: illiterate
-illiterate:
-	illiterate preset build
+.PHONY: bugfix
+bugfix:
+	git commit -a -m "Bugfix"
 
-.PHONY: examples
-examples:
-	(cd docs && python guide.py)
-	(cd docs/examples && python animations.py)
-	(cd docs/examples && python color_spaces.py)
-	(cd docs/examples && python flex_grid.py)
-	(cd docs/examples && python semantic_design.py)
-	(cd docs/examples && python utilities.py)
-	(cd docs/examples && python markup.py)
+.PHONY: format
+format:
+	black . && git commit -am "Apply code formatting"
+
+.PHONY: format-check
+format-check:
+	black --check .
+
+.PHONY: type-check
+type-check:
+	mypy
+
+.PHONY: test-unit test-all
+
+test-unit: format-check
+	pytest tests --cov=violetear
+
+test-all: format-check
+	pytest --cov=violetear
+
+.PHONY: docker-build
+docker-build:
+	docker build -t violetear:latest -f dockerfile .
+
+.PHONY: clean
+clean:
+	rm -rf dist
+	rm -rf violetear.egg-info
+	rm -rf *.db*
+	find . -name '*.pyc' -exec rm -f {} +
+	find . -name '__pycache__' -exec rm -rf {} +
+
+.PHONY: issues
+issues:
+	gh md-issues push
+	sleep 5
+	gh md-issues pull
+	git add issues && git commit -m "Sync issues"
+
+# Get the current version from pyproject.toml
+CURRENT_VERSION := $(shell grep 'version = ' pyproject.toml | cut -d '"' -f 2)
+
+.PHONY: release
+release: format-check
+	@echo "Current version: ${CURRENT_VERSION}"
+	@if [ -z "$(NEW_VERSION)" ]; then \
+		echo "ERROR: NEW_VERSION environment variable is not set."; \
+		echo "Usage: NEW_VERSION=x.y.z make release"; \
+		exit 1; \
+	fi
+	@make test-all
+	@echo "Bumping version from $(CURRENT_VERSION) to $(NEW_VERSION)..."
+
+	@echo Replace version in pyproject.toml
+	@sed -i.bak "s/version = \"$(CURRENT_VERSION)\"/version = \"$(NEW_VERSION)\"/" pyproject.toml
+
+	@echo Replace version in violetear/__init__.py
+	@sed -i.bak "s/__version__ = \"$(CURRENT_VERSION)\"/__version__ = \"$(NEW_VERSION)\"/" violetear/__init__.py
+
+	@echo Remove backup files
+	@rm pyproject.toml.bak violetear/__init__.py.bak
+
+	@uv sync
+
+	@echo "Committing version bump..."
+	@git add pyproject.toml violetear/__init__.py uv.lock
+	@git commit -m "Bump version to $(NEW_VERSION)"
+
+	@echo "Tagging new version..."
+	@git tag "v$(NEW_VERSION)"
+
+	@echo "Pushing commit and tags..."
+	@git push
+	@git push --tags
+
+	@echo "Creating Github release..."
+	@gh release create "v$(NEW_VERSION)" --title "v$(NEW_VERSION)" --notes "Release version $(NEW_VERSION)"
+
+	@echo "✅ Version $(NEW_VERSION) successfully released."
+
+	@uv pip install -e .[full]

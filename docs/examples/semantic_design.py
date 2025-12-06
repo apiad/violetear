@@ -151,7 +151,9 @@ for cls, color in zip("normal primary success warning error info".split(), color
         btn_style.on("active")
         .color(accent_color)  # :ref:active_style:
         .background(color.darker(0.1))  # :ref:active_style:
-        .shadow(color.lit(0.2).transparent(0.2), x=0, y=0, blur=2, spread=1)  # :ref:active_style:
+        .shadow(
+            color.lit(0.2).transparent(0.2), x=0, y=0, blur=2, spread=1
+        )  # :ref:active_style:
     )
 
     # The on-hover style will change to a slightly lighter version of the background color,
@@ -165,5 +167,5 @@ for cls, color in zip("normal primary success warning error info".split(), color
 
     # :hl:active_style:
 
-if __name__ == "__main__": # :skip:
+if __name__ == "__main__":  # :skip:
     sheet.render("semantic-design.css")

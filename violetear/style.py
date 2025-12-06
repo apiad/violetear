@@ -1,7 +1,6 @@
 # # Styles
 
-"""This module defines the `Style` class.
-"""
+"""This module defines the `Style` class."""
 
 from __future__ import annotations
 
