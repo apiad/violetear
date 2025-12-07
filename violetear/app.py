@@ -100,10 +100,13 @@ class App:
         # 3. Create a wrapper that accepts the Model
         # We need to handle both sync and async user functions
         if inspect.iscoroutinefunction(func):
+
             async def wrapper(body: BodyModel):
                 # Unpack the Pydantic model into kwargs
                 return await func(**body.model_dump())
+
         else:
+
             async def wrapper(body: BodyModel):
                 # Run sync function (FastAPI handles threadpooling, but we are inside an async wrapper)
                 return func(**body.model_dump())
@@ -214,7 +217,16 @@ class App:
         # 5. Initialization
         init_code = "# --- Init ---\n\nhydrate(globals())\n"
 
-        return header + runtime_code + "\n\n" + "\n".join(user_code) + "\n\n" + server_stubs + "\n\n" + init_code
+        return (
+            header
+            + runtime_code
+            + "\n\n"
+            + "\n".join(user_code)
+            + "\n\n"
+            + server_stubs
+            + "\n\n"
+            + init_code
+        )
 
     def _inject_client_side(self, doc: Document):
         """Injects Pyodide and the Bundle bootstrapper."""

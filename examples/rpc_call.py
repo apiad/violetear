@@ -4,10 +4,12 @@ from violetear.markup import Document, Element
 
 app = App(title="RPC Demo")
 
+
 # 1. Define a Shared Model (Optional, but good practice)
 class UserData(BaseModel):
     name: str
     age: int
+
 
 # 2. Define the Server Logic
 @app.server
@@ -18,6 +20,7 @@ def create_user(name: str, age: int) -> UserData:
 
     # Return a model or dict. It will be serialized to JSON.
     return UserData(name=name.upper(), age=age)
+
 
 # 3. Define the Client Logic
 @app.client
@@ -36,6 +39,7 @@ async def on_submit(event):
     except Exception as e:
         alert(f"Error: {e}")
 
+
 # 4. The UI
 @app.route("/")
 def index():
@@ -45,9 +49,10 @@ def index():
         Element("h1", text="Server RPC Test"),
         Element("input", id="name-input", placeholder="Name"),
         Element("input", id="age-input", placeholder="Age", type="number"),
-        Element("button", text="Create User").on("click", on_submit)
+        Element("button", text="Create User").on("click", on_submit),
     )
 
     return doc
+
 
 app.run()
