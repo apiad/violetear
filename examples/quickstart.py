@@ -9,35 +9,23 @@ from violetear.dom import Event
 app = App(title="Violetear Counter")
 
 # --- 1. THE STYLES (Pure Python CSS) ---
-style = StyleSheet(
-    Style("body")
-    .background(Colors.AliceBlue)
-    .font(family="sans-serif")
-    .flexbox(align="center", justify="center")
-    .height("320px")
-    .margin(top=20),
-    Style(".counter-card")
-    .background(Colors.White)
-    .padding(40)
-    .rounded(15)
-    .shadow(blur=20, color="rgba(0,0,0,0.1)")
-    .text(align="center"),
-    Style(".count-display")
-    .font(size=64, weight="bold")
-    .color(Colors.SlateBlue)
-    .margin(10),
-    Style("button")
-    .padding("10px 20px")
-    .font(size=20, weight="bold")
-    .margin(5)
-    .rounded(8)
-    .border(0)
-    .rule("cursor", "pointer")
-    .color(Colors.White),
-    Style(".btn-plus").background(Colors.MediumSeaGreen),
-    Style(".btn-minus").background(Colors.IndianRed),
-    Style(".btn:hover").rule("opacity", "0.8"),
-)
+style = StyleSheet()
+
+style.select("body").background(Colors.AliceBlue).font(family="sans-serif").flexbox(
+    align="center", justify="center"
+).height("320px").margin(top=20)
+style.select(".counter-card").background(Colors.White).padding(40).rounded(15).shadow(
+    blur=20, color="rgba(0,0,0,0.1)"
+).text(align="center")
+style.select(".count-display").font(size=64, weight="bold").color(
+    Colors.SlateBlue
+).margin(10)
+style.select("button").padding("10px 20px").font(size=20, weight="bold").margin(
+    5
+).rounded(8).border(0).rule("cursor", "pointer").color(Colors.White)
+style.select(".btn-plus").background(Colors.MediumSeaGreen)
+style.select(".btn-minus").background(Colors.IndianRed)
+style.select(".btn:hover").rule("opacity", "0.8")
 
 
 # --- 2. THE SERVER (FastAPI RPC) ---
