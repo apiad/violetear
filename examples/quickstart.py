@@ -8,7 +8,6 @@ from violetear.dom import Event
 # 1. Initialize the App
 app = App(title="Violetear Counter")
 
-
 # --- 1. THE STYLES (Pure Python CSS) ---
 style = StyleSheet()
 

@@ -32,7 +32,12 @@ class App:
     Wraps FastAPI to provide a full-stack Python web framework experience.
     """
 
-    def __init__(self, title: str = "Violetear App", favicon: str | None = None):
+    def __init__(
+        self,
+        title: str = "Violetear App",
+        favicon: str | None = None,
+        fade_in: float = 0.1,
+    ):
         self.title = title
         self.api = FastAPI(title=title)
 
@@ -40,6 +45,7 @@ class App:
             favicon = str(Path(__file__).parent / "icon.png")
 
         self.favicon = favicon
+        self.fade_in = fade_in
 
         # Standard path for browser favicon requests
         @self.api.get("/favicon.ico", include_in_schema=False)
@@ -290,18 +296,51 @@ class App:
 
     def _inject_client_side(self, doc: Document):
         """Injects Pyodide and the Bundle bootstrapper."""
-        # 1. Load Pyodide
+
+        if self.fade_in > 0:
+            print("fadeout")
+            # 1. The "Cloak" Script
+            # We inject this FIRST so it runs immediately before the body renders.
+            # It creates a style that hides the body and disables clicking.
+            cloak_script = dedent(
+                """
+                var cloak = document.createElement("style");
+                cloak.id = "violetear-cloak";
+                // opacity: 0 -> hides content visually
+                // pointer-events: none -> prevents clicking on invisible buttons
+                cloak.innerHTML = "body { opacity: 0; pointer-events: none; }";
+                document.head.appendChild(cloak);
+                """
+            )
+            doc.script(content=cloak_script)
+
+        # 2. Load Pyodide (from CDN)
         doc.script(src="https://cdn.jsdelivr.net/pyodide/v0.29.0/full/pyodide.js")
 
-        # 2. Bootstrap Script
+        # 3. Bootstrap Script
+        # We update this to remove the cloak once hydration is complete.
         bootstrap = dedent(
-            """
-            async function main() {
+            f"""
+            async function main() {{
+                // optional: You could inject a 'Loading...' spinner here if you wanted
+
                 let pyodide = await loadPyodide();
                 let response = await fetch("/_violetear/bundle.py");
                 let code = await response.text();
                 await pyodide.runPythonAsync(code);
-            }
+
+                // --- Hydration Complete ---
+
+                // Find the cloak style
+                let cloak = document.getElementById("violetear-cloak");
+                if (cloak) {{
+                    // Update styles to fade in
+                    cloak.innerHTML = "body {{ opacity: 1; pointer-events: auto; transition: opacity {self.fade_in}s ease-in-out; }}";
+
+                    // Clean up the style tag after the transition finishes
+                    setTimeout(() => cloak.remove(), {int(self.fade_in * 1000)});
+                }}
+            }}
             main();
             """
         )
