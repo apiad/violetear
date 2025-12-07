@@ -47,11 +47,12 @@ class App:
         # Registry of served styles to prevent duplicate route registration
         self.served_styles: Dict[str, StyleSheet] = {}
 
-        # Registry for client-side functions
+        # Registry for client- and serverside functions
         self.client_functions: Dict[str, Callable] = {}
-
-        # Registry for server-side functions
         self.server_functions: Dict[str, Callable] = {}
+
+        # Names of client-side functions to run on load
+        self.startup_functions: List[str] = []
 
         # Register the Bundle Route (Dynamic Python file)
         @self.api.get("/_violetear/bundle.py")
@@ -61,6 +62,15 @@ class App:
     def client(self, func: Callable):
         """Decorator to mark a function to be compiled to the client."""
         self.client_functions[func.__name__] = func
+        return func
+
+    def startup(self, func: Callable):
+        """
+        Decorator to mark a function to run automatically when the client loads.
+        Also registers it as a client function.
+        """
+        self.client(func)
+        self.startup_functions.append(func.__name__)
         return func
 
     def server(self, func: Callable):
@@ -248,6 +258,10 @@ class App:
 
         # 6. Initialization
         init_code = "# --- Init ---\nhydrate(globals())"
+
+        # Run startup functions
+        for func_name in self.startup_functions:
+            init_code += f"\n{func_name}()"
 
         return "\n\n".join(
             [

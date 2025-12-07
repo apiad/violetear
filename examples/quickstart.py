@@ -8,6 +8,7 @@ from violetear.dom import Event
 # 1. Initialize the App
 app = App(title="Violetear Counter")
 
+
 # --- 1. THE STYLES (Pure Python CSS) ---
 style = StyleSheet()
 
@@ -40,6 +41,8 @@ async def report_count(current_count: int, action: str):
 
 
 # --- 3. THE CLIENT (Pyodide Browser) ---
+
+
 @app.client
 async def handle_change(event: Event):
     """
@@ -63,7 +66,26 @@ async def handle_change(event: Event):
     await report_count(current_count=new_value, action=action)
 
 
+@app.startup
+def init_counter():
+    """
+    Runs automatically when the page loads (Client-Side).
+    Restores the counter from Local Storage.
+    """
+    from violetear.dom import Document
+    from violetear.storage import store
+
+    # Check if we have a saved count
+    saved_count = store.count
+
+    if saved_count:
+        Document.find("display").text = str(saved_count)
+        print(f"Restored count: {saved_count}")
+
+
 # --- 4. THE UI (Server-Side Rendered) ---
+
+
 @app.route("/")
 def index():
     doc = Document(title="Violetear Counter")
