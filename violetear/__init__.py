@@ -16,4 +16,4 @@ from .color import Color
 # though our App class handles the check internally)
 from .app import App
 
-__version__ = "1.0.1"
+__version__ = "1.1.0"
