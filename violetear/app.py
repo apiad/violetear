@@ -261,7 +261,7 @@ class App:
         user_code = []
         for name, func in self.client_functions.items():
             code = inspect.getsource(func).split("\n")
-            code = [c for c in code if not c.startswith("@")] # remove decorators
+            code = [c for c in code if not c.startswith("@")]  # remove decorators
             user_code.append("\n".join(code))
 
         # 5. Generate Server Stubs
