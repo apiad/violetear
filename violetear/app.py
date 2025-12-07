@@ -4,6 +4,8 @@ from pathlib import Path
 from textwrap import dedent
 from typing import Any, Callable, Dict, List, Union
 
+from pydantic import create_model
+
 
 # --- Optional Server Dependencies ---
 try:
@@ -48,6 +50,9 @@ class App:
         # Registry for client-side functions
         self.client_functions: Dict[str, Callable] = {}
 
+        # Registry for server-side functions
+        self.server_functions: Dict[str, Callable] = {}
+
         # Register the Bundle Route (Dynamic Python file)
         @self.api.get("/_violetear/bundle.py")
         def get_bundle():
@@ -56,6 +61,57 @@ class App:
     def client(self, func: Callable):
         """Decorator to mark a function to be compiled to the client."""
         self.client_functions[func.__name__] = func
+        return func
+
+    def server(self, func: Callable):
+        """
+        Decorator to expose a function as a server-side RPC endpoint.
+        The client bundle will receive a stub that calls this endpoint via fetch.
+        """
+        self.server_functions[func.__name__] = func
+
+        # 1. Introspect the function to find arguments
+        sig = inspect.signature(func)
+        fields = {}
+
+        for name, param in sig.parameters.items():
+            # Skip 'self' if it happens to be a method (though we expect functions)
+            if name == "self":
+                continue
+
+            # Determine default value (required if empty)
+            default = param.default
+
+            if default is inspect.Parameter.empty:
+                default = ...  # Ellipsis means field is required in Pydantic
+
+            # Determine type annotation (default to Any if missing)
+            annotation = param.annotation
+
+            if annotation is inspect.Parameter.empty:
+                annotation = Any
+
+            fields[name] = (annotation, default)
+
+        # 2. Create a dynamic Pydantic model representing the JSON Body
+        # This tells FastAPI: "Expect a JSON body with these fields"
+        BodyModel = create_model(f"{func.__name__}Request", **fields)
+
+        # 3. Create a wrapper that accepts the Model
+        # We need to handle both sync and async user functions
+        if inspect.iscoroutinefunction(func):
+            async def wrapper(body: BodyModel):
+                # Unpack the Pydantic model into kwargs
+                return await func(**body.model_dump())
+        else:
+            async def wrapper(body: BodyModel):
+                # Run sync function (FastAPI handles threadpooling, but we are inside an async wrapper)
+                return func(**body.model_dump())
+
+        # 4. Register the route with FastAPI using the wrapper
+        route_path = f"/_violetear/rpc/{func.__name__}"
+        self.api.post(route_path)(wrapper)
+
         return func
 
     def style(self, path: str, sheet: StyleSheet):
@@ -87,6 +143,49 @@ class App:
                 if resource.sheet and resource.href and not resource.inline:
                     self.style(resource.href, resource.sheet)
 
+    def _generate_server_stubs(self) -> str:
+        """
+        Generates client-side Python stubs for server functions.
+        These stubs use fetch() to call the RPC endpoints.
+        """
+        stubs = []
+
+        for name, func in self.server_functions.items():
+            # Introspect the function to support positional arguments in the stub
+            sig = inspect.signature(func)
+            arg_names = [p.name for p in sig.parameters.values()]
+
+            # We generate a Python async function that wraps the fetch call
+            stub = dedent(
+                f"""
+                async def {name}(*args, **kwargs):
+                    import json
+                    from pyodide.http import pyfetch
+
+                    # Map positional args to their names (captured from server signature)
+                    arg_names = {arg_names!r}
+                    payload = {{k: v for k, v in zip(arg_names, args)}}
+                    payload.update(kwargs)
+
+                    # Perform RPC
+                    response = await pyfetch(
+                        "/_violetear/rpc/{name}",
+                        method="POST",
+                        headers={{"Content-Type": "application/json"}},
+                        body=json.dumps(payload)
+                    )
+
+                    if not response.ok:
+                        raise Exception(f"RPC Error: {{response.status}} {{response.statusText}}")
+
+                    # Automatically convert JSON response back to Python objects (dicts/lists)
+                    return await response.json()
+                """
+            )
+            stubs.append(stub)
+
+        return "\n\n".join(stubs)
+
     def _generate_bundle(self) -> str:
         """
         Generates the Python bundle to run in the browser.
@@ -109,10 +208,13 @@ class App:
         for name, func in self.client_functions.items():
             user_code.append(inspect.getsource(func))
 
-        # 4. Initialization
-        init_code = "\n\n# --- Init ---\n\nhydrate(globals())\n"
+        # 4. Generate Server Stubs
+        server_stubs = self._generate_server_stubs()
 
-        return header + runtime_code + "\n\n" + "\n".join(user_code) + init_code
+        # 5. Initialization
+        init_code = "# --- Init ---\n\nhydrate(globals())\n"
+
+        return header + runtime_code + "\n\n" + "\n".join(user_code) + "\n\n" + server_stubs + "\n\n" + init_code
 
     def _inject_client_side(self, doc: Document):
         """Injects Pyodide and the Bundle bootstrapper."""
@@ -122,14 +224,14 @@ class App:
         # 2. Bootstrap Script
         bootstrap = dedent(
             """
-        async function main() {
-            let pyodide = await loadPyodide();
-            let response = await fetch("/_violetear/bundle.py");
-            let code = await response.text();
-            await pyodide.runPythonAsync(code);
-        }
-        main();
-        """
+            async function main() {
+                let pyodide = await loadPyodide();
+                let response = await fetch("/_violetear/bundle.py");
+                let code = await response.text();
+                await pyodide.runPythonAsync(code);
+            }
+            main();
+            """
         )
 
         doc.script(content=bootstrap)
