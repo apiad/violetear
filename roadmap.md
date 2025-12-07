@@ -11,29 +11,29 @@ Transform `violetear` into a hybrid, full-stack Python web framework. It will su
 
 - [x] **Dependency Update**: Bump minimum Python version to **3.12+**.
 - [x] **Migrate to `uv`**: Replace `poetry` with `uv` for lightning-fast package management and CI/CD resolution.
-- [ ] **Project Structure**: Establish the folder structure for the new modules (`violetear.app`, `violetear.client`).
+- [x] **Project Structure**: Establish the folder structure for the new modules (`violetear.app`, `violetear.client`).
 
 ## Phase 2: The Framework Core (SSR Focus)
 *Objective: Build a robust engine for serving Server-Side Rendered applications with zero unused CSS.*
 
 ### 2.1. Optional Server Dependencies
-- [ ] Add `fastapi` and `uvicorn` as optional extras (`pip install violetear[server]`).
+- [x] Add `fastapi` and `uvicorn` as optional extras (`pip install violetear[server]`).
 
 ### 2.2. The `App` Class (`violetear.app`)
-- [ ] **Initialization**: Create the `App` class that wraps a `FastAPI` instance.
-- [ ] **Routing**: Implement the `@app.route(path)` decorator.
+- [x] **Initialization**: Create the `App` class that wraps a `FastAPI` instance.
+- [x] **Routing**: Implement the `@app.route(path)` decorator.
     - Handle standard `GET` requests returning `Document` objects.
     - Handle standard `POST` form submissions.
-- [ ] **Asset Registry**: Implement `app.add_style(name, sheet)`.
+- [x] **Asset Registry**: Implement `app.add_style(name, sheet)`.
     - Automatically mount a route to serve these rendered stylesheets from memory.
     - Provide helpers to inject `<link>` tags for registered styles into Documents.
 
 ### 2.3. Static Asset Handling
-- [ ] **Server Side**: Implement `app.mount_static(dir, path)` and auto-discover a `./static` folder.
-- [ ] **Markup Side**: Extend `Document` in `violetear/markup.py`:
+- [x] **Server Side**: Implement `app.mount_static(dir, path)` and auto-discover a `./static` folder.
+- [x] **Markup Side**: Extend `Document` in `violetear/markup.py`:
     - Add `.link_css(url)` for CDNs/local files.
     - Add `.add_script(src)` for external JS.
-- [ ] **HTML Helpers**: Extend `Element` in `violetear/markup.py`:
+- [x] **HTML Helpers**: Extend `Element` in `violetear/markup.py`:
     - Add `.link(href)` helper for anchors.
     - Add `.form(action, method)` and `.input()` helpers.
 
@@ -51,19 +51,19 @@ Transform `violetear` into a hybrid, full-stack Python web framework. It will su
 *Objective: Enable "Smart Hydration" where Python runs in the browser only when needed.*
 
 ### 3.1. Event Binding API (`violetear`)
-- [ ] Update `Element` to support event listeners.
+- [x] Update `Element` to support event listeners.
     - Implement `.on("click", func)` and `.onclick(func)`.
     - **Server Behavior**: Serialize function name to `data-py-on-click` attribute.
     - **Client Behavior**: Bind the actual Python callable to the DOM.
 
 ### 3.2. Client Runtime (`violetear.client`)
-- [ ] **Hydration Script**: Create a generic Python script (to run in Pyodide) that:
+- [x] **Hydration Script**: Create a generic Python script (to run in Pyodide) that:
     - Scans the DOM for `data-py-on-*` attributes.
     - Maps attributes to loaded Python functions from the user's bundle.
-- [ ] **RPC Stubs**: Create the client-side mechanism to intercept calls to `@app.server` functions and perform `fetch()` requests.
+- [x] **RPC Stubs**: Create the client-side mechanism to intercept calls to `@app.server` functions and perform `fetch()` requests.
 
 ### 3.3. Smart Injection (`violetear.app`)
-- [ ] **Detection Logic**: Update `App` to inspect the generated `Document`.
+- [x] **Detection Logic**: Update `App` to inspect the generated `Document`.
     - If `data-py-on-*` attributes exist -> Inject Pyodide bootstrap + Client Bundle.
     - If no attributes exist -> Serve pure HTML (SSR Mode).
 
