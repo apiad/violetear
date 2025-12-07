@@ -196,7 +196,7 @@ class App:
         Generates the Python bundle to run in the browser.
         """
         # 1. Mock the 'app' object
-        header = "class MockApp:\n    def client(self, f): return f\n    def server(self, f): return f\napp = MockApp()\n\nclass Event: pass\n\n"
+        header = "class MockApp:\n    def client(self, f): return f\n    def server(self, f): return f\napp = MockApp()\n\nclass Event: pass"
 
         # 2. Inject violetear.dom module
         # This allows 'from violetear.dom import Document' to work in the browser
@@ -220,6 +220,19 @@ class App:
             """
         )
 
+        # Inject Storage
+        storage_path = Path(__file__).parent / "storage.py"
+        with open(storage_path, "r") as f:
+            storage_source = f.read()
+
+        storage_injection = dedent(
+            f"""
+            m_storage = types.ModuleType("violetear.storage")
+            sys.modules["violetear.storage"] = m_storage
+            exec({repr(storage_source)}, m_storage.__dict__)
+            """
+        )
+
         # 3. Read the Client Runtime (Hydration logic)
         runtime_path = Path(__file__).parent / "client.py"
         with open(runtime_path, "r") as f:
@@ -234,17 +247,18 @@ class App:
         server_stubs = self._generate_server_stubs()
 
         # 6. Initialization
-        init_code = "\n\n# --- Init ---\nhydrate(globals())"
+        init_code = "# --- Init ---\nhydrate(globals())"
 
-        return (
-            header
-            + dom_injection
-            + runtime_code
-            + "\n\n"
-            + "\n".join(user_code)
-            + "\n\n"
-            + server_stubs
-            + init_code
+        return "\n\n".join(
+            [
+                header,
+                dom_injection,
+                storage_injection,
+                runtime_code,
+                "\n\n".join(user_code),
+                server_stubs,
+                init_code,
+            ]
         )
 
     def _inject_client_side(self, doc: Document):
