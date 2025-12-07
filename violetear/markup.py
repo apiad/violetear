@@ -111,6 +111,32 @@ class Element(Markup):
         self._attrs.update(attrs)
         return self
 
+    def on(self, event: str, handler: Callable) -> Self:
+        """
+        Binds a python function to a DOM event.
+        Serializes the function name to a data attribute.
+        """
+        if not hasattr(handler, "__name__"):
+            raise ValueError("Event handler must be a named function")
+
+        # We store it as a special attribute for the client runtime to find
+        self._attrs[f"data-on-{event}"] = handler.__name__
+        return self
+
+    def has_bindings(self) -> bool:
+        """Checks if this element or any child has a Python event binding."""
+        # Check self
+        for key in self._attrs:
+            if key.startswith("data-on-"):
+                return True
+
+        # Check children
+        for child in self._content:
+            if isinstance(child, Element) and child.has_bindings():
+                return True
+
+        return False
+
     def _render(self, fp, indent: int):
         parts = [self._tag]
 
@@ -243,6 +269,18 @@ class StyleResource:
     inline: bool = False
 
 
+@dataclass
+class ScriptResource:
+    """
+    Represents a JS script resource.
+    """
+
+    src: str | None = None
+    content: str | None = None
+    defer: bool = False
+    module: bool = False
+
+
 class Document(Markup):
     def __init__(self, lang: str = "en", **head_kwargs) -> None:
         self.lang = lang
@@ -274,6 +312,20 @@ class Document(Markup):
 
         return self
 
+    def script(
+        self,
+        src: str | None = None,
+        content: str | None = None,
+        defer: bool = False,
+        module: bool = False,
+    ) -> Document:
+        self.head.scripts.append(
+            ScriptResource(
+                src, textwrap.dedent(content) if content else None, defer, module
+            )
+        )
+        return self
+
     def _render(self, fp, indent: int):
         self._write_line(fp, "<!DOCTYPE html>")
         self._write_line(fp, f'<html lang="{self.lang}">')
@@ -287,6 +339,7 @@ class Head(Markup):
         self.charset = charset
         self.title = title
         self.styles: list[StyleResource] = []
+        self.scripts: list[ScriptResource] = []
 
     def _render(self, fp, indent: int):
         self._write_line(fp, "<head>", indent)
@@ -301,18 +354,35 @@ class Head(Markup):
         )
         self._write_line(fp, f"<title>{self.title}</title>", indent + 1)
 
-        for resource in self.styles:
-            if resource.inline and resource.sheet:
+        for style in self.styles:
+            if style.inline and style.sheet:
                 # Render Inline
                 self._write_line(fp, "<style>", indent + 1)
-                resource.sheet.render(fp)
+                self._write_line(fp, style.sheet.render(), indent + 1)
                 self._write_line(fp, "</style>", indent + 1)
 
-            elif resource.href:
+            elif style.href:
                 # Render Link
                 self._write_line(
-                    fp, f'<link rel="stylesheet" href="{resource.href}">', indent + 1
+                    fp, f'<link rel="stylesheet" href="{style.href}">', indent + 1
                 )
+
+        for script in self.scripts:
+            if script.src:
+                # External script
+                attrs = f'src="{script.src}"'
+                if script.defer:
+                    attrs += " defer"
+                if script.module:
+                    attrs += ' type="module"'
+                self._write_line(fp, f"<script {attrs}></script>", indent + 1)
+
+            elif script.content:
+                # Inline script
+                attrs = ' type="module"' if script.module else ""
+                self._write_line(fp, f"<script{attrs}>", indent + 1)
+                self._write_line(fp, script.content, indent + 1)
+                self._write_line(fp, "</script>", indent + 1)
 
         self._write_line(fp, "</head>", indent)
 

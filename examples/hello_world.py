@@ -38,4 +38,4 @@ def index():
 
 # 4. Run the Server
 # Ensure you have installed server deps: uv add --extra server "fastapi[standard]"
-app.run(port=8000)
+app.run()

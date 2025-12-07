@@ -1,5 +1,7 @@
 import os
 import inspect
+from pathlib import Path
+from textwrap import dedent
 from typing import Any, Callable, Dict, List, Union
 
 
@@ -43,7 +45,20 @@ class App:
         # Registry of served styles to prevent duplicate route registration
         self.served_styles: Dict[str, StyleSheet] = {}
 
-    def add_style(self, path: str, sheet: StyleSheet):
+        # Registry for client-side functions
+        self.client_functions: Dict[str, Callable] = {}
+
+        # Register the Bundle Route (Dynamic Python file)
+        @self.api.get("/_violetear/bundle.py")
+        def get_bundle():
+            return Response(content=self._generate_bundle(), media_type="text/x-python")
+
+    def client(self, func: Callable):
+        """Decorator to mark a function to be compiled to the client."""
+        self.client_functions[func.__name__] = func
+        return func
+
+    def style(self, path: str, sheet: StyleSheet):
         """
         Registers a stylesheet to be served by the app at a specific path.
 
@@ -70,7 +85,50 @@ class App:
             if isinstance(resource, StyleResource):
                 # If it has a sheet object AND a URL, it needs to be served
                 if resource.sheet and resource.href and not resource.inline:
-                    self.add_style(resource.href, resource.sheet)
+                    self.style(resource.href, resource.sheet)
+
+    def _generate_bundle(self) -> str:
+        """
+        Generates the Python bundle to run in the browser.
+        It combines the runtime logic + user functions.
+        """
+        # 1. Mock the 'app' object so decorators don't fail in the browser
+        header = "class MockApp:\n    def client(self, f): return f\n\napp = MockApp()\n\n"
+
+        # 2. Read the Client Runtime (Hydration logic)
+        runtime_path = Path(__file__).parent / "client.py"
+
+        with open(runtime_path, "r") as f:
+            runtime_code = f.read()
+
+        # 3. Extract User Functions
+        user_code = []
+
+        for name, func in self.client_functions.items():
+            user_code.append(inspect.getsource(func))
+
+        # 4. Initialization
+        init_code = "\n\n# --- Init ---\n\nhydrate(globals())\n"
+
+        return header + runtime_code + "\n\n" + "\n".join(user_code) + init_code
+
+    def _inject_client_side(self, doc: Document):
+        """Injects Pyodide and the Bundle bootstrapper."""
+        # 1. Load Pyodide
+        doc.script(src="https://cdn.jsdelivr.net/pyodide/v0.29.0/full/pyodide.js")
+
+        # 2. Bootstrap Script
+        bootstrap = dedent("""
+        async function main() {
+            let pyodide = await loadPyodide();
+            let response = await fetch("/_violetear/bundle.py");
+            let code = await response.text();
+            await pyodide.runPythonAsync(code);
+        }
+        main();
+        """)
+
+        doc.script(content=bootstrap)
 
     def route(self, path: str, methods: List[str] = ["GET"]):
         """
@@ -97,8 +155,12 @@ class App:
 
                 # 2. Handle Document Rendering
                 if isinstance(response, Document):
-                    # JIT: Check if this doc uses any new stylesheets we need to serve
+                    # Check if this doc uses any new stylesheets we need to serve
                     self._register_document_styles(response)
+
+                    # Check if this document contains Python bindings
+                    if response.body.has_bindings():
+                        self._inject_client_side(response)
 
                     # Render the HTML (which will contain <link href="..."> tags)
                     return HTMLResponse(response.render())
