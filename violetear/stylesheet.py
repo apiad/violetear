@@ -38,8 +38,8 @@ class StyleSheet:
         - `base`: A style to use as base for all newly defined styles
                   (i.e., any new style will `apply` the base style).
         """
-        self.styles = []
-        self.medias = []
+        self.styles: list[Style] = []
+        self.medias: list[MediaQuery] = []
         self._by_name = {}
         self._by_selector = {}
         self._used = set()
