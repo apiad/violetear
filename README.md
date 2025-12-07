@@ -13,9 +13,9 @@
 
 It features a unique 3-layer architecture:
 
-1.  **🎨 Styling Layer**: Generate CSS rules programmatically with a fluent, pythonic API. No more huge `.css` files; just composable Python objects.
+1.  **🎨 Styling Layer**: Generate CSS rules programmatically with a fluent, pythonic API. Includes an **Atomic CSS** engine that generates utility classes on the fly.
 2.  **🧱 UI Layer**: Build reusable HTML components with a fluent builder pattern. Type-safe, refactor-friendly, and composable.
-3.  **⚡ Logic Layer**: Write server-side and client-side code in the same file. `violetear` handles the compilation, bundling, and RPC bridges for you seamlessly.
+3.  **⚡ Logic Layer**: Write server-side and client-side code in the same file. `violetear` handles the compilation, bundling, RPC bridges, and state persistence seamlessly.
 
 Use it for anything: from a simple script to generate a CSS file, to a static site generator, all the way up to a full-stack Isomorphic Web App powered by **FastAPI** and **Pyodide**.
 
@@ -25,7 +25,7 @@ To use the core library (HTML/CSS generation only), install the base package:
 
 ```bash
 pip install violetear
-```
+````
 
 To build full-stack applications (with the App Engine and Server), install the server extras:
 
@@ -35,9 +35,11 @@ pip install "violetear[server]"
 
 ## 🚀 Quickstart: The Isomorphic Counter
 
-Let's build a fully interactive "Counter" app where the state updates instantly in the browser using our Pythonic DOM API, but every change is reported back to the server. **Zero JavaScript required.**
+Let's build a fully interactive "Counter" app. The state persists across reloads using **Local Storage**, updates instantly in the browser via the **DOM API**, and syncs with the server via **RPC**.
 
-### Step 1: Initialize the App
+**Zero JavaScript required.**
+
+### 1. Initialize the App
 
 First, we create the application instance. This wraps FastAPI to provide a powerful server engine.
 
@@ -51,7 +53,7 @@ from violetear.dom import Event
 app = App(title="Violetear Counter")
 ```
 
-### Step 2: Define Styles (CSS-in-Python)
+### 2. Define Styles (CSS-in-Python)
 
 Instead of writing CSS strings, use the fluent API to define your theme.
 
@@ -59,28 +61,23 @@ Instead of writing CSS strings, use the fluent API to define your theme.
 # Create a global stylesheet
 style = StyleSheet()
 
-style.select("body").background(Colors.AliceBlue).font(family="sans-serif").flexbox(
-    align="center", justify="center"
-).height("320px").margin(top=20)
+style.select("body").background(Colors.AliceBlue).font(family="sans-serif") \
+     .flexbox(align="center", justify="center").height("320px").margin(top=20)
 
-style.select(".counter-card").background(Colors.White).padding(40).rounded(15).shadow(
-    blur=20, color="rgba(0,0,0,0.1)"
-).text(align="center")
+style.select(".counter-card").background(Colors.White).padding(40).rounded(15) \
+     .shadow(blur=20, color="rgba(0,0,0,0.1)").text(align="center")
 
-style.select(".count-display").font(size=64, weight="bold").color(
-    Colors.SlateBlue
-).margin(10)
+style.select(".count-display").font(size=64, weight="bold").color(Colors.SlateBlue).margin(10)
 
-style.select("button").padding("10px 20px").font(size=20, weight="bold").margin(
-    5
-).rounded(8).border(0).rule("cursor", "pointer").color(Colors.White)
+style.select("button").padding("10px 20px").font(size=20, weight="bold") \
+     .margin(5).rounded(8).border(0).rule("cursor", "pointer").color(Colors.White)
 
 style.select(".btn-plus").background(Colors.MediumSeaGreen)
 style.select(".btn-minus").background(Colors.IndianRed)
 style.select(".btn:hover").rule("opacity", "0.8")
 ```
 
-### Step 3: Server Logic (RPC)
+### 3. Server Logic (RPC)
 
 Define a function that runs on the server. The `@app.server` decorator exposes this function so your client code can call it directly.
 
@@ -88,28 +85,44 @@ Define a function that runs on the server. The `@app.server` decorator exposes t
 @app.server
 async def report_count(current_count: int, action: str):
     """
-    This runs on the server.
+    This runs on the SERVER.
     FastAPI automatically validates that current_count is an int.
     """
     print(f"[SERVER] Count is now {current_count} (Action: {action})")
     return {"status": "received"}
 ```
 
-### Step 4: Client Logic (In-Browser Python)
+### 4. Client Logic (In-Browser Python)
 
-Define the interactivity. The `@app.client` decorator compiles this function and sends it to the browser to run inside Pyodide. We use `violetear.dom` to manipulate the page using a familiar, pythonic API.
+Define the interactivity. We use `@app.startup` to restore state when the page loads, and `@app.client` to handle user interactions.
 
 ```python
+@app.startup
+async def init_counter():
+    """
+    Runs automatically when the page loads (Client-Side).
+    Restores the counter from Local Storage so F5 doesn't reset it.
+    """
+    from violetear.dom import Document
+    from violetear.storage import store
+
+    # We can access storage like an object!
+    saved_count = store.count
+    if saved_count is not None:
+        Document.find("display").text = str(saved_count)
+        print(f"Restored count: {saved_count}")
+
 @app.client
 async def handle_change(event: Event):
     """
-    Runs in the browser.
+    Runs in the browser on click.
     """
-    # Import the DOM wrapper (Client-Side implementation)
     from violetear.dom import Document
+    from violetear.storage import store
 
     # A. Get current state from DOM
     display = Document.find("display")
+    # We can read/write text content directly
     current_value = int(display.text)
 
     # B. Determine action
@@ -119,12 +132,15 @@ async def handle_change(event: Event):
     # C. Update DOM immediately (Responsive)
     display.text = str(new_value)
 
-    # D. Sync with Server (Background)
-    # This calls the @app.server function seamlessly!
+    # D. Save to Local Storage (Persistence)
+    # This automatically serializes the value to JSON
+    store.count = new_value
+
+    # E. Sync with Server (Background)
     await report_count(current_count=new_value, action=action)
 ```
 
-### Step 5: The UI (Server-Side Rendering)
+### 5. The UI (Server-Side Rendered)
 
 Finally, create the route that renders the initial HTML. We attach the style and bind the Python function to the button's click event.
 
@@ -151,7 +167,7 @@ def index():
                 "click", handle_change
             ),
 
-            Element("p", text="Check server console for pings.").style(
+            Element("p", text="Refresh the page! The count persists.").style(
                 Style().color(Colors.Gray).margin(top=20)
             ),
         )
@@ -160,10 +176,10 @@ def index():
     return doc
 
 if __name__ == "__main__":
-    app.run(port=8000)
+    app.run()
 ```
 
-Run it with `python main.py` and open `http://localhost:8000`. You have a full-stack, styled, interactive app in just 60 lines of pure Python!
+Run it with `python main.py` and open `http://localhost:8000`. You have a full-stack, styled, interactive app with persistence in 70 lines of pure Python!
 
 ## ✨ Features
 
@@ -171,37 +187,46 @@ Run it with `python main.py` and open `http://localhost:8000`. You have a full-s
 
   * **Fluent API**: `style.select("div").color(Colors.Red).margin(10)`
   * **Type-Safe Colors**: Built-in support for RGB, HSL, Hex, and a massive library of standard web colors (`violetear.color.Colors`).
-  * **Unit Handling**: Intelligent handling of `px`, `rem`, `em`, `vh`, etc.
   * **Presets**:
-      * `FlexGrid`: Create complex 12-column layouts with a single line.
-      * `SemanticDesign`: Pre-configured design systems for typography and buttons.
-      * `UtilitySystem`: Generate thousands of utility classes (`p-4`, `text-xl`, `flex`, `hover:bg-red-500`) purely in Python without any build step.
-      * `Atomic`: A pre-made, completely configurable, Tailwind-like atomic CSS based on the utility system.
+      * **Atomic CSS**: A complete Tailwind-compatible utility preset. Generate thousands of utility classes (`p-4`, `text-xl`, `hover:bg-red-500`) purely in Python.
+      * `FlexGrid` & `SemanticDesign` included.
 
 ### 🧱 Component System
 
   * **Declarative Builder**: Create HTML structures without writing HTML strings.
   * **Reusability**: Subclass `Component` to create reusable widgets (Navbars, Cards, Modals) that encapsulate their own structure and logic.
-  * **Context-Aware**: Elements know about their parents and styles.
 
 ### ⚡ Full-Stack Application Engine
 
   * **Hybrid Architecture**: Supports both **Server-Side Rendering (SSR)** for SEO and speed, and **Client-Side Rendering (CSR)** for interactivity.
-  * **Pythonic DOM**: A wrapper (`violetear.dom`) that provides a clean, type-safe Python API for DOM manipulation in the browser (`Document.find("id").text("Hello")`).
-  * **Smart Hydration**: If a page has no interactive elements, `violetear` serves pure HTML. If you add an `@app.client` handler, it automatically injects the runtime.
-  * **Asset Management**: Stylesheets created in Python are served directly from memory; no need to manage static files manually.
-  * **Seamless RPC**: Call server functions from the browser as if they were local. Arguments and return values are automatically serialized.
+  * **Pythonic DOM**: A wrapper (`violetear.dom`) that provides a clean, type-safe Python API for DOM manipulation in the browser.
+  * **Smart Storage**: A Pythonic wrapper (`violetear.storage`) around `localStorage` that handles JSON serialization automatically and allows attribute access (`store.user.name`).
+  * **Asset Management**: Stylesheets created in Python are served directly from memory.
+  * **Seamless RPC**: Call server functions from the browser as if they were local.
 
 ## 🛣️ Roadmap
 
-We are just getting started. Here is what's coming in v1.1 and beyond:
+We are currently in v1.0 (Core). Here is the vision for the immediate future of Violetear:
 
-  * **📱 Progressive Web Apps (PWA)**: Simply pass `App(pwa=True)` to automatically generate `manifest.json` and a Service Worker, making your Python app installable and offline-capable.
-  * **🔥 JIT CSS**: An optimization engine that scans your Python code and serves *only* the CSS rules actually used by your components, reducing file size to the minimum.
+### v1.1: The "App" Update (Deployment)
+
+  * **📱 Progressive Web Apps (PWA)**: Simply pass `@app.route(..., pwa=True)` to automatically generate `manifest.json` and a Service Worker.
+  * **🔥 JIT CSS**: An optimization engine that scans your Python code and serves *only* the CSS rules actually used by your components.
+
+### v1.2: The "Navigation" Update (SPA)
+
+  * **🧭 SPA Engine**: An abstraction (`violetear.spa`) for building Single Page Applications.
+  * **Client-Side Routing**: Define routes that render specific components into a shell without reloading the page.
+
+### v1.3: The "Twin-State" Update (Reactivity)
+
+  * **`@app.local`**: Reactive state that lives in the browser (per user). Changes update the DOM automatically.
+  * **`@app.shared`**: Real-time state that lives on the server (multiplayer). Changes are synced to all connected clients via **WebSockets**.
 
 ## 🤝 Contribution
 
-`violetear` is open-source and we love contributions!
+`violetear` is open-source and we love contributions\!
+Check out the [Design Philosophy](https://www.google.com/search?q=docs/design.md) to understand our "Unopinionated" and "Zero-Dependency Core" approach.
 
 1.  Fork the repo.
 2.  Install dependencies with `uv sync`.
