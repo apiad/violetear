@@ -11,9 +11,13 @@ from .style import Style
 from .selector import Selector
 from .units import Unit
 from .color import Color
+from .markup import Document, Element, Component
 
 # New Framework export (lazy import to avoid hard dependency errors if possible,
 # though our App class handles the check internally)
-from .app import App
+try:
+    from .app import App
+except ImportError:
+    pass
 
 __version__ = "1.2.0"

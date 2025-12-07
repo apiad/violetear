@@ -4,24 +4,22 @@ from pathlib import Path
 from textwrap import dedent
 from typing import Any, Callable, Dict, List, Union
 
-from pydantic import create_model
-
 
 # --- Optional Server Dependencies ---
 try:
+    from pydantic import create_model
     from fastapi import FastAPI, APIRouter, Request, Response
-    from fastapi.responses import HTMLResponse
+    from fastapi.responses import HTMLResponse, FileResponse
     from fastapi.staticfiles import StaticFiles
     import uvicorn
 
     HAS_SERVER = True
+
 except ImportError:
-    HAS_SERVER = False
-    # Dummy classes for type hinting
-    FastAPI = object  # type: ignore
-    APIRouter = object  # type: ignore
-    Request = object  # type: ignore
-    Response = object  # type: ignore
+    raise ImportError(
+        "Violetear Server dependencies are missing. "
+        "Please install them with: uv add --extra server 'fastapi[standard]'"
+    )
 
 
 from .stylesheet import StyleSheet
@@ -34,15 +32,19 @@ class App:
     Wraps FastAPI to provide a full-stack Python web framework experience.
     """
 
-    def __init__(self, title: str = "Violetear App"):
-        if not HAS_SERVER:
-            raise ImportError(
-                "Violetear Server dependencies are missing. "
-                "Please install them with: uv add --extra server 'fastapi[standard]'"
-            )
-
+    def __init__(self, title: str = "Violetear App", favicon: str | None = None):
         self.title = title
         self.api = FastAPI(title=title)
+
+        if favicon is None:
+            favicon = str(Path(__file__).parent / "icon.png")
+
+        self.favicon = favicon
+
+        # Standard path for browser favicon requests
+        @self.api.get("/favicon.ico", include_in_schema=False)
+        async def favicon():
+            return FileResponse(self.favicon)
 
         # Registry of served styles to prevent duplicate route registration
         self.served_styles: Dict[str, StyleSheet] = {}

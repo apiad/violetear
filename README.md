@@ -1,3 +1,7 @@
+<div style="text-align: center;">
+  <img src="https://github.com/apiad/violetear/blob/main/logo.png?raw=true" height="200px" style="border-radius:5px;">
+</div>
+
 # 🐦 violetear
 
 **The Full-Stack Web Framework for Pythonistas.**

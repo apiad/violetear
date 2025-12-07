@@ -335,9 +335,15 @@ class Document(Markup):
 
 
 class Head(Markup):
-    def __init__(self, charset: str = "UTF-8", title: str = "") -> None:
+    def __init__(
+        self,
+        charset: str = "UTF-8",
+        title: str = "",
+        favicon: str = "/favicon.ico"
+    ) -> None:
         self.charset = charset
         self.title = title
+        self.favicon = favicon
         self.styles: list[StyleResource] = []
         self.scripts: list[ScriptResource] = []
 
@@ -353,6 +359,14 @@ class Head(Markup):
             indent + 1,
         )
         self._write_line(fp, f"<title>{self.title}</title>", indent + 1)
+
+        # Render Favicon
+        if self.favicon:
+            self._write_line(
+                fp,
+                f'<link rel="icon" href="{self.favicon}">',
+                indent + 1
+            )
 
         for style in self.styles:
             if style.inline and style.sheet:
