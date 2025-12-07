@@ -153,6 +153,7 @@ class ProxyElement(Protocol):
     """
     Lightweight protocol for typing DOM elements
     """
+
     id: str
     classes: list[str]
 
@@ -161,4 +162,5 @@ class Event(Protocol):
     """
     Lightweight protocol for typing DOM events
     """
+
     target: ProxyElement
