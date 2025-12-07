@@ -70,7 +70,7 @@ release: format-check
 	@echo Remove backup files
 	@rm pyproject.toml.bak violetear/__init__.py.bak
 
-	@uv sync
+	@uv sync --all-extras
 
 	@echo "Committing version bump..."
 	@git add pyproject.toml violetear/__init__.py uv.lock
@@ -87,5 +87,3 @@ release: format-check
 	@gh release create "v$(NEW_VERSION)" --title "v$(NEW_VERSION)" --notes "Release version $(NEW_VERSION)"
 
 	@echo "✅ Version $(NEW_VERSION) successfully released."
-
-	@uv pip install -e .[full]
