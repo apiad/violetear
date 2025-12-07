@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import abc
+from dataclasses import dataclass
 import io
 from pathlib import Path
 from typing import (
@@ -231,23 +232,39 @@ class ElementSet:
         return self._parent.root()
 
 
+@dataclass
+class StyleResource:
+    """
+    Represents a CSS resource attached to a document.
+    """
+    sheet: StyleSheet | None = None
+    href: str | None = None
+    inline: bool = False
+
+
 class Document(Markup):
     def __init__(self, lang: str = "en", **head_kwargs) -> None:
         self.lang = lang
         self.head = Head(**head_kwargs)
         self.body = Body()
-        self.styles = []
 
     def style(
-        self, sheet: StyleSheet, inline: bool = False, href: str = None
+        self, sheet: StyleSheet | None = None, inline: bool = False, href: str | None = None
     ) -> Document:
-        if not inline and href is None:
-            raise ValueError("Need an href when inline is false")
+        if sheet is None and href is None:
+            raise ValueError("Need either a sheet or an external href")
 
-        if inline:
-            self.styles.append(sheet)
-        else:
-            self.head.styles.append(href)
+        if not inline and href is None:
+            raise ValueError("Need an href when inline is False")
+
+        if inline and sheet is None:
+            raise ValueError("Need a sheet when inline is True")
+
+        self.head.styles.append(StyleResource(
+            sheet=sheet,
+            href=href,
+            inline=inline,
+        ))
 
         return self
 
@@ -263,7 +280,7 @@ class Head(Markup):
     def __init__(self, charset: str = "UTF-8", title: str = "") -> None:
         self.charset = charset
         self.title = title
-        self.styles = []
+        self.styles: list[StyleResource] = []
 
     def _render(self, fp, indent: int):
         self._write_line(fp, "<head>", indent)
@@ -278,8 +295,16 @@ class Head(Markup):
         )
         self._write_line(fp, f"<title>{self.title}</title>", indent + 1)
 
-        for href in self.styles:
-            self._write_line(fp, f'<link rel="stylesheet" href="{href}">', indent + 1)
+        for resource in self.styles:
+            if resource.inline and resource.sheet:
+                # Render Inline
+                self._write_line(fp, '<style>', indent + 1)
+                resource.sheet.render(fp)
+                self._write_line(fp, '</style>', indent + 1)
+
+            elif resource.href:
+                # Render Link
+                self._write_line(fp, f'<link rel="stylesheet" href="{resource.href}">', indent + 1)
 
         self._write_line(fp, "</head>", indent)
 
