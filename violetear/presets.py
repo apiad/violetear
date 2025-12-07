@@ -1,7 +1,7 @@
 from __future__ import annotations
 from inspect import isgenerator
 
-from typing import Any, Callable, Dict, List
+from typing import Any, Callable, Dict, Iterator, List
 import itertools
 from violetear.color import Color, Colors
 from violetear.style import Style
@@ -140,35 +140,35 @@ class UtilitySystem(StyleSheet):
     def define(
         self,
         *,
-        variants: List[str],
+        variants: Iterator[str] | Iterator[Iterator[str]],
         rule: Callable[[Style, Any]],
         clss: str = "",
-        values: List[Any] = None,
-        name: Callable = None,
+        values: Iterator[Any] | Iterator[Iterator[Any]] | None = None,
+        name: Callable[..., str] | None = None,
     ):
-        variants = list(variants)
+        _variants = list(variants)
 
-        if isinstance(variants[0], (list, tuple)) or isgenerator(variants[0]):
-            variants = list(itertools.product(*variants))
+        if isinstance(_variants[0], (list, tuple)) or isgenerator(_variants[0]):
+            _variants = list(itertools.product(*_variants))
         else:
-            variants = [[v] for v in variants]
+            _variants = [[v] for v in _variants]
 
         if values is None:
-            values = variants
+            _values = _variants
         else:
-            values = list(values)
+            _values = list(values)
 
-            if isinstance(values[0], (list, tuple)) or isgenerator(values[0]):
-                values = list(itertools.product(*values))
+            if isinstance(_values[0], (list, tuple)) or isgenerator(_values[0]):
+                _values = list(itertools.product(*_values))
             else:
-                values = [[v] for v in values]
+                _values = [[v] for v in _values]
 
         if name is None:
 
             def name(*variant):
                 return "-".join(map(str, [clss] + list(variant)))
 
-        for variant, value in zip(variants, values):
+        for variant, value in zip(_variants, _values):
             style = self.select(f".{name(*variant)}")
             rule(style, *value)
 
