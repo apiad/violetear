@@ -10,7 +10,10 @@ app = App(title="Violetear Demo")
 theme = StyleSheet()
 theme.select("body").font(family="Helvetica, sans-serif").background(Colors.AliceBlue)
 theme.select("h1").color(Colors.Navy).margin(bottom=20)
-theme.select(".card").background(Colors.White).padding(20).rounded(10).shadow(x=2, y=2, blur=10, color=Colors.Gray)
+theme.select(".card").background(Colors.White).padding(20).rounded(10).shadow(
+    x=2, y=2, blur=10, color=Colors.Gray
+)
+
 
 # 3. Define your Routes (The "Controller")
 @app.route("/")
@@ -27,10 +30,11 @@ def index():
         Element("h1", text="Welcome to Violetear"),
         Element("div", classes="card").add(
             Element("p", text="This is a server-side rendered page.")
-        )
+        ),
     )
 
     return doc
+
 
 # 4. Run the Server
 # Ensure you have installed server deps: uv add --extra server "fastapi[standard]"
