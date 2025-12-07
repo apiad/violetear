@@ -56,18 +56,18 @@ async def handle_change(event):
     """
     Runs in the browser.
     """
-    from js import document
+    from violetear.dom import Document
 
     # A. Get current state from DOM
-    display_el = document.getElementById("display")
-    current_value = int(display_el.innerText)
+    display = Document.find("display")
+    current_value = int(display.text)
 
     # B. Determine action
     action = event.target.id  # "plus" or "minus"
     new_value = current_value + (1 if action == "plus" else -1)
 
     # C. Update DOM immediately (Responsive)
-    display_el.innerText = str(new_value)
+    display.text = str(new_value)
 
     # D. Sync with Server (Background)
     # This calls the @app.server function seamlessly!
