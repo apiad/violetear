@@ -196,7 +196,7 @@ class App:
         Generates the Python bundle to run in the browser.
         """
         # 1. Mock the 'app' object
-        header = "class MockApp:\n    def client(self, f): return f\n    def server(self, f): return f\napp = MockApp()\n\n"
+        header = "class MockApp:\n    def client(self, f): return f\n    def server(self, f): return f\napp = MockApp()\n\nclass Event: pass\n\n"
 
         # 2. Inject violetear.dom module
         # This allows 'from violetear.dom import Document' to work in the browser

@@ -3,6 +3,7 @@ from violetear import App, StyleSheet
 from violetear.markup import Document, Element
 from violetear.color import Colors
 from violetear.style import Style
+from violetear.dom import Event
 
 # 1. Initialize the App
 app = App(title="Violetear Counter")
@@ -52,7 +53,7 @@ def report_count(current_count: int, action: str):
 
 # --- 3. THE CLIENT (Pyodide Browser) ---
 @app.client
-async def handle_change(event):
+async def handle_change(event: Event):
     """
     Runs in the browser.
     """
