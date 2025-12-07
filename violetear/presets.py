@@ -175,7 +175,6 @@ class UtilitySystem(StyleSheet):
         return self
 
 
-
 # Atomic CSS
 
 from typing import Dict, List, Optional, Union
@@ -295,7 +294,6 @@ class Atomic(UtilitySystem):
     # 6. State Variants to generate (e.g. hover:...)
     DEFAULT_STATES = ["hover", "focus", "active"]
 
-
     def __init__(
         self,
         *,
@@ -344,12 +342,26 @@ class Atomic(UtilitySystem):
         # Display & Position (No prefix, just the value name)
         # e.g. .block, .flex, .absolute
         self.define(
-            variants=
-                ["block", "inline", "flex", "grid", "hidden",
-                "static", "fixed", "absolute", "relative"]
-            ,
-            rule=lambda s, v: s.rule("display" if v in ["block", "inline", "flex", "grid", "hidden"] else "position", v if v != "hidden" else "none"),
-            name=lambda v: v
+            variants=[
+                "block",
+                "inline",
+                "flex",
+                "grid",
+                "hidden",
+                "static",
+                "fixed",
+                "absolute",
+                "relative",
+            ],
+            rule=lambda s, v: s.rule(
+                (
+                    "display"
+                    if v in ["block", "inline", "flex", "grid", "hidden"]
+                    else "position"
+                ),
+                v if v != "hidden" else "none",
+            ),
+            name=lambda v: v,
         )
 
         # Flex Direction (row, col...)
@@ -357,14 +369,14 @@ class Atomic(UtilitySystem):
             clss="flex",
             variants=["row", "col", "row-reverse", "col-reverse"],
             values=["row", "column", "row-reverse", "column-reverse"],
-            rule=lambda s, v: s.flexbox(direction=v)
+            rule=lambda s, v: s.flexbox(direction=v),
         )
 
         # Z-Index
         self.define(
             clss="z",
             variants=["0", "10", "20", "30", "40", "50", "auto"],
-            rule=lambda s, v: s.rule("z-index", v)
+            rule=lambda s, v: s.rule("z-index", v),
         )
 
     def _generate_sizing(self):
@@ -375,7 +387,7 @@ class Atomic(UtilitySystem):
                 clss=prefix,
                 variants=self.spacing.keys(),
                 values=self.spacing.values(),
-                rule=lambda s, v: s.rule(rule_name, v)
+                rule=lambda s, v: s.rule(rule_name, v),
             )
 
         # Fractions (1/2 -> 50%)
@@ -386,7 +398,7 @@ class Atomic(UtilitySystem):
             variants=[["w", "h"], fractions.keys()],
             values=[["width", "height"], fractions.values()],
             rule=lambda s, prop, v: s.rule(prop, v),
-            name=lambda p, v: f"{p}-{v.replace('/', r'\/')}"
+            name=lambda p, v: f"{p}-{v.replace('/', r'\/')}",
         )
 
     def _generate_spacing(self):
@@ -396,23 +408,34 @@ class Atomic(UtilitySystem):
         # Helper to map 't' -> 'top', 'x' -> 'left, right', etc.
         def apply_spacing(style, property, side, value):
             kwargs = {}
-            if side == "": kwargs = {"all": value}
-            elif side == "t": kwargs = {"top": value}
-            elif side == "b": kwargs = {"bottom": value}
-            elif side == "l": kwargs = {"left": value}
-            elif side == "r": kwargs = {"right": value}
-            elif side == "x": kwargs = {"left": value, "right": value}
-            elif side == "y": kwargs = {"top": value, "bottom": value}
+            if side == "":
+                kwargs = {"all": value}
+            elif side == "t":
+                kwargs = {"top": value}
+            elif side == "b":
+                kwargs = {"bottom": value}
+            elif side == "l":
+                kwargs = {"left": value}
+            elif side == "r":
+                kwargs = {"right": value}
+            elif side == "x":
+                kwargs = {"left": value, "right": value}
+            elif side == "y":
+                kwargs = {"top": value, "bottom": value}
 
             # Call style.padding(...) or style.margin(...)
             getattr(style, property)(**kwargs)
 
         self.define(
-            variants=[["p", "m"], ["", "t", "b", "l", "r", "x", "y"], self.spacing.keys()],
-            values=[["padding", "margin"], [None]*7, self.spacing.values()],
+            variants=[
+                ["p", "m"],
+                ["", "t", "b", "l", "r", "x", "y"],
+                self.spacing.keys(),
+            ],
+            values=[["padding", "margin"], [None] * 7, self.spacing.values()],
             # Logic: property is 'padding'/'margin', side is 't'/'x', value is '1rem'
             rule=lambda s, prop, side, val: apply_spacing(s, prop, side, val),
-            name=lambda prop, side, val: f"{prop[0]}{side}-{val}"
+            name=lambda prop, side, val: f"{prop[0]}{side}-{val}",
         )
 
         # 2. Gap
@@ -420,7 +443,7 @@ class Atomic(UtilitySystem):
             clss="gap",
             variants=self.spacing.keys(),
             values=self.spacing.values(),
-            rule=lambda s, v: s.rule("gap", v)
+            rule=lambda s, v: s.rule("gap", v),
         )
 
     def _generate_typography(self):
@@ -429,7 +452,7 @@ class Atomic(UtilitySystem):
             clss="text",
             variants=self.font_sizes.keys(),
             values=self.font_sizes.values(),
-            rule=lambda s, v: s.font(size=v)
+            rule=lambda s, v: s.font(size=v),
         )
 
         # Font Weights (font-bold)
@@ -437,14 +460,14 @@ class Atomic(UtilitySystem):
             clss="font",
             variants=self.font_weights.keys(),
             values=self.font_weights.values(),
-            rule=lambda s, v: s.font(weight=v)
+            rule=lambda s, v: s.font(weight=v),
         )
 
         # Text Align
         self.define(
             clss="text",
             variants=["left", "center", "right", "justify"],
-            rule=lambda s, v: s.text(align=v)
+            rule=lambda s, v: s.text(align=v),
         )
 
         # Text Colors
@@ -452,7 +475,7 @@ class Atomic(UtilitySystem):
             clss="text",
             variants=self.colors.keys(),
             values=self.colors.values(),
-            rule=lambda s, v: s.color(v)
+            rule=lambda s, v: s.color(v),
         )
 
     def _generate_backgrounds_borders(self):
@@ -461,7 +484,7 @@ class Atomic(UtilitySystem):
             clss="bg",
             variants=self.colors.keys(),
             values=self.colors.values(),
-            rule=lambda s, v: s.background(v)
+            rule=lambda s, v: s.background(v),
         )
 
         # Border Colors
@@ -469,7 +492,7 @@ class Atomic(UtilitySystem):
             clss="border",
             variants=self.colors.keys(),
             values=self.colors.values(),
-            rule=lambda s, v: s.border(color=v)
+            rule=lambda s, v: s.border(color=v),
         )
 
         # Border Radius
@@ -478,7 +501,7 @@ class Atomic(UtilitySystem):
             variants=self.border_radius.keys(),
             values=self.border_radius.values(),
             rule=lambda s, v: s.rounded(v),
-            name=lambda v: f"rounded-{v}" if v != "default" else "rounded"
+            name=lambda v: f"rounded-{v}" if v != "default" else "rounded",
         )
 
     def _generate_effects(self):
@@ -487,17 +510,19 @@ class Atomic(UtilitySystem):
             clss="shadow",
             variants=self.shadows.keys(),
             values=self.shadows.values(),
-            rule=lambda s, v: s.rule("box-shadow", v)
+            rule=lambda s, v: s.rule("box-shadow", v),
         )
 
         # Default shadow (equivalent to .shadow)
-        self.select(".shadow").rule("box-shadow", self.shadows.get("base", "0 1px 3px 0 rgb(0 0 0 / 0.1)"))
+        self.select(".shadow").rule(
+            "box-shadow", self.shadows.get("base", "0 1px 3px 0 rgb(0 0 0 / 0.1)")
+        )
 
         # Opacity (0, 25, 50, 75, 100)
         self.define(
             clss="opacity",
             variants=range(0, 101, 25),
-            rule=lambda s, v: s.rule("opacity", v / 100)
+            rule=lambda s, v: s.rule("opacity", v / 100),
         )
 
     def _generate_states(self):
