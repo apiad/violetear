@@ -94,7 +94,7 @@ async def report_count(current_count: int, action: str):
 
 ### 4. Client Logic (In-Browser Python)
 
-Define the interactivity. We use `@app.startup` to restore state when the page loads, and `@app.client` to handle user interactions.
+Define the interactivity. We use `@app.startup` to restore state when the page loads.
 
 ```python
 @app.startup
@@ -111,7 +111,11 @@ async def init_counter():
     if saved_count is not None:
         Document.find("display").text = str(saved_count)
         print(f"Restored count: {saved_count}")
+```
 
+And we use `@app.client` to handle user interactions and run Python code in the browser. Check out the Pythonic API for interacting with the DOM and the LocalStorage. We can also call server-side functions seamlessly, via automagic RPC (Remote Procedure Call).
+
+```python
 @app.client
 async def handle_change(event: Event):
     """
@@ -225,8 +229,7 @@ We are currently in v1.0 (Core). Here is the vision for the immediate future of 
 
 ## 🤝 Contribution
 
-`violetear` is open-source and we love contributions\!
-Check out the [Design Philosophy](https://www.google.com/search?q=docs/design.md) to understand our "Unopinionated" and "Zero-Dependency Core" approach.
+`violetear` is open-source and we love contributions!
 
 1.  Fork the repo.
 2.  Install dependencies with `uv sync`.
