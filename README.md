@@ -210,19 +210,19 @@ Run it with `python main.py` and open `http://localhost:8000`. You have a full-s
 
 ## 🛣️ Roadmap
 
-We are currently in v1.0 (Core). Here is the vision for the immediate future of Violetear:
+We are currently in v1.1 (Core). Here is the vision for the immediate future of Violetear:
 
-### v1.1: The "App" Update (Deployment)
+### v1.2: The "App" Update (Deployment)
 
   * **📱 Progressive Web Apps (PWA)**: Simply pass `@app.route(..., pwa=True)` to automatically generate `manifest.json` and a Service Worker.
   * **🔥 JIT CSS**: An optimization engine that scans your Python code and serves *only* the CSS rules actually used by your components.
 
-### v1.2: The "Navigation" Update (SPA)
+### v1.3: The "Navigation" Update (SPA)
 
   * **🧭 SPA Engine**: An abstraction (`violetear.spa`) for building Single Page Applications.
   * **Client-Side Routing**: Define routes that render specific components into a shell without reloading the page.
 
-### v1.3: The "Twin-State" Update (Reactivity)
+### v1.4: The "Twin-State" Update (Reactivity)
 
   * **`@app.local`**: Reactive state that lives in the browser (per user). Changes update the DOM automatically.
   * **`@app.shared`**: Real-time state that lives on the server (multiplayer). Changes are synced to all connected clients via **WebSockets**.
