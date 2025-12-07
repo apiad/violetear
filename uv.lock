@@ -984,7 +984,7 @@ wheels = [
 
 [[package]]
 name = "violetear"
-version = "0.13.1"
+version = "0.14.0"
 source = { editable = "." }
 
 [package.optional-dependencies]

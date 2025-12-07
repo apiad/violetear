@@ -1,6 +1,6 @@
 [project]
 name = "violetear"
-version = "0.13.1"
+version = "0.14.0"
 description = "Full-Stack Web Development Framework for Pythonistas"
 readme = "README.md"
 authors = [
