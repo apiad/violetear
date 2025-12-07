@@ -42,7 +42,7 @@ style = StyleSheet(
 
 # --- 2. THE SERVER (FastAPI RPC) ---
 @app.server
-def report_count(current_count: int, action: str):
+async def report_count(current_count: int, action: str):
     """
     This runs on the server.
     FastAPI automatically validates that current_count is an int.
