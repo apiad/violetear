@@ -541,7 +541,7 @@ class Atomic(UtilitySystem):
             for state in self.states:
                 # We create a class name like "hover:bg-red"
                 # In CSS this must be escaped as ".hover\:bg-red"
-                variant_class = f"{state}\:{original_class}"
+                variant_class = f"{state}\\:{original_class}"
 
                 # Create a new Style manually to handle the escaped class name
                 # 1. The selector matches the class (e.g. .hover:bg-red)
