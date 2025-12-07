@@ -125,6 +125,9 @@ class App:
         """
         if path not in self.served_styles:
             # Register the route dynamically (just once)
+            if not path.startswith("/"):
+                path = f"/{path}"
+
             @self.api.get(path)
             def serve_css():
                 # Render the full CSS content
@@ -141,10 +144,9 @@ class App:
         and registers their routes on the fly.
         """
         for resource in doc.head.styles:
-            if isinstance(resource, StyleResource):
-                # If it has a sheet object AND a URL, it needs to be served
-                if resource.sheet and resource.href and not resource.inline:
-                    self.style(resource.href, resource.sheet)
+            # If it has a sheet object AND a URL, it needs to be served
+            if resource.sheet and resource.href and not resource.inline:
+                self.style(resource.href, resource.sheet)
 
     def _generate_server_stubs(self) -> str:
         """
