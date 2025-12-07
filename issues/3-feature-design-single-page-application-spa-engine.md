@@ -2,11 +2,12 @@
 number: 3
 title: "Feature Design: Single Page Application (SPA) Engine"
 state: open
+labels:
 ---
 
 # Feature Design: SPA Engine
 
-**Target Version:** v1.2
+**Target Version:** v1.3
 **Status:** Draft
 
 This document outlines the design specifications for adding a first-class Single Page Application (SPA) engine to Violetear. This allows building multi-view applications where navigation is handled instantly in the browser without page reloads, while maintaining full Server-Side Rendering (SSR) capability for the initial load.

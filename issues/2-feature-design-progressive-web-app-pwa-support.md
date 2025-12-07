@@ -2,11 +2,12 @@
 number: 2
 title: "Feature Design: Progressive Web App (PWA) Support"
 state: open
+labels:
 ---
 
 # Feature Design: PWA Integration
 
-**Target Version:** v1.1
+**Target Version:** v1.2
 **Status:** Draft
 
 This document outlines the design specifications for adding first-class Progressive Web App (PWA) support to the Violetear framework.

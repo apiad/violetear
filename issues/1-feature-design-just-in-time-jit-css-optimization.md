@@ -2,11 +2,12 @@
 number: 1
 title: "Feature Design: Just-In-Time (JIT) CSS Optimization"
 state: open
+labels:
 ---
 
 # Feature Design: JIT CSS Optimization
 
-**Target Version:** v1.1
+**Target Version:** v1.2
 **Status:** Draft
 
 This document outlines the design specifications for adding an automatic CSS optimization engine to Violetear. This feature ensures that Server-Side Rendered (SSR) pages serve the absolute minimum amount of CSS required to render the content, significantly improving First Contentful Paint (FCP) and reducing network usage.
