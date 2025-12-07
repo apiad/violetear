@@ -1,10 +1,16 @@
 [project]
 name = "violetear"
-version = "0.15.0"
+version = "1.0.0"
 description = "Full-Stack Web Development Framework for Pythonistas"
 readme = "README.md"
 authors = [
     { name = "Alejandro Piad", email = "apiad@apiad.net" }
+]
+classifiers = [
+    "Programming Language :: Python :: 3.12",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Topic :: Software Development :: Libraries :: Application Frameworks",
 ]
 requires-python = ">=3.12"
 dependencies = []
