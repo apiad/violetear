@@ -4,6 +4,7 @@ from violetear.markup import Document, Element
 
 app = App()
 
+
 @app.route("/")
 def index():
     doc = Document(title="Hello Violetear")
@@ -12,6 +13,7 @@ def index():
         Element("p", text="Served via Violetear App Engine."),
     )
     return doc
+
 
 if __name__ == "__main__":
     app.run()

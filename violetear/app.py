@@ -9,6 +9,7 @@ try:
     from fastapi.responses import HTMLResponse
     from fastapi.staticfiles import StaticFiles
     import uvicorn
+
     HAS_SERVER = True
 except ImportError:
     HAS_SERVER = False
@@ -16,7 +17,7 @@ except ImportError:
     FastAPI = object  # type: ignore
     APIRouter = object  # type: ignore
     Request = object  # type: ignore
-    Response = object # type: ignore
+    Response = object  # type: ignore
 
 
 from .stylesheet import StyleSheet
@@ -75,6 +76,7 @@ class App:
         """
         Decorator to register a route.
         """
+
         def decorator(func: Callable):
             @self.api.api_route(path, methods=methods)
             async def wrapper(request: Request):
@@ -105,6 +107,7 @@ class App:
                 return response
 
             return wrapper
+
         return decorator
 
     def mount_static(self, directory: str, path: str = "/static"):

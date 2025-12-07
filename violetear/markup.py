@@ -237,6 +237,7 @@ class StyleResource:
     """
     Represents a CSS resource attached to a document.
     """
+
     sheet: StyleSheet | None = None
     href: str | None = None
     inline: bool = False
@@ -249,7 +250,10 @@ class Document(Markup):
         self.body = Body()
 
     def style(
-        self, sheet: StyleSheet | None = None, inline: bool = False, href: str | None = None
+        self,
+        sheet: StyleSheet | None = None,
+        inline: bool = False,
+        href: str | None = None,
     ) -> Document:
         if sheet is None and href is None:
             raise ValueError("Need either a sheet or an external href")
@@ -260,11 +264,13 @@ class Document(Markup):
         if inline and sheet is None:
             raise ValueError("Need a sheet when inline is True")
 
-        self.head.styles.append(StyleResource(
-            sheet=sheet,
-            href=href,
-            inline=inline,
-        ))
+        self.head.styles.append(
+            StyleResource(
+                sheet=sheet,
+                href=href,
+                inline=inline,
+            )
+        )
 
         return self
 
@@ -298,13 +304,15 @@ class Head(Markup):
         for resource in self.styles:
             if resource.inline and resource.sheet:
                 # Render Inline
-                self._write_line(fp, '<style>', indent + 1)
+                self._write_line(fp, "<style>", indent + 1)
                 resource.sheet.render(fp)
-                self._write_line(fp, '</style>', indent + 1)
+                self._write_line(fp, "</style>", indent + 1)
 
             elif resource.href:
                 # Render Link
-                self._write_line(fp, f'<link rel="stylesheet" href="{resource.href}">', indent + 1)
+                self._write_line(
+                    fp, f'<link rel="stylesheet" href="{resource.href}">', indent + 1
+                )
 
         self._write_line(fp, "</head>", indent)
 
