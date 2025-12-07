@@ -54,7 +54,7 @@ class App:
             @self.api.get(path)
             def serve_css():
                 # Render the full CSS content
-                css_content = self.served_styles[path]
+                css_content = self.served_styles[path].render()
                 return Response(content=css_content, media_type="text/css")
 
         # Set the stylesheet, overrides if existing
