@@ -194,39 +194,56 @@ class App:
     def _generate_bundle(self) -> str:
         """
         Generates the Python bundle to run in the browser.
-        It combines the runtime logic + user functions.
         """
-        # 1. Mock the 'app' object so decorators don't fail in the browser
-        header = (
-            "class MockApp:\n    def client(self, f): return f\n\napp = MockApp()\n\n"
+        # 1. Mock the 'app' object
+        header = "class MockApp:\n    def client(self, f): return f\n    def server(self, f): return f\napp = MockApp()\n\n"
+
+        # 2. Inject violetear.dom module
+        # This allows 'from violetear.dom import Document' to work in the browser
+        dom_path = Path(__file__).parent / "dom.py"
+        with open(dom_path, "r") as f:
+            dom_source = f.read()
+
+        dom_injection = dedent(
+            f"""
+            import sys, types
+            # Create virtual module 'violetear'
+            m_violetear = types.ModuleType("violetear")
+            sys.modules["violetear"] = m_violetear
+
+            # Create virtual module 'violetear.dom'
+            m_dom = types.ModuleType("violetear.dom")
+            sys.modules["violetear.dom"] = m_dom
+
+            # Execute source
+            exec({repr(dom_source)}, m_dom.__dict__)
+            """
         )
 
-        # 2. Read the Client Runtime (Hydration logic)
+        # 3. Read the Client Runtime (Hydration logic)
         runtime_path = Path(__file__).parent / "client.py"
-
         with open(runtime_path, "r") as f:
             runtime_code = f.read()
 
-        # 3. Extract User Functions
+        # 4. Extract User Functions
         user_code = []
-
         for name, func in self.client_functions.items():
             user_code.append(inspect.getsource(func))
 
-        # 4. Generate Server Stubs
+        # 5. Generate Server Stubs
         server_stubs = self._generate_server_stubs()
 
-        # 5. Initialization
-        init_code = "# --- Init ---\n\nhydrate(globals())\n"
+        # 6. Initialization
+        init_code = "\n\n# --- Init ---\nhydrate(globals())"
 
         return (
             header
+            + dom_injection
             + runtime_code
             + "\n\n"
             + "\n".join(user_code)
             + "\n\n"
             + server_stubs
-            + "\n\n"
             + init_code
         )
 
