@@ -7,11 +7,13 @@ IS_BROWSER = "pyodide" in sys.modules or "emscripten" in sys.platform
 if IS_BROWSER:
     from js import localStorage, sessionStorage
 
+
 class Thing:
     """
     A smart wrapper for JSON-like data (dicts and lists).
     Allows attribute access (obj.prop) and automatically persists changes.
     """
+
     def __init__(self, data: Any, on_change: Callable[[], None] = None):
         self._data = data
         # If on_change is None, it's just a passive wrapper (Server side or non-persistent)
@@ -22,17 +24,19 @@ class Thing:
         if isinstance(self._data, dict):
             if name in self._data:
                 return self._wrap(self._data[name])
-            return None # JS-like behavior: undefined property is None
+            return None  # JS-like behavior: undefined property is None
 
         # 2. Forward methods for list (append, etc)
         # This allows store.items.append("new") to trigger a save!
         if hasattr(self._data, name):
             attr = getattr(self._data, name)
             if callable(attr):
+
                 def wrapper(*args, **kwargs):
                     result = attr(*args, **kwargs)
-                    self._on_change() # Trigger save on method call
+                    self._on_change()  # Trigger save on method call
                     return result
+
                 return wrapper
             return attr
 
@@ -90,11 +94,13 @@ class Thing:
     def unwrap(self):
         return self._data
 
+
 class StorageAPI:
     """
     A Pythonic wrapper around Browser Storage.
     Persists dicts/lists automatically via the Thing wrapper.
     """
+
     def __init__(self, backend=None):
         self._backend = backend
         # Server-side memory fallback (for testing/mocking)
@@ -115,7 +121,8 @@ class StorageAPI:
         if IS_BROWSER:
             self._backend.removeItem(key)
         else:
-            if key in self._memory: del self._memory[key]
+            if key in self._memory:
+                del self._memory[key]
 
     def __getattr__(self, key: str) -> Any:
         # Enables 'store.user' syntax
@@ -168,6 +175,7 @@ class StorageAPI:
             self._backend.clear()
         else:
             self._memory.clear()
+
 
 # --- Instances ---
 
