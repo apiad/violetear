@@ -526,30 +526,30 @@ class Atomic(UtilitySystem):
         )
 
     def _generate_states(self):
-        """
-        Generates pseudo-state variants for all currently defined styles.
-        e.g., creates .hover\\:bg-red:hover from .bg-red
-        """
-        # We take a snapshot of the current styles to avoid infinite loops
-        # (Since adding a style modifies the list we are iterating over)
+        from violetear import Selector, Style
+
+        # Snapshot current styles to avoid infinite recursion
         base_styles = list(self.styles)
 
         for style in base_styles:
-            # We only generate variants for class selectors
-            # (Skipping tag selectors like 'body' if you had them)
-            original_selector = style.selector.css()
-            if not original_selector.startswith("."):
+            # Skip styles that aren't class-based or are already complex
+            if not style.selector._classes:
                 continue
 
-            # The class name without the dot (e.g., "bg-red")
-            class_name = original_selector[1:]
+            original_class = style.selector._classes[0]
 
             for state in self.states:
-                # Tailwind syntax: state:class (escaped as state\:class in CSS)
-                # e.g., .hover\:bg-red:hover
-                variant_class = f"{state}\\:{class_name}"
+                # We create a class name like "hover:bg-red"
+                # In CSS this must be escaped as ".hover\:bg-red"
+                variant_class = f"{state}\:{original_class}"
 
-                # Create the new style
-                # 1. Create selector with the escaped class
-                # 2. Add the pseudo-class state (:hover)
-                self.select(f".{variant_class}").on(state).apply(style)
+                # Create a new Style manually to handle the escaped class name
+                # 1. The selector matches the class (e.g. .hover:bg-red)
+                # 2. The .on(state) adds the pseudo-class (e.g. :hover)
+                variant_style = Style(Selector(classes=variant_class)).on(state)
+
+                # Copy the rules from the original utility
+                variant_style.apply(style)
+
+                # Register it
+                self.add(variant_style)
