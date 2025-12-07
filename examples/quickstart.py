@@ -49,6 +49,7 @@ async def handle_change(event: Event):
     Runs in the browser.
     """
     from violetear.dom import Document
+    from violetear.storage import store
 
     # A. Get current state from DOM
     display = Document.find("display")
@@ -61,7 +62,10 @@ async def handle_change(event: Event):
     # C. Update DOM immediately (Responsive)
     display.text = str(new_value)
 
-    # D. Sync with Server (Background)
+    # D. Store in LocalStorage
+    store.count = new_value
+
+    # E. Sync with Server (Background)
     # This calls the @app.server function seamlessly!
     await report_count(current_count=new_value, action=action)
 
