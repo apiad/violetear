@@ -35,7 +35,7 @@ pip install "violetear[server]"
 
 ## 🚀 Quickstart: The Isomorphic Counter
 
-Let's build a fully interactive "Counter" app where the state updates instantly in the browser, but every change is reported back to the server. **Zero JavaScript required.**
+Let's build a fully interactive "Counter" app where the state updates instantly in the browser using our Pythonic DOM API, but every change is reported back to the server. **Zero JavaScript required.**
 
 ### Step 1: Initialize the App
 
@@ -46,6 +46,7 @@ from violetear import App, StyleSheet
 from violetear.markup import Document, Element
 from violetear.color import Colors
 from violetear.style import Style
+from violetear.dom import Event
 
 app = App(title="Violetear Counter")
 ```
@@ -58,21 +59,25 @@ Instead of writing CSS strings, use the fluent API to define your theme.
 # Create a global stylesheet
 style = StyleSheet()
 
-# Layout
-style.select("body").background(Colors.AliceBlue).font(family="sans-serif") \
-     .flexbox(align="center", justify="center").height("100vh").margin(0)
+style.select("body").background(Colors.AliceBlue).font(family="sans-serif").flexbox(
+    align="center", justify="center"
+).height("320px").margin(top=20)
 
-# Component Styles
-style.select(".card").background(Colors.White).padding(40).rounded(15) \
-     .shadow(blur=20, color="rgba(0,0,0,0.1)").text(align="center")
+style.select(".counter-card").background(Colors.White).padding(40).rounded(15).shadow(
+    blur=20, color="rgba(0,0,0,0.1)"
+).text(align="center")
 
-style.select(".count").font(size=64, weight="bold").color(Colors.SlateBlue).margin(10)
+style.select(".count-display").font(size=64, weight="bold").color(
+    Colors.SlateBlue
+).margin(10)
 
-style.select("button").padding("10px 20px").font(size=20, weight="bold") \
-     .margin(5).rounded(8).border(0).rule("cursor", "pointer").color(Colors.White)
+style.select("button").padding("10px 20px").font(size=20, weight="bold").margin(
+    5
+).rounded(8).border(0).rule("cursor", "pointer").color(Colors.White)
 
 style.select(".btn-plus").background(Colors.MediumSeaGreen)
 style.select(".btn-minus").background(Colors.IndianRed)
+style.select(".btn:hover").rule("opacity", "0.8")
 ```
 
 ### Step 3: Server Logic (RPC)
@@ -81,9 +86,9 @@ Define a function that runs on the server. The `@app.server` decorator exposes t
 
 ```python
 @app.server
-def report_count(current_count: int, action: str):
+async def report_count(current_count: int, action: str):
     """
-    This runs on the SERVER.
+    This runs on the server.
     FastAPI automatically validates that current_count is an int.
     """
     print(f"[SERVER] Count is now {current_count} (Action: {action})")
@@ -92,30 +97,30 @@ def report_count(current_count: int, action: str):
 
 ### Step 4: Client Logic (In-Browser Python)
 
-Define the interactivity. The `@app.client` decorator compiles this function and sends it to the browser to run inside Pyodide.
+Define the interactivity. The `@app.client` decorator compiles this function and sends it to the browser to run inside Pyodide. We use `violetear.dom` to manipulate the page using a familiar, pythonic API.
 
 ```python
 @app.client
-async def handle_change(event):
+async def handle_change(event: Event):
     """
-    This runs in the BROWSER.
+    Runs in the browser.
     """
-    from js import document
+    # Import the DOM wrapper (Client-Side implementation)
+    from violetear.dom import Document
 
-    # 1. Interact with the DOM
-    display_el = document.getElementById("display")
-    current_value = int(display_el.innerText)
+    # A. Get current state from DOM
+    display = Document.find("display")
+    current_value = int(display.text)
 
-    # 2. Update State
-    action = event.target.id
+    # B. Determine action
+    action = event.target.id  # "plus" or "minus"
     new_value = current_value + (1 if action == "plus" else -1)
 
-    # 3. Update UI (Instant feedback)
-    display_el.innerText = str(new_value)
+    # C. Update DOM immediately (Responsive)
+    display.text = str(new_value)
 
-    # 4. Sync with Server (Seamless RPC)
-    # Call our previously defined `report_count` method.
-    # This looks like a local function call, but it performs a network request!
+    # D. Sync with Server (Background)
+    # This calls the @app.server function seamlessly!
     await report_count(current_count=new_value, action=action)
 ```
 
@@ -132,26 +137,33 @@ def index():
     doc.style(style, href="/style.css")
 
     doc.body.add(
-        Element("div", classes="card").extend(
+        Element("div", classes="counter-card").extend(
             Element("h2", text="Isomorphic Counter"),
 
-            # The Counter Display
-            Element("div", id="display", classes="count", text="0"),
+            # The Count
+            Element("div", id="display", classes="count-display", text="0"),
 
-            # The Controls
-            # We attach the Python function directly to the event!
-            Element("button", id="minus", text="-", classes="btn-minus").on("click", handle_change),
-            Element("button", id="plus", text="+", classes="btn-plus").on("click", handle_change),
+            # Controls - Both call the same Python function
+            Element("button", id="minus", text="-", classes="btn-minus btn").on(
+                "click", handle_change
+            ),
+            Element("button", id="plus", text="+", classes="btn-plus btn").on(
+                "click", handle_change
+            ),
+
+            Element("p", text="Check server console for pings.").style(
+                Style().color(Colors.Gray).margin(top=20)
+            ),
         )
     )
+
     return doc
 
-
-app.run(port=8000)
+if __name__ == "__main__":
+    app.run(port=8000)
 ```
 
-Run it with `python main.py` and open `http://localhost:8000`. You have a full-stack, styled, interactive app in \~60 lines of pure Python!
-
+Run it with `python main.py` and open `http://localhost:8000`. You have a full-stack, styled, interactive app in just 60 lines of pure Python!
 
 ## ✨ Features
 
@@ -163,7 +175,8 @@ Run it with `python main.py` and open `http://localhost:8000`. You have a full-s
   * **Presets**:
       * `FlexGrid`: Create complex 12-column layouts with a single line.
       * `SemanticDesign`: Pre-configured design systems for typography and buttons.
-      * `UtilitySystem`: Generate Tailwind-like utility classes (`p-4`, `m-2`, `text-lg`) programmatically.
+      * `UtilitySystem`: Generate thousands of utility classes (`p-4`, `text-xl`, `flex`, `hover:bg-red-500`) purely in Python without any build step.
+      * `Atomic`: A pre-made, completely configurable, Tailwind-like atomic CSS based on the utility system.
 
 ### 🧱 Component System
 
@@ -174,6 +187,7 @@ Run it with `python main.py` and open `http://localhost:8000`. You have a full-s
 ### ⚡ Full-Stack Application Engine
 
   * **Hybrid Architecture**: Supports both **Server-Side Rendering (SSR)** for SEO and speed, and **Client-Side Rendering (CSR)** for interactivity.
+  * **Pythonic DOM**: A wrapper (`violetear.dom`) that provides a clean, type-safe Python API for DOM manipulation in the browser (`Document.find("id").text("Hello")`).
   * **Smart Hydration**: If a page has no interactive elements, `violetear` serves pure HTML. If you add an `@app.client` handler, it automatically injects the runtime.
   * **Asset Management**: Stylesheets created in Python are served directly from memory; no need to manage static files manually.
   * **Seamless RPC**: Call server functions from the browser as if they were local. Arguments and return values are automatically serialized.
@@ -183,7 +197,6 @@ Run it with `python main.py` and open `http://localhost:8000`. You have a full-s
 We are just getting started. Here is what's coming in v1.1 and beyond:
 
   * **📱 Progressive Web Apps (PWA)**: Simply pass `App(pwa=True)` to automatically generate `manifest.json` and a Service Worker, making your Python app installable and offline-capable.
-  * **🐍 Pythonic DOM**: A wrapper around `js.document` so you can manipulate the browser DOM using pythonic idioms and a fluent interface.
   * **🔥 JIT CSS**: An optimization engine that scans your Python code and serves *only* the CSS rules actually used by your components, reducing file size to the minimum.
 
 ## 🤝 Contribution
@@ -197,4 +210,4 @@ We are just getting started. Here is what's coming in v1.1 and beyond:
 
 ## 📄 License
 
-MIT License. You know what it means!
+MIT License. Copyright (c) Alejandro Piad.
