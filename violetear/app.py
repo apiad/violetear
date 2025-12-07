@@ -93,7 +93,9 @@ class App:
         It combines the runtime logic + user functions.
         """
         # 1. Mock the 'app' object so decorators don't fail in the browser
-        header = "class MockApp:\n    def client(self, f): return f\n\napp = MockApp()\n\n"
+        header = (
+            "class MockApp:\n    def client(self, f): return f\n\napp = MockApp()\n\n"
+        )
 
         # 2. Read the Client Runtime (Hydration logic)
         runtime_path = Path(__file__).parent / "client.py"
@@ -118,7 +120,8 @@ class App:
         doc.script(src="https://cdn.jsdelivr.net/pyodide/v0.29.0/full/pyodide.js")
 
         # 2. Bootstrap Script
-        bootstrap = dedent("""
+        bootstrap = dedent(
+            """
         async function main() {
             let pyodide = await loadPyodide();
             let response = await fetch("/_violetear/bundle.py");
@@ -126,7 +129,8 @@ class App:
             await pyodide.runPythonAsync(code);
         }
         main();
-        """)
+        """
+        )
 
         doc.script(content=bootstrap)
 

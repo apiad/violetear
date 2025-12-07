@@ -14,6 +14,7 @@ def on_button_click(event):
 
     # You can even use the Pyodide/JS bridge
     from js import alert
+
     alert("It works! Python is running in your browser.")
 
 
@@ -24,15 +25,14 @@ def home():
 
     # 4. Build the UI
     # We create a button and attach the Python function directly.
-    btn = (
-        Element("button", text="Click Me!")
-        .on("click", on_button_click)  # <--- The Magic Link
-    )
+    btn = Element("button", text="Click Me!").on(
+        "click", on_button_click
+    )  # <--- The Magic Link
 
     doc.body.extend(
         Element("h1", text="Violetear Full-Stack Demo"),
         Element("p", text="Open your browser console (F12) and click the button."),
-        btn
+        btn,
     )
 
     return doc

@@ -27,8 +27,14 @@ def hydrate(namespace: dict):
     # We explicitly scan for common events.
     # In the future, we could inspect the DOM more aggressively or use a MutationObserver.
     supported_events = [
-        "click", "change", "input", "submit",
-        "keydown", "keyup", "mouseenter", "mouseleave"
+        "click",
+        "change",
+        "input",
+        "submit",
+        "keydown",
+        "keyup",
+        "mouseenter",
+        "mouseleave",
     ]
 
     bound_count = 0
@@ -61,6 +67,8 @@ def hydrate(namespace: dict):
 
                 bound_count += 1
             else:
-                print(f"[Violetear] Warning: Function '{handler_name}' not found for event '{event_name}'")
+                print(
+                    f"[Violetear] Warning: Function '{handler_name}' not found for event '{event_name}'"
+                )
 
     print(f"[Violetear] Hydrated {bound_count} interactive elements.")
