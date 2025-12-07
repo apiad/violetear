@@ -71,7 +71,7 @@ async def handle_change(event: Event):
 
 
 @app.startup
-def init_counter():
+async def init_counter():
     """
     Runs automatically when the page loads (Client-Side).
     Restores the counter from Local Storage.
@@ -82,7 +82,7 @@ def init_counter():
     # Check if we have a saved count
     saved_count = store.count
 
-    if saved_count:
+    if saved_count is not None:
         Document.find("display").text = str(saved_count)
         print(f"Restored count: {saved_count}")
 

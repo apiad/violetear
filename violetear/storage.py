@@ -6,6 +6,7 @@ IS_BROWSER = "pyodide" in sys.modules or "emscripten" in sys.platform
 
 if IS_BROWSER:
     from js import localStorage, sessionStorage
+    from pyodide.ffi import JsNull
 
 
 class Thing:
@@ -126,10 +127,7 @@ class StorageAPI:
 
     def __getattr__(self, key: str) -> Any:
         # Enables 'store.user' syntax
-        try:
-            return self[key]
-        except KeyError:
-            return None
+        return self[key]
 
     def __setattr__(self, key: str, value: Any):
         if key.startswith("_"):
@@ -139,8 +137,8 @@ class StorageAPI:
 
     def __getitem__(self, key: str) -> Any:
         raw = self._get_raw(key)
-        if raw is None:
-            raise KeyError(key)
+        if isinstance(raw, JsNull):
+            return None
 
         try:
             data = json.loads(raw)

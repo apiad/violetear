@@ -61,6 +61,9 @@ class App:
 
     def client(self, func: Callable):
         """Decorator to mark a function to be compiled to the client."""
+        if not inspect.iscoroutinefunction(func):
+            raise ValueError("func must be async")
+
         self.client_functions[func.__name__] = func
         return func
 
@@ -69,6 +72,9 @@ class App:
         Decorator to mark a function to run automatically when the client loads.
         Also registers it as a client function.
         """
+        if not inspect.iscoroutinefunction(func):
+            raise ValueError("func must be async")
+
         self.client(func)
         self.startup_functions.append(func.__name__)
         return func
@@ -78,6 +84,9 @@ class App:
         Decorator to expose a function as a server-side RPC endpoint.
         The client bundle will receive a stub that calls this endpoint via fetch.
         """
+        if not inspect.iscoroutinefunction(func):
+            raise ValueError("func must be async")
+
         self.server_functions[func.__name__] = func
 
         # 1. Introspect the function to find arguments
@@ -206,7 +215,7 @@ class App:
         Generates the Python bundle to run in the browser.
         """
         # 1. Mock the 'app' object
-        header = "class MockApp:\n    def client(self, f): return f\n    def server(self, f): return f\napp = MockApp()\n\nclass Event: pass"
+        header = "class Event: pass"
 
         # 2. Inject violetear.dom module
         # This allows 'from violetear.dom import Document' to work in the browser
@@ -251,7 +260,9 @@ class App:
         # 4. Extract User Functions
         user_code = []
         for name, func in self.client_functions.items():
-            user_code.append(inspect.getsource(func))
+            code = inspect.getsource(func).split("\n")
+            code = [c for c in code if not c.startswith("@")] # remove decorators
+            user_code.append("\n".join(code))
 
         # 5. Generate Server Stubs
         server_stubs = self._generate_server_stubs()
@@ -261,7 +272,7 @@ class App:
 
         # Run startup functions
         for func_name in self.startup_functions:
-            init_code += f"\n{func_name}()"
+            init_code += f"\nawait {func_name}()"
 
         return "\n\n".join(
             [
