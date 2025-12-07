@@ -1,7 +1,7 @@
 from __future__ import annotations
 from inspect import isgenerator
 
-from typing import Any, Callable, Dict, Iterator, List
+from typing import Any, Callable, Dict, Iterable, Iterator, List
 import itertools
 from violetear.color import Color, Colors
 from violetear.style import Style
@@ -140,10 +140,10 @@ class UtilitySystem(StyleSheet):
     def define(
         self,
         *,
-        variants: Iterator[str] | Iterator[Iterator[str]],
+        variants: Iterable[str] | Iterable[Iterable[str]],
         rule: Callable[[Style, Any]],
         clss: str = "",
-        values: Iterator[Any] | Iterator[Iterator[Any]] | None = None,
+        values: Iterable[Any] | Iterable[Iterable[Any]] | None = None,
         name: Callable[..., str] | None = None,
     ):
         _variants = list(variants)
