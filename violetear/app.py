@@ -107,13 +107,27 @@ class App:
                 headers=headers,
             )
 
+        # In App.__init__
+        self.socket_manager = SocketManager()
+
+        @self.api.websocket("/_violetear/ws")
+        async def websocket_endpoint(websocket: WebSocket):
+            await self.socket_manager.connect(websocket)
+            try:
+                while True:
+                    # Keep the connection alive.
+                    # We can also listen for client-to-server messages here if needed later.
+                    await websocket.receive()
+            except WebSocketDisconnect:
+                self.socket_manager.disconnect(websocket)
+
     def client(self, func: Callable):
         """Decorator to mark a function to be compiled to the client."""
         if not inspect.iscoroutinefunction(func):
             raise ValueError("func must be async")
 
         self.client_functions[func.__name__] = func
-        return func
+        return ClientFunctionWrapper(self, func)
 
     def startup(self, func: Callable):
         """
@@ -304,6 +318,25 @@ class App:
             code = [c for c in code if not c.startswith("@")]  # remove decorators
             user_code.append("\n".join(code))
 
+        # --- SAFETY INJECTION START ---
+        # We attach a dummy .broadcast() method to client functions running in the browser.
+        # This prevents confusion if a user tries to call await my_func.broadcast() in client code.
+        safety_checks = []
+        safety_checks.append(
+            dedent(
+                """
+                def _server_only_broadcast(*args, **kwargs):
+                    raise RuntimeError("❌ .broadcast() cannot be called from the Client (Browser).\\nIt must be called from the Server to trigger client updates.")
+                """
+            )
+        )
+
+        for name in self.client_functions.keys():
+            safety_checks.append(f"{name}.broadcast = _server_only_broadcast")
+
+        safety_code = "\n".join(safety_checks)
+        # --- SAFETY INJECTION END ---
+
         # 5. Generate Server Stubs
         server_stubs = self._generate_server_stubs()
 
@@ -321,6 +354,7 @@ class App:
                 storage_injection,
                 runtime_code,
                 "\n\n".join(user_code),
+                safety_code,
                 server_stubs,
                 init_code,
             ]
@@ -537,3 +571,85 @@ class App:
     def run(self, host="0.0.0.0", port=8000, **kwargs):
         """Helper to run via uvicorn programmatically."""
         uvicorn.run(self.api, host=host, port=port, **kwargs)
+
+
+class ClientFunctionWrapper:
+    """
+    Wraps a client-side function to provide Server-Side RPC capabilities.
+
+    When you define:
+        @app.client
+        async def my_func(...): ...
+
+    This wrapper ensures that:
+    1. Calling `await my_func(...)` on the server runs the function (or warns).
+    2. Calling `await my_func.broadcast(...)` triggers the WebSocket dispatcher.
+    """
+
+    def __init__(self, app: "App", func: Callable):
+        self.app = app
+        self.func = func
+        # Mimic the original function's identity
+        self.__name__ = func.__name__
+        self.__doc__ = func.__doc__
+
+    def __call__(self, *args, **kwargs):
+        """
+        Standard call: await my_func(...)
+        Executes the function logic locally (useful for testing or shared logic).
+        """
+        raise RuntimeError(
+            f"Cannot call client-side functions in the server! Did you meant {self.func.__name__}.broadcast(...)?"
+        )
+
+    async def broadcast(self, *args, **kwargs):
+        """
+        RPC Call: await my_func.broadcast(...)
+
+        Tells the server to instructing ALL connected clients to run this function.
+        """
+        # FUTURE: This will hook into the WebSocket manager
+        if hasattr(self.app, "socket_manager"):
+            # print(f"Broadcasting {self.__name__} to all clients...")
+            await self.app.socket_manager.broadcast(
+                func_name=self.__name__, args=args, kwargs=kwargs
+            )
+        else:
+            print(
+                f"[Violetear] Warning: Broadcast called on '{self.__name__}' but no SocketManager is active."
+            )
+
+
+# Add this class to violetear/app.py
+
+from fastapi import WebSocket, WebSocketDisconnect
+
+
+class SocketManager:
+    def __init__(self):
+        # Keep track of active connections
+        self.active_connections: List[WebSocket] = []
+
+    async def connect(self, websocket: WebSocket):
+        await websocket.accept()
+        self.active_connections.append(websocket)
+
+    def disconnect(self, websocket: WebSocket):
+        self.active_connections.remove(websocket)
+
+    async def broadcast(self, func_name: str, args: tuple, kwargs: dict):
+        """
+        Sends a command to all connected clients to run a specific function.
+        """
+        payload = json.dumps(
+            {"type": "rpc", "func": func_name, "args": args, "kwargs": kwargs}
+        )
+
+        # Iterate over all connections and send the message
+        # We use a copy of the list to avoid modification errors during iteration
+        for connection in self.active_connections[:]:
+            try:
+                await connection.send_text(payload)
+            except Exception:
+                # If sending fails (e.g. client disconnected), remove it
+                self.disconnect(connection)
