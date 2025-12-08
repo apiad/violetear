@@ -9,6 +9,7 @@ class Icon:
     """
     Represents an icon in the Web App Manifest.
     """
+
     src: str
     sizes: str
     type: str = "image/png"
@@ -21,6 +22,7 @@ class Manifest:
     Represents a Web App Manifest file (manifest.json).
     Controls how the app appears when installed on a device.
     """
+
     name: str
     short_name: Optional[str] = None
     start_url: str = "."
@@ -56,7 +58,7 @@ class ServiceWorker:
     Handles asset caching for offline support.
     """
 
-    def __init__(self, version:str, cache_name: str = "violetear-{}"):
+    def __init__(self, version: str, cache_name: str = "violetear-{}"):
         self.version = version
         self.cache_name = cache_name.format(version)
         self.assets = set()

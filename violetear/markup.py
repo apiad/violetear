@@ -399,13 +399,22 @@ class Body(Element):
         super().__init__("body", *classes)
 
 
-
-def elfactory(tag:str):
+def elfactory(tag: str):
     @staticmethod
-    def element(*content: Element, text:str|None=None, id:str|None=None, classes:str|None=None, style:Style|None = None, **attrs):
-        return Element(tag, *content, text=text, id=id, classes=classes, style=style, **attrs)
+    def element(
+        *content: Element,
+        text: str | None = None,
+        id: str | None = None,
+        classes: str | None = None,
+        style: Style | None = None,
+        **attrs,
+    ):
+        return Element(
+            tag, *content, text=text, id=id, classes=classes, style=style, **attrs
+        )
 
     return element
+
 
 class HTML:
     div = elfactory("div")

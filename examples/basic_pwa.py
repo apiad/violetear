@@ -6,6 +6,7 @@ app = App(title="Auto Updating PWA")
 
 print(app.version)
 
+
 @app.route("/", pwa=True)
 def index():
     doc = Document(title=f"Auto PWA")
@@ -15,6 +16,7 @@ def index():
         HTML.p(text=f"Version: {app.version}"),
     )
     return doc
+
 
 if __name__ == "__main__":
     app.run()

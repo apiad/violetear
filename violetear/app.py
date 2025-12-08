@@ -167,7 +167,7 @@ class App:
         # 3. Create a wrapper that accepts the Model
         # We need to handle both sync and async user functions
 
-        async def wrapper(body: BodyModel): # type: ignore
+        async def wrapper(body: BodyModel):  # type: ignore
             return await func(**body.model_dump())
 
         # 4. Register the route with FastAPI using the wrapper
@@ -372,7 +372,8 @@ class App:
                     setTimeout(() => cloak.remove(), {int(self.fade_in * 1000)});
                 }}
             }}
-            main();
+
+            await main();
             """
         )
 
@@ -446,7 +447,7 @@ class App:
                         .catch(err => console.log('[Violetear] SW registration failed', err));
                 }});
             }}
-        """
+            """
         )
         doc.script(content=sw_script)
 
