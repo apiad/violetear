@@ -17,6 +17,7 @@ from .markup import Document, Element, Component
 # though our App class handles the check internally)
 try:
     from .app import App
+    from .pwa import Manifest
 except ImportError:
     pass
 

@@ -1,8 +1,11 @@
 import os
 import inspect
+import hashlib
+import json
 from pathlib import Path
 from textwrap import dedent
 from typing import Any, Callable, Dict, List, Union
+import uuid
 
 
 # --- Optional Server Dependencies ---
@@ -24,6 +27,7 @@ except ImportError:
 
 from .stylesheet import StyleSheet
 from .markup import Document, StyleResource
+from .pwa import Manifest, ServiceWorker
 
 
 class App:
@@ -37,9 +41,18 @@ class App:
         title: str = "Violetear App",
         favicon: str | None = None,
         fade_in: float = 0.1,
+        version: str | None = None,
     ):
         self.title = title
         self.api = FastAPI(title=title)
+
+        # Automatic Versioning Strategy:
+        # If version is None, generate a random hash (Startup ID).
+        # This ensures every server restart invalidates the cache.
+        if version is None:
+            self.version = uuid.uuid4().hex[:8]
+        else:
+            self.version = version
 
         if favicon is None:
             favicon = str(Path(__file__).parent / "icon.png")
@@ -49,7 +62,7 @@ class App:
 
         # Standard path for browser favicon requests
         @self.api.get("/favicon.ico", include_in_schema=False)
-        async def favicon():
+        async def get_favicon():
             return FileResponse(self.favicon)
 
         # Registry of served styles to prevent duplicate route registration
@@ -62,10 +75,37 @@ class App:
         # Names of client-side functions to run on load
         self.startup_functions: List[str] = []
 
+        # PWA Registry: route_scope_hash -> (Manifest, ServiceWorker)
+        self.pwa_registry: Dict[str, tuple[Manifest, ServiceWorker]] = {}
+
         # Register the Bundle Route (Dynamic Python file)
         @self.api.get("/_violetear/bundle.py")
         def get_bundle():
             return Response(content=self._generate_bundle(), media_type="text/x-python")
+
+        # --- PWA Asset Routes ---
+        @self.api.get("/_violetear/pwa/{scope_hash}/manifest.json")
+        def get_manifest(scope_hash: str):
+            if scope_hash not in self.pwa_registry:
+                return Response(status_code=404)
+
+            manifest, _ = self.pwa_registry[scope_hash]
+            return Response(content=manifest.render(), media_type="application/json")
+
+        @self.api.get("/_violetear/pwa/{scope_hash}/sw.js")
+        def get_service_worker(scope_hash: str):
+            if scope_hash not in self.pwa_registry:
+                return Response(status_code=404)
+
+            _, sw = self.pwa_registry[scope_hash]
+            # Crucial: Allow this script to control pages at the route's scope
+            # even though the script is served from /_violetear/...
+            headers = {"Service-Worker-Allowed": "/"}
+            return Response(
+                content=sw.render(),
+                media_type="application/javascript",
+                headers=headers,
+            )
 
     def client(self, func: Callable):
         """Decorator to mark a function to be compiled to the client."""
@@ -126,17 +166,9 @@ class App:
 
         # 3. Create a wrapper that accepts the Model
         # We need to handle both sync and async user functions
-        if inspect.iscoroutinefunction(func):
 
-            async def wrapper(body: BodyModel):
-                # Unpack the Pydantic model into kwargs
-                return await func(**body.model_dump())
-
-        else:
-
-            async def wrapper(body: BodyModel):
-                # Run sync function (FastAPI handles threadpooling, but we are inside an async wrapper)
-                return func(**body.model_dump())
+        async def wrapper(body: BodyModel): # type: ignore
+            return await func(**body.model_dump())
 
         # 4. Register the route with FastAPI using the wrapper
         route_path = f"/_violetear/rpc/{func.__name__}"
@@ -298,7 +330,6 @@ class App:
         """Injects Pyodide and the Bundle bootstrapper."""
 
         if self.fade_in > 0:
-            print("fadeout")
             # 1. The "Cloak" Script
             # We inject this FIRST so it runs immediately before the body renders.
             # It creates a style that hides the body and disables clicking.
@@ -347,10 +378,96 @@ class App:
 
         doc.script(content=bootstrap)
 
-    def route(self, path: str, methods: List[str] = ["GET"]):
+    def _register_pwa(self, path: str, config: Union[bool, Manifest]):
+        """
+        Registers a PWA configuration for a specific route path.
+        """
+        scope_hash = hashlib.md5(path.encode()).hexdigest()[:8]
+
+        if isinstance(config, Manifest):
+            manifest = config
+            # Ensure the manifest scope matches the route if not explicitly set
+            if manifest.scope == "/":
+                manifest.scope = path
+            if manifest.start_url == ".":
+                manifest.start_url = path
+        else:
+            # Generate a default manifest
+            manifest = Manifest(
+                name=self.title,
+                start_url=path,
+                scope=path,
+                display="standalone",
+                background_color="#ffffff",
+                theme_color="#ffffff",
+            )
+
+        # Create Service Worker
+        sw = ServiceWorker()
+
+        # Add basic assets to cache
+        sw.add_assets(
+            manifest.start_url,
+            "/_violetear/bundle.py",
+            "https://cdn.jsdelivr.net/pyodide/v0.29.0/full/pyodide.js",
+        )
+
+        self.pwa_registry[scope_hash] = (manifest, sw)
+
+    def _inject_pwa_tags(self, doc: Document, path: str):
+        """
+        Injects the PWA manifest link and Service Worker registration script.
+        """
+        scope_hash = hashlib.md5(path.encode()).hexdigest()[:8]
+
+        if scope_hash not in self.pwa_registry:
+            return
+
+        manifest_url = f"/_violetear/pwa/{scope_hash}/manifest.json"
+        sw_url = f"/_violetear/pwa/{scope_hash}/sw.js"
+
+        # 1. Inject Manifest Link (using JS as Document.Head doesn't support generic links yet)
+        # Note: In a future update to Markup, we should support doc.head.add_link()
+        js_injector = f"""
+        var link = document.createElement('link');
+        link.rel = 'manifest';
+        link.href = '{manifest_url}';
+        document.head.appendChild(link);
+        """
+        doc.script(content=js_injector)
+
+        # 2. Inject Service Worker Registration
+        sw_script = dedent(
+            f"""
+            if ('serviceWorker' in navigator) {{
+                window.addEventListener('load', () => {{
+                    navigator.serviceWorker.register('{sw_url}', {{ scope: '{path}' }})
+                        .then(reg => console.log('[Violetear] SW registered for {path}', reg))
+                        .catch(err => console.log('[Violetear] SW registration failed', err));
+                }});
+            }}
+        """
+        )
+        doc.script(content=sw_script)
+
+        # 3. Add styles to the SW cache
+        # We find what stylesheets this document uses and add them to the service worker
+        _, sw = self.pwa_registry[scope_hash]
+        for style in doc.head.styles:
+            if style.href:
+                sw.add_assets(style.href)
+
+    def route(
+        self, path: str, methods: List[str] = ["GET"], pwa: bool | Manifest = False
+    ):
         """
         Decorator to register a route.
+
+        :param pwa: If True (or a Manifest object), enables PWA features for this route.
         """
+        # Register PWA if requested
+        if pwa:
+            self._register_pwa(path, pwa)
 
         def decorator(func: Callable):
             @self.api.api_route(path, methods=methods)
@@ -378,6 +495,10 @@ class App:
                     # Check if this document contains Python bindings
                     if response.body.has_bindings():
                         self._inject_client_side(response)
+
+                    # Inject PWA tags if enabled for this route
+                    if pwa:
+                        self._inject_pwa_tags(response, path)
 
                     # Render the HTML (which will contain <link href="..."> tags)
                     return HTMLResponse(response.render())
