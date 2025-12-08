@@ -70,7 +70,7 @@ class ServiceWorker:
     def render(self) -> str:
         """
         Generates the JavaScript code for the Service Worker.
-        Implements a simple Cache-First strategy.
+        Implements a Network-First strategy for navigation and Cache-First for assets.
         """
         assets_json = json.dumps(list(sorted(self.assets)))
 
@@ -81,6 +81,9 @@ class ServiceWorker:
 
             // 1. Install Phase: Cache all static assets
             self.addEventListener("install", (event) => {{
+                // Force the waiting service worker to become the active service worker
+                self.skipWaiting();
+
                 event.waitUntil(
                     caches.open(CACHE_NAME).then((cache) => {{
                         console.log("[Service Worker] Caching all: app shell and content");
@@ -89,7 +92,7 @@ class ServiceWorker:
                 );
             }});
 
-            // 2. Activate Phase: Cleanup old caches (Optional but good practice)
+            // 2. Activate Phase: Cleanup old caches
             self.addEventListener("activate", (event) => {{
                 event.waitUntil(
                     caches.keys().then((keyList) => {{
@@ -99,12 +102,28 @@ class ServiceWorker:
                                 return caches.delete(key);
                             }}
                         }}));
+                    }}).then(() => {{
+                        // Tell the active service worker to take control of the page immediately
+                        return self.clients.claim();
                     }})
                 );
             }});
 
-            // 3. Fetch Phase: Cache First, Fallback to Network
+            // 3. Fetch Phase
             self.addEventListener("fetch", (event) => {{
+                // Navigation requests (HTML): Network First, fall back to Cache
+                // This ensures users always get the latest Python/HTML logic if online.
+                if (event.request.mode === 'navigate') {{
+                    event.respondWith(
+                        fetch(event.request).catch(() => {{
+                            return caches.match(event.request);
+                        }})
+                    );
+                    return;
+                }}
+
+                // Assets (CSS, JS, Images, Pyodide): Cache First, fall back to Network
+                // These should be versioned by the app (e.g. ?v=...) so we can trust the cache.
                 event.respondWith(
                     caches.match(event.request).then((response) => {{
                         return response || fetch(event.request);

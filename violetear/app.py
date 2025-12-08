@@ -326,6 +326,11 @@ class App:
             ]
         )
 
+    def _version_url(self, url: str) -> str:
+        """Appends the app version to the URL to bust caches."""
+        delimiter = "&" if "?" in url else "?"
+        return f"{url}{delimiter}v={self.version}"
+
     def _inject_client_side(self, doc: Document):
         """Injects Pyodide and the Bundle bootstrapper."""
 
@@ -350,13 +355,16 @@ class App:
 
         # 3. Bootstrap Script
         # We update this to remove the cloak once hydration is complete.
+        # Ensure we fetch the versioned bundle to avoid stale logic
+        bundle_url = self._version_url("/_violetear/bundle.py")
+
         bootstrap = dedent(
             f"""
             async function main() {{
                 // optional: You could inject a 'Loading...' spinner here if you wanted
 
                 let pyodide = await loadPyodide();
-                let response = await fetch("/_violetear/bundle.py");
+                let response = await fetch("{bundle_url}");
                 let code = await response.text();
                 await pyodide.runPythonAsync(code);
 
@@ -407,10 +415,11 @@ class App:
         sw = ServiceWorker(version=self.version)
 
         # Add basic assets to cache
+        # We implicitly version these to ensure the SW caches fresh copies
         sw.add_assets(
-            manifest.start_url,
-            "/_violetear/bundle.py",
-            "/favicon.ico",
+            manifest.start_url,  # Nav request (HTML) - network first, but good to have in cache
+            self._version_url("/_violetear/bundle.py"),
+            self._version_url("/favicon.ico"),
         )
 
         self.pwa_registry[scope_hash] = (manifest, sw)
@@ -418,6 +427,7 @@ class App:
     def _inject_pwa_tags(self, doc: Document, path: str):
         """
         Injects the PWA manifest link and Service Worker registration script.
+        Also patches the document's resources to use versioned URLs.
         """
         scope_hash = hashlib.md5(path.encode()).hexdigest()[:8]
 
@@ -452,9 +462,19 @@ class App:
         doc.script(content=sw_script)
 
         # 3. Add styles and scripts to the SW cache
+        # We also rewrite the document's resource URLs to include the version hash.
+        # This ensures the HTML <link> matches the Cache Key in the Service Worker.
         _, sw = self.pwa_registry[scope_hash]
-        sw.add_assets(*(style.href for style in doc.head.styles))
-        sw.add_assets(*(script.src for script in doc.head.scripts))
+
+        for style in doc.head.styles:
+            if style.href and not style.href.startswith(("http", "//")):
+                style.href = self._version_url(style.href)
+                sw.add_assets(style.href)
+
+        for script in doc.head.scripts:
+            if script.src and not script.src.startswith(("http", "//")):
+                script.src = self._version_url(script.src)
+                sw.add_assets(script.src)
 
     def route(
         self, path: str, methods: List[str] = ["GET"], pwa: bool | Manifest = False
