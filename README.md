@@ -265,12 +265,12 @@ We are currently in v1.1 (Core). Here is the vision for the immediate future of 
 ### v1.3: The "Navigation" Update (SPA)
 
   * [ ] **🧭 SPA Engine**: An abstraction (`violetear.spa`) for building Single Page Applications.
-  * [ ] **Client-Side Routing**: Define routes that render specific components into a shell without reloading the page.
+  * [ ] **🔀 Client-Side Routing**: Define routes that render specific components into a shell without reloading the page.
 
 ### v1.4: The "Twin-State" Update (Reactivity)
 
-  * [ ] **`@app.local`**: Reactive state that lives in the browser (per user). Changes update the DOM automatically.
-  * [ ] **`@app.shared`**: Real-time state that lives on the server (multiplayer). Changes are synced to all connected clients via **WebSockets**.
+  * [ ] **🗃️ `@app.local`**: Reactive state that lives in the browser (per user). Changes update the DOM automatically.
+  * [ ] **🌐 `@app.shared`**: Real-time state that lives on the server (multiplayer). Changes are synced to all connected clients via **WebSockets**.
 
 ## 🤝 Contribution
 
