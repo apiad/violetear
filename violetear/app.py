@@ -118,7 +118,7 @@ class App:
                     # Keep the connection alive.
                     # We can also listen for client-to-server messages here if needed later.
                     await websocket.receive()
-            except WebSocketDisconnect:
+            except (WebSocketDisconnect, RuntimeError):
                 self.socket_manager.disconnect(websocket)
 
     def client(self, func: Callable):
@@ -415,7 +415,7 @@ class App:
                 }}
             }}
 
-            await main();
+            main();
             """
         )
 
@@ -546,7 +546,7 @@ class App:
                     self._register_document_styles(response)
 
                     # Check if this document contains Python bindings
-                    if response.body.has_bindings():
+                    if response.body.has_bindings() or self.client_functions:
                         self._inject_client_side(response)
 
                     # Inject PWA tags if enabled for this route
@@ -608,16 +608,10 @@ class ClientFunctionWrapper:
 
         Tells the server to instructing ALL connected clients to run this function.
         """
-        # FUTURE: This will hook into the WebSocket manager
-        if hasattr(self.app, "socket_manager"):
-            # print(f"Broadcasting {self.__name__} to all clients...")
-            await self.app.socket_manager.broadcast(
-                func_name=self.__name__, args=args, kwargs=kwargs
-            )
-        else:
-            print(
-                f"[Violetear] Warning: Broadcast called on '{self.__name__}' but no SocketManager is active."
-            )
+        await self.app.socket_manager.broadcast(
+            func_name=self.__name__, args=args, kwargs=kwargs
+        )
+        print(f"[Violetear] Broadcasting {self.__name__} with args={args} and kwargs={kwargs}")
 
 
 # Add this class to violetear/app.py
