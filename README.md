@@ -210,24 +210,67 @@ Run it with `python main.py` and open `http://localhost:8000`. You have a full-s
   * **Asset Management**: Stylesheets created in Python are served directly from memory.
   * **Seamless RPC**: Call server functions from the browser as if they were local.
 
+## 📱 Progressive Web App (PWA) Support
+
+Violetear allows you to turn any route into an installable PWA. This enables your app to:
+
+1.  **Be Installed:** Users can add it to their home screen (mobile/desktop).
+2.  **Work Offline:** The app shell and assets are cached automatically.
+3.  **Auto-Update:** Changes to your Python code are detected, ensuring users always see the latest version.
+
+### How to Enable PWA
+
+Simply pass `pwa=True` (or a `Manifest` object) to the `@app.route` decorator.
+
+**Important:** You must define an app `version`. If you don't, Violetear generates a random one on every restart, which will force users to re-download the app every time you deploy.
+
+```python
+from violetear import App, Manifest
+
+# 1. Set a version string (e.g., from git commit or semantic version)
+app = App(title="My App", version="v1.0.2")
+
+# 2. Enable PWA on your main route
+@app.route("/", pwa=Manifest(
+    name="My Super App",
+    short_name="SuperApp",
+    description="An amazing Python PWA",
+    theme_color="#6b21a8"
+))
+def home():
+    return Document(...)
+```
+
+### Caching Strategy
+
+Violetear uses a hybrid strategy to ensure safety and speed:
+
+  * **Navigation (HTML):** *Network-First*. It tries to fetch the latest version from the server. If offline, it falls back to the cache.
+  * **Assets (JS/CSS):** *Cache-First*. Assets are versioned (e.g., `bundle.py?v=1.0.2`). This ensures instant loading while guaranteeing updates when the version changes.
+
+### Current Limitations
+
+  * **Push Notifications:** Not yet supported (requires VAPID key generation and a push server).
+  * **Background Sync:** Offline actions (like submitting a form while disconnected) are not automatically retried when online. You must handle connection errors manually in your client logic.
+
 ## 🛣️ Roadmap
 
 We are currently in v1.1 (Core). Here is the vision for the immediate future of Violetear:
 
 ### v1.2: The "App" Update (Deployment)
 
-  * **📱 Progressive Web Apps (PWA)**: Simply pass `@app.route(..., pwa=True)` to automatically generate `manifest.json` and a Service Worker.
-  * **🔥 JIT CSS**: An optimization engine that scans your Python code and serves *only* the CSS rules actually used by your components.
+  * [x] **📱 Progressive Web Apps (PWA)**: Simply pass `@app.route(..., pwa=True)` to automatically generate `manifest.json` and a Service Worker.
+  * [ ] **🔥 JIT CSS**: An optimization engine that scans your Python code and serves *only* the CSS rules actually used by your components.
 
 ### v1.3: The "Navigation" Update (SPA)
 
-  * **🧭 SPA Engine**: An abstraction (`violetear.spa`) for building Single Page Applications.
-  * **Client-Side Routing**: Define routes that render specific components into a shell without reloading the page.
+  * [ ] **🧭 SPA Engine**: An abstraction (`violetear.spa`) for building Single Page Applications.
+  * [ ] **Client-Side Routing**: Define routes that render specific components into a shell without reloading the page.
 
 ### v1.4: The "Twin-State" Update (Reactivity)
 
-  * **`@app.local`**: Reactive state that lives in the browser (per user). Changes update the DOM automatically.
-  * **`@app.shared`**: Real-time state that lives on the server (multiplayer). Changes are synced to all connected clients via **WebSockets**.
+  * [ ] **`@app.local`**: Reactive state that lives in the browser (per user). Changes update the DOM automatically.
+  * [ ] **`@app.shared`**: Real-time state that lives on the server (multiplayer). Changes are synced to all connected clients via **WebSockets**.
 
 ## 🤝 Contribution
 
