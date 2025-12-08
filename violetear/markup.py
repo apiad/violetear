@@ -420,3 +420,5 @@ class HTML:
     p = elfactory("p")
     span = elfactory("span")
     ul = elfactory("ul")
+    button = elfactory("button")
+    input = elfactory("input")

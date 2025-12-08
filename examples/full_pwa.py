@@ -1,6 +1,5 @@
-from violetear import App, Document, StyleSheet
+from violetear import App, Document, StyleSheet, Element, HTML
 from violetear.dom import Event
-from violetear.markup import Element
 
 app = App(title="Cached PWA Demo")
 
@@ -17,7 +16,7 @@ style.select("body").rules(
     align_items="center",
     justify_content="center",
     height="100vh",
-    margin="0"
+    margin="0",
 )
 
 style.select(".card").rules(
@@ -26,7 +25,7 @@ style.select(".card").rules(
     border_radius="12px",
     box_shadow="0 4px 6px rgba(0,0,0,0.1)",
     text_align="center",
-    max_width="400px"
+    max_width="400px",
 )
 
 style.select("button").rules(
@@ -38,9 +37,10 @@ style.select("button").rules(
     font_size="1rem",
     cursor="pointer",
     margin_top="1rem",
-    transition="background 0.2s"
+    transition="background 0.2s",
 )
 style.select("button:hover").rules(background="#3700b3")
+
 
 # --- 2. Define Client Logic ---
 # This function runs in the browser (compiled to the client bundle).
@@ -71,17 +71,18 @@ def index():
     doc.style(sheet=style, href="/static/main.css")
 
     doc.body.add(
-        Element("div",
-            Element("h1", text="PWA Demo"),
-            Element("p", text="This app works completely offline."),
-            Element("p", text="The CSS and the Python logic below are cached.", id="status"),
-            Element("button", text="Change Card Color").on("click", change_color),
-
+        HTML.div(
+            HTML.h1(text="PWA Demo"),
+            HTML.p(text="This app works completely offline."),
+            HTML.p(text="The CSS and the Python logic below are cached.", id="status"),
+            HTML.button(text="Change Card Color").on("click", change_color),
+            # div attributes
             id="my-card",
-            classes="card"
+            classes="card",
         )
     )
     return doc
+
 
 if __name__ == "__main__":
     print("Running Cached PWA at http://0.0.0.0:8000")
