@@ -409,7 +409,7 @@ class App:
         sw.add_assets(
             manifest.start_url,
             "/_violetear/bundle.py",
-            "https://cdn.jsdelivr.net/pyodide/v0.29.0/full/pyodide.js",
+            "/favicon.ico",
         )
 
         self.pwa_registry[scope_hash] = (manifest, sw)
@@ -450,12 +450,10 @@ class App:
         )
         doc.script(content=sw_script)
 
-        # 3. Add styles to the SW cache
-        # We find what stylesheets this document uses and add them to the service worker
+        # 3. Add styles and scripts to the SW cache
         _, sw = self.pwa_registry[scope_hash]
-        for style in doc.head.styles:
-            if style.href:
-                sw.add_assets(style.href)
+        sw.add_assets(*(style.href for style in doc.head.styles))
+        sw.add_assets(*(script.src for script in doc.head.scripts))
 
     def route(
         self, path: str, methods: List[str] = ["GET"], pwa: bool | Manifest = False

@@ -1,5 +1,4 @@
-from violetear import App, StyleSheet
-from violetear.markup import Document, Element
+from violetear import App, StyleSheet, HTML, Document
 from violetear.color import Colors
 
 # 1. Initialize the App
@@ -27,9 +26,9 @@ def index():
 
     # Build the UI (The "View")
     doc.body.extend(
-        Element("h1", text="Welcome to Violetear"),
-        Element("div", classes="card").add(
-            Element("p", text="This is a server-side rendered page.")
+        HTML.h1(text="Welcome to Violetear"),
+        HTML.div(classes="card").add(
+            HTML.p(text="This is a server-side rendered page.")
         ),
     )
 

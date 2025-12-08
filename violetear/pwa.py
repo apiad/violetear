@@ -61,9 +61,9 @@ class ServiceWorker:
         self.cache_name = cache_name.format(version)
         self.assets = set()
 
-    def add_assets(self, *files: str):
+    def add_assets(self, *files: str | None):
         """Register files to be pre-cached during the 'install' phase."""
-        self.assets.update(files)
+        self.assets.update([f for f in files if f])
 
     def render(self) -> str:
         """
