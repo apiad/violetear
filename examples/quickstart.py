@@ -1,6 +1,6 @@
 import uvicorn
 from violetear import App, StyleSheet
-from violetear.markup import Document, Element
+from violetear.markup import Document, HTML
 from violetear.color import Colors
 from violetear.style import Style
 from violetear.dom import Event
@@ -95,18 +95,18 @@ def index():
     doc.style(style, href="/style.css")  # Link our style
 
     doc.body.add(
-        Element("div", classes="counter-card").extend(
-            Element("h2", text="Isomorphic Counter"),
+        HTML.div(classes="counter-card").extend(
+            HTML.h2(text="Isomorphic Counter"),
             # The Count
-            Element("div", id="display", classes="count-display", text="0"),
+            HTML.div(id="display", classes="count-display", text="0"),
             # Controls - Both call the same Python function
-            Element("button", id="minus", text="-", classes="btn-minus btn").on(
+            HTML.button(id="minus", text="-", classes="btn-minus btn").on(
                 "click", handle_change
             ),
-            Element("button", id="plus", text="+", classes="btn-plus btn").on(
+            HTML.button(id="plus", text="+", classes="btn-plus btn").on(
                 "click", handle_change
             ),
-            Element("p", text="Check server console for pings.").style(
+            HTML.p(text="Check server console for pings.").style(
                 Style().color(Colors.Gray).margin(top=20)
             ),
         )

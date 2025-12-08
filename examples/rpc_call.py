@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 from violetear import App
+from violetear.dom import Event
 from violetear.markup import Document, Element, HTML
 
 app = App(title="RPC Demo")
@@ -24,7 +25,7 @@ async def create_user(name: str, age: int) -> UserData:
 
 # 3. Define the Client Logic
 @app.client
-async def on_submit(event):
+async def on_submit(event: Event):
     from violetear.dom import Document
 
     # Get values from DOM
