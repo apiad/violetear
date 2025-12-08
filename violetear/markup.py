@@ -65,11 +65,11 @@ class Element(Markup):
         self,
         tag: str,
         *content: Element,
-        text: str = None,
-        classes: Union[str, List[str]] = None,
-        id: str = None,
-        style: Style = None,
-        parent: Element = None,
+        text: str | None = None,
+        classes: str | List[str] | None = None,
+        id: str | None = None,
+        style: Style | None = None,
+        parent: Element | None = None,
         **attrs: str,
     ) -> None:
         self._tag = tag
@@ -397,3 +397,26 @@ class Head(Markup):
 class Body(Element):
     def __init__(self, *classes) -> None:
         super().__init__("body", *classes)
+
+
+
+def elfactory(tag:str):
+    @staticmethod
+    def element(*content: Element, text:str|None=None, id:str|None=None, classes:str|None=None, style:Style|None = None, **attrs):
+        return Element(tag, *content, text=text, id=id, classes=classes, style=style, **attrs)
+
+    return element
+
+class HTML:
+    div = elfactory("div")
+    h1 = elfactory("h1")
+    h2 = elfactory("h2")
+    h3 = elfactory("h3")
+    h4 = elfactory("h4")
+    h5 = elfactory("h5")
+    h6 = elfactory("h6")
+    li = elfactory("li")
+    ol = elfactory("ol")
+    p = elfactory("p")
+    span = elfactory("span")
+    ul = elfactory("ul")
