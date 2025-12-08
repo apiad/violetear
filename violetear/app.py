@@ -403,7 +403,7 @@ class App:
             )
 
         # Create Service Worker
-        sw = ServiceWorker()
+        sw = ServiceWorker(version=self.version)
 
         # Add basic assets to cache
         sw.add_assets(

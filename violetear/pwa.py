@@ -56,8 +56,9 @@ class ServiceWorker:
     Handles asset caching for offline support.
     """
 
-    def __init__(self, cache_name: str = "violetear-v1"):
-        self.cache_name = cache_name
+    def __init__(self, version:str, cache_name: str = "violetear-{}"):
+        self.version = version
+        self.cache_name = cache_name.format(version)
         self.assets = set()
 
     def add_assets(self, *files: str):
@@ -92,6 +93,7 @@ class ServiceWorker:
                     caches.keys().then((keyList) => {{
                         return Promise.all(keyList.map((key) => {{
                             if (key !== CACHE_NAME) {{
+                                console.log("[SW] Removing old cache:", key);
                                 return caches.delete(key);
                             }}
                         }}));
