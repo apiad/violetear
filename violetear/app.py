@@ -355,12 +355,15 @@ class App:
                 """
                 def _server_only_broadcast(*args, **kwargs):
                     raise RuntimeError("❌ .broadcast() cannot be called from the Client (Browser).\\nIt must be called from the Server to trigger client updates.")
+                def _server_only_invoke(*args, **kwargs):
+                    raise RuntimeError("❌ .invoke() cannot be called from the Client (Browser).\\nIt must be called from the Server to trigger client updates.")
                 """
             )
         )
 
         for name in self.client_functions.keys():
             safety_checks.append(f"{name}.broadcast = _server_only_broadcast")
+            safety_checks.append(f"{name}.invoke = _server_only_invokes")
 
         safety_code = "\n".join(safety_checks)
         # --- SAFETY INJECTION END ---
@@ -639,8 +642,16 @@ class ClientFunctionWrapper:
         await self.app.socket_manager.broadcast(
             func_name=self.__name__, args=args, kwargs=kwargs
         )
-        print(
-            f"[Violetear] Broadcasting {self.__name__} with args={args} and kwargs={kwargs}"
+
+    async def invoke(self, client_id, *args, **kwargs):
+        """
+        RPC Call: await my_func.invoke("1234-", ...)
+
+        Tells the server to instructing an specific client to run this function.
+        You can get client ids from @connect handlers.
+        """
+        await self.app.socket_manager.invoke(
+            client_id=client_id, func_name=self.__name__, args=args, kwargs=kwargs
         )
 
 
@@ -678,9 +689,28 @@ class SocketManager:
 
         # Iterate over all connections and send the message
         # We use a copy of the list to avoid modification errors during iteration
-        for id, connection in list(self.active_connections.items()):
+        for client_id, connection in list(self.active_connections.items()):
             try:
                 await connection.send_text(payload)
             except Exception:
                 # If sending fails (e.g. client disconnected), remove it
-                await self.disconnect(id)
+                await self.disconnect(client_id)
+
+    async def invoke(self, client_id: str, func_name: str, args: tuple, kwargs: dict):
+        """
+        Sends a command to a specific client to run a specific function.
+        """
+        payload = json.dumps(
+            {"type": "rpc", "func": func_name, "args": args, "kwargs": kwargs}
+        )
+
+        if not client_id in self.active_connections:
+            raise KeyError("Invalid client id. Did it disconnect?")
+
+        connection = self.active_connections[client_id]
+
+        try:
+            await connection.send_text(payload)
+        except Exception:
+            # If sending fails (e.g. client disconnected), remove it
+            await self.disconnect(client_id)
