@@ -639,7 +639,9 @@ class ClientFunctionWrapper:
         await self.app.socket_manager.broadcast(
             func_name=self.__name__, args=args, kwargs=kwargs
         )
-        print(f"[Violetear] Broadcasting {self.__name__} with args={args} and kwargs={kwargs}")
+        print(
+            f"[Violetear] Broadcasting {self.__name__} with args={args} and kwargs={kwargs}"
+        )
 
 
 # Add this class to violetear/app.py

@@ -15,7 +15,7 @@ async def update_counter(count: int):
 
     el = Document.find("counter")
     el.text = f"Server Pings: {count}"
-    el.style(color = "red" if count % 2 == 0 else "blue")
+    el.style(color="red" if count % 2 == 0 else "blue")
 
 
 @app.connect
