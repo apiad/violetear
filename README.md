@@ -253,22 +253,88 @@ Violetear uses a hybrid strategy to ensure safety and speed:
   * **Push Notifications:** Not yet supported (requires VAPID key generation and a push server).
   * **Background Sync:** Offline actions (like submitting a form while disconnected) are not automatically retried when online. You must handle connection errors manually in your client logic.
 
+Based on the `examples/broadcast.py` file you provided, here is a new section for the `README.md`.
+
+This section explains the **Reverse RPC** capability (Server-to-Client communication), detailing how to define client-side functions and trigger them from the server to broadcast updates to all connected users.
+
+You should place this section immediately after the **"🚀 Quickstart: The Isomorphic Counter"** section in your `README.md`.
+
+## 📡 Real-Time: Server Broadcasts
+
+Violetear supports **Reverse RPC**, allowing the server to call functions running in the user's browser. This is perfect for real-time notifications, live feeds, or multiplayer games.
+
+The magic happens via the `.broadcast()` method available on any `@app.client` function.
+
+### 1. Define the Client Function
+
+Create a function decorated with `@app.client`. This code will be compiled and run in the browser, but the server "knows" about it.
+
+```python
+# This function runs in the User's Browser
+@app.client
+async def update_alert(message: str, color: str):
+    from violetear.dom import Document
+
+    # Update the DOM immediately
+    el = Document.find("status-message")
+    el.text = message
+    el.style(color=color)
+```
+
+### 2. Call it from the Server
+
+You can call this function from anywhere in your server-side code (a background task, a cron job, or another API route) using `.broadcast()`.
+
+```python
+import asyncio
+from contextlib import asynccontextmanager
+
+# A background task running on the server
+async def background_monitor():
+    while True:
+        await asyncio.sleep(5)
+        # Send data to ALL connected clients
+        await update_alert.broadcast(
+            message="Server is alive!",
+            color="green"
+        )
+
+# Register the background task using standard FastAPI lifespan
+@asynccontextmanager
+async def lifespan(api):
+    task = asyncio.create_task(background_monitor())
+    yield
+    task.cancel()
+
+# Hook into the app
+app.api.router.lifespan_context = lifespan
+```
+
+### 3. Handle Connections
+
+You can also hook into WebSocket lifecycle events to track users or trigger actions when they join or leave.
+
+```python
+@app.connect
+async def on_join(client_id: str):
+    print(f"Client {client_id} connected.")
+    # You could broadcast a "User Joined" message here
+    await update_alert.broadcast(f"User {client_id} joined!", "blue")
+
+@app.disconnect
+async def on_leave(client_id: str):
+    print(f"Client {client_id} left.")
+```
+
 ## 🛣️ Roadmap
 
-We are currently in v1.1 (Core). Here is the vision for the immediate future of Violetear:
-
-### v1.2: The "App" Update (Deployment)
+Here is the vision for the immediate future of Violetear:
 
   * [x] **📱 Progressive Web Apps (PWA)**: Simply pass `@app.route(..., pwa=True)` to automatically generate `manifest.json` and a Service Worker.
+  * [x] **📡 Reverse RPC (Broadcast and Invoke)**: Invoke client-side functions from the server via websockets.
   * [ ] **🔥 JIT CSS**: An optimization engine that scans your Python code and serves *only* the CSS rules actually used by your components.
-
-### v1.3: The "Navigation" Update (SPA)
-
   * [ ] **🧭 SPA Engine**: An abstraction (`violetear.spa`) for building Single Page Applications.
   * [ ] **🔀 Client-Side Routing**: Define routes that render specific components into a shell without reloading the page.
-
-### v1.4: The "Twin-State" Update (Reactivity)
-
   * [ ] **🗃️ `@app.local`**: Reactive state that lives in the browser (per user). Changes update the DOM automatically.
   * [ ] **🌐 `@app.shared`**: Real-time state that lives on the server (multiplayer). Changes are synced to all connected clients via **WebSockets**.
 
