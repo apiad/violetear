@@ -363,7 +363,7 @@ class App:
 
         for name in self.client_functions.keys():
             safety_checks.append(f"{name}.broadcast = _server_only_broadcast")
-            safety_checks.append(f"{name}.invoke = _server_only_invokes")
+            safety_checks.append(f"{name}.invoke = _server_only_invoke")
 
         safety_code = "\n".join(safety_checks)
         # --- SAFETY INJECTION END ---
