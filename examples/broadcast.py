@@ -18,6 +18,16 @@ async def update_counter(count: int):
     el.style(color = "red" if count % 2 == 0 else "blue")
 
 
+@app.connect
+async def enter(id: str):
+    print(f"Client connected {id}")
+
+
+@app.disconnect
+async def exit(id: str):
+    print(f"Client disconnected {id}")
+
+
 # --- 2. Server Side (Background Task) ---
 async def background_pinger():
     """Simulates a server event happening every second."""

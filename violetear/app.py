@@ -68,12 +68,16 @@ class App:
         # Registry of served styles to prevent duplicate route registration
         self.served_styles: Dict[str, StyleSheet] = {}
 
-        # Registry for client- and serverside functions
+        # Registry for client- and server-side functions
         self.client_functions: Dict[str, Callable] = {}
         self.server_functions: Dict[str, Callable] = {}
 
         # Names of client-side functions to run on load
         self.startup_functions: List[str] = []
+
+        # Registry for connect and disconnect handlers
+        self.connect_functions: list[Callable] = []
+        self.disconnect_functions: list[Callable] = []
 
         # PWA Registry: route_scope_hash -> (Manifest, ServiceWorker)
         self.pwa_registry: Dict[str, tuple[Manifest, ServiceWorker]] = {}
@@ -108,18 +112,18 @@ class App:
             )
 
         # In App.__init__
-        self.socket_manager = SocketManager()
+        self.socket_manager = SocketManager(self)
 
         @self.api.websocket("/_violetear/ws")
-        async def websocket_endpoint(websocket: WebSocket):
-            await self.socket_manager.connect(websocket)
+        async def websocket_endpoint(websocket: WebSocket, client_id: str):
+            await self.socket_manager.connect(client_id, websocket)
             try:
                 while True:
                     # Keep the connection alive.
                     # We can also listen for client-to-server messages here if needed later.
                     await websocket.receive()
             except (WebSocketDisconnect, RuntimeError):
-                self.socket_manager.disconnect(websocket)
+                await self.socket_manager.disconnect(client_id)
 
     def client(self, func: Callable):
         """Decorator to mark a function to be compiled to the client."""
@@ -189,6 +193,30 @@ class App:
         self.api.post(route_path)(wrapper)
 
         return func
+
+    def connect(self, func: Callable):
+        """
+        Decorator to register a function to run
+        everytime a client connects.
+
+        The callable receives a single parameter `client_id:str`.
+        """
+        if not inspect.iscoroutinefunction(func):
+            raise ValueError("Connect callbacks must be async")
+
+        self.connect_functions.append(func)
+
+    def disconnect(self, func: Callable):
+        """
+        Decorator to register a function to run
+        everytime a client disconnects.
+
+        The callable receives a single parameter `client_id:str`.
+        """
+        if not inspect.iscoroutinefunction(func):
+            raise ValueError("Connect callbacks must be async")
+
+        self.disconnect_functions.append(func)
 
     def style(self, path: str, sheet: StyleSheet):
         """
@@ -620,16 +648,23 @@ from fastapi import WebSocket, WebSocketDisconnect
 
 
 class SocketManager:
-    def __init__(self):
+    def __init__(self, app: App):
         # Keep track of active connections
-        self.active_connections: List[WebSocket] = []
+        self.active_connections: dict[str, WebSocket] = {}
+        self.app = app
 
-    async def connect(self, websocket: WebSocket):
+    async def connect(self, client_id: str, websocket: WebSocket):
         await websocket.accept()
-        self.active_connections.append(websocket)
+        self.active_connections[client_id] = websocket
 
-    def disconnect(self, websocket: WebSocket):
-        self.active_connections.remove(websocket)
+        for func in self.app.connect_functions:
+            await func(client_id)
+
+    async def disconnect(self, client_id: str):
+        self.active_connections.pop(client_id)
+
+        for func in self.app.disconnect_functions:
+            await func(client_id)
 
     async def broadcast(self, func_name: str, args: tuple, kwargs: dict):
         """
@@ -641,9 +676,9 @@ class SocketManager:
 
         # Iterate over all connections and send the message
         # We use a copy of the list to avoid modification errors during iteration
-        for connection in self.active_connections[:]:
+        for id, connection in list(self.active_connections.items()):
             try:
                 await connection.send_text(payload)
             except Exception:
                 # If sending fails (e.g. client disconnected), remove it
-                self.disconnect(connection)
+                await self.disconnect(id)

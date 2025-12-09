@@ -1,14 +1,30 @@
 import asyncio
 import json
-from js import document, window, WebSocket, console
-from pyodide.ffi import create_proxy
+import uuid
+
+from violetear.storage import session
+
+# Pyiodide-specific imports that don't work in the IDE
+from js import document, window, WebSocket, console  # type: ignore
+from pyodide.ffi import create_proxy  # type: ignore
+
+
+def get_client_id():
+    client_id = session.get("VIOLETEAR_ID")
+
+    if client_id is None:
+        client_id = str(uuid.uuid4())
+
+    session["VIOLETEAR_ID"] = client_id
+    return client_id
 
 
 def get_socket_url():
     """Calculates the correct WebSocket URL based on the current page."""
     protocol = "wss" if window.location.protocol == "https:" else "ws"
     host = window.location.host
-    return f"{protocol}://{host}/_violetear/ws"
+    client_id = get_client_id()
+    return f"{protocol}://{host}/_violetear/ws?client_id={client_id}"
 
 
 def setup_socket_listener(scope):
