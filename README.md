@@ -43,14 +43,10 @@ Let's build a fully interactive "Counter" app. The state persists across reloads
 
 ### 1. Initialize the App
 
-First, we create the application instance. This wraps FastAPI to provide a powerful server engine.
+First, we create the application instance. This wraps FastAPI to provide a powerful client-server isomorphic engine.
 
 ```python
-from violetear import App, StyleSheet
-from violetear.markup import Document, Element
-from violetear.color import Colors
-from violetear.style import Style
-from violetear.dom import Event
+from violetear import App
 
 app = App(title="Violetear Counter")
 ```
@@ -60,6 +56,10 @@ app = App(title="Violetear Counter")
 Instead of writing CSS strings, use the fluent API to define your theme.
 
 ```python
+from violetear import StyleSheet
+from violetear.color import Colors
+from violetear.style import Style
+
 # Create a global stylesheet
 style = StyleSheet()
 
@@ -81,10 +81,10 @@ style.select(".btn:hover").rule("opacity", "0.8")
 
 ### 3. Server Logic (RPC)
 
-Define a function that runs on the server. The `@app.server` decorator exposes this function so your client code can call it directly.
+Define a function that runs on the server. The `@app.server.rpc` decorator exposes this function so your client code can call it directly.
 
 ```python
-@app.server
+@app.server.rpc
 async def report_count(current_count: int, action: str):
     """
     This runs on the SERVER.
@@ -96,10 +96,10 @@ async def report_count(current_count: int, action: str):
 
 ### 4. Client Logic (In-Browser Python)
 
-Define the interactivity. We use `@app.startup` to restore state when the page loads.
+Define the interactivity. We use `@app.client.on("ready")` to restore state when the page loads and everything is setup.
 
 ```python
-@app.startup
+@app.client.on("ready")
 async def init_counter():
     """
     Runs automatically when the page loads (Client-Side).
@@ -115,10 +115,12 @@ async def init_counter():
         print(f"Restored count: {saved_count}")
 ```
 
-And we use `@app.client` to handle user interactions and run Python code in the browser. Check out the Pythonic API for interacting with the DOM and the LocalStorage. We can also call server-side functions seamlessly, via automagic RPC (Remote Procedure Call).
+And we use `@app.client.callback` to handle user interactions and run Python code in the browser. Check out the Pythonic API for interacting with the DOM and the LocalStorage. We can also call server-side functions seamlessly, via automagic RPC (Remote Procedure Call).
 
 ```python
-@app.client
+from violetear.dom import Event
+
+@app.client.callback
 async def handle_change(event: Event):
     """
     Runs in the browser on click.
@@ -151,7 +153,9 @@ async def handle_change(event: Event):
 Finally, create the route that renders the initial HTML. We attach the style and bind the Python function to the button's click event.
 
 ```python
-@app.route("/")
+from violetear.markup import Document, HTML
+
+@app.view("/")
 def index():
     doc = Document(title="Violetear Counter")
 
@@ -159,21 +163,18 @@ def index():
     doc.style(style, href="/style.css")
 
     doc.body.add(
-        Element("div", classes="counter-card").extend(
-            Element("h2", text="Isomorphic Counter"),
-
+        HTML.div(classes="counter-card").extend(
+            HTML.h2(text="Isomorphic Counter"),
             # The Count
-            Element("div", id="display", classes="count-display", text="0"),
-
+            HTML.div(id="display", classes="count-display", text="0"),
             # Controls - Both call the same Python function
-            Element("button", id="minus", text="-", classes="btn-minus btn").on(
+            HTML.button(id="minus", text="-", classes="btn-minus btn").on(
                 "click", handle_change
             ),
-            Element("button", id="plus", text="+", classes="btn-plus btn").on(
+            HTML.button(id="plus", text="+", classes="btn-plus btn").on(
                 "click", handle_change
             ),
-
-            Element("p", text="Refresh the page! The count persists.").style(
+            HTML.p(text="Refresh the page! The count persists.").style(
                 Style().color(Colors.Gray).margin(top=20)
             ),
         )
@@ -225,13 +226,13 @@ Simply pass `pwa=True` (or a `Manifest` object) to the `@app.route` decorator.
 **Important:** You must define an app `version`. If you don't, Violetear generates a random one on every restart, which will force users to re-download the app every time you deploy.
 
 ```python
-from violetear import App, Manifest
-
 # 1. Set a version string (e.g., from git commit or semantic version)
 app = App(title="My App", version="v1.0.2")
 
-# 2. Enable PWA on your main route
-@app.route("/", pwa=Manifest(
+# ...
+
+# 2. Enable PWA on your desired route
+@app.view("/", pwa=Manifest(
     name="My Super App",
     short_name="SuperApp",
     description="An amazing Python PWA",
@@ -240,6 +241,8 @@ app = App(title="My App", version="v1.0.2")
 def home():
     return Document(...)
 ```
+
+The "application" cache is defined per route (@app.view), so you can have multiple PWAs served from the same violetear application. You can setup some routes for delivering PWA-enables app while other routes serve server-side rendered documents or standard (non-PWA) dynamic documents. You can match and mix as you wish.
 
 ### Caching Strategy
 
@@ -250,14 +253,8 @@ Violetear uses a hybrid strategy to ensure safety and speed:
 
 ### Current Limitations
 
-  * **Push Notifications:** Not yet supported (requires VAPID key generation and a push server).
-  * **Background Sync:** Offline actions (like submitting a form while disconnected) are not automatically retried when online. You must handle connection errors manually in your client logic.
-
-Based on the `examples/broadcast.py` file you provided, here is a new section for the `README.md`.
-
-This section explains the **Reverse RPC** capability (Server-to-Client communication), detailing how to define client-side functions and trigger them from the server to broadcast updates to all connected users.
-
-You should place this section immediately after the **"🚀 Quickstart: The Isomorphic Counter"** section in your `README.md`.
+  * **Push Notifications:** Not yet supported, and unclear if we ever will.
+  * **Background Sync:** Offline actions (like submitting a form while disconnected) are not automatically retried when online. You must handle connection errors manually in your client logic. At some time we may provide a standard mechanism for queueing this type of actions.
 
 ## 📡 Real-Time: Server Broadcasts
 
@@ -267,11 +264,11 @@ The magic happens via the `.broadcast()` method available on any `@app.client` f
 
 ### 1. Define the Client Function
 
-Create a function decorated with `@app.client`. This code will be compiled and run in the browser, but the server "knows" about it.
+Create a function decorated with `@app.client.realtime`. This code will be compiled and run in the browser, but the server "knows" about it and can invoke it.
 
 ```python
 # This function runs in the User's Browser
-@app.client
+@app.client.realtime
 async def update_alert(message: str, color: str):
     from violetear.dom import Document
 
@@ -283,58 +280,52 @@ async def update_alert(message: str, color: str):
 
 ### 2. Call it from the Server
 
-You can call this function from anywhere in your server-side code (a background task, a cron job, or another API route) using `.broadcast()`.
+Now the server code can call `update_alert.invoke(...)` for any specific client.
+You can get the appropriate client ID via `@app.server.on("connect")` handlers.
+
+You can also call it for all connected clients using `.broadcast()`. For example, if the server shutdowns and restarts later on, you can inform your clients like this:
 
 ```python
 import asyncio
-from contextlib import asynccontextmanager
-
-# A background task running on the server
-async def background_monitor():
-    while True:
-        await asyncio.sleep(5)
-        # Send data to ALL connected clients
-        await update_alert.broadcast(
-            message="Server is alive!",
-            color="green"
-        )
 
 # Register the background task using standard FastAPI lifespan
-@asynccontextmanager
-async def lifespan(api):
-    task = asyncio.create_task(background_monitor())
-    yield
-    task.cancel()
-
-# Hook into the app
-app.api.router.lifespan_context = lifespan
+@app.server.on("startup")
+async def start_monitor():
+  # A background task running on the server
+  await update_alert.broadcast(
+      message="Server is alive!",
+      color="green"
+  )
 ```
 
 ### 3. Handle Connections
 
-You can also hook into WebSocket lifecycle events to track users or trigger actions when they join or leave.
+You can hook into WebSocket lifecycle events to track users or trigger actions when they join or leave.
 
 ```python
-@app.connect
+@app.server.on("connect")
 async def on_join(client_id: str):
     print(f"Client {client_id} connected.")
     # You could broadcast a "User Joined" message here
     await update_alert.broadcast(f"User {client_id} joined!", "blue")
 
-@app.disconnect
+@app.server.on("disconnect")
 async def on_leave(client_id: str):
     print(f"Client {client_id} left.")
 ```
 
+Similarly, you can hook `@app.client.on("connect")` and `"disconnect"` events to execute client-side code whenever the client websocket connects and disconnects.
+
 ## 🛣️ Roadmap
 
-Here is the vision for the immediate future of Violetear:
+The long-term vision for Violetear is to become a Python-native, full-stack, production-ready web framework. Here are some of the currently planned features:
 
   * [x] **📱 Progressive Web Apps (PWA)**: Simply pass `@app.route(..., pwa=True)` to automatically generate `manifest.json` and a Service Worker.
   * [x] **📡 Reverse RPC (Broadcast and Invoke)**: Invoke client-side functions from the server via websockets.
   * [ ] **🔥 JIT CSS**: An optimization engine that scans your Python code and serves *only* the CSS rules actually used by your components.
   * [ ] **🧭 SPA Engine**: An abstraction (`violetear.spa`) for building Single Page Applications.
-  * [ ] **🔀 Client-Side Routing**: Define routes that render specific components into a shell without reloading the page.
+  * [ ] **🔀 Client-Side Routing**: Define client-side routes that render specific components into a shell without reloading the page.
+  * [ ] **📃 Partial Views**: Define server views that render only partial documents, which can be injected into the client-side DOM dynamically.
   * [ ] **🗃️ `@app.local`**: Reactive state that lives in the browser (per user). Changes update the DOM automatically.
   * [ ] **🌐 `@app.shared`**: Real-time state that lives on the server (multiplayer). Changes are synced to all connected clients via **WebSockets**.
 
