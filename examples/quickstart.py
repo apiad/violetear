@@ -47,11 +47,11 @@ async def handle_change(event: Event):
     """
     Runs in the browser.
     """
-    from violetear.dom import Document
+    from violetear.dom import DOM
     from violetear.storage import store
 
     # A. Get current state from DOM
-    display = Document.find("display")
+    display = DOM.find("display")
     current_value = int(display.text)
 
     # B. Determine action
@@ -75,14 +75,14 @@ async def init_counter():
     Runs automatically when the page loads (Client-Side).
     Restores the counter from Local Storage.
     """
-    from violetear.dom import Document
+    from violetear.dom import DOM
     from violetear.storage import store
 
     # Check if we have a saved count
     saved_count = store.count
 
     if saved_count is not None:
-        Document.find("display").text = str(saved_count)
+        DOM.find("display").text = str(saved_count)
         print(f"Restored count: {saved_count}")
 
 

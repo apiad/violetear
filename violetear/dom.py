@@ -7,6 +7,10 @@ IS_BROWSER = "pyodide" in sys.modules or "emscripten" in sys.platform
 if IS_BROWSER:
     from js import document, console
     from pyodide.ffi import create_proxy
+else:
+    raise RuntimeError(
+        "Module violetear.dom is only supposed to be used in the browser."
+    )
 
 
 class DOMElement:
@@ -110,7 +114,7 @@ class DOMElement:
         return self._el
 
 
-class Document:
+class DOM:
     """
     Static entry point for DOM selection.
     """

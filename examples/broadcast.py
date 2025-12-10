@@ -11,9 +11,9 @@ app = App(title="Live Ping", version="v1")
 @app.client.realtime
 async def update_counter(count: int):
     # This runs in the User's Browser
-    from violetear.dom import Document
+    from violetear.dom import DOM
 
-    el = Document.find("counter")
+    el = DOM.find("counter")
     el.text = f"Server Pings: {count}"
     el.style(color="red" if count % 2 == 0 else "blue")
 

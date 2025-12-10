@@ -26,11 +26,11 @@ async def create_user(name: str, age: int) -> UserData:
 # 3. Define the Client Logic
 @app.client.callback
 async def on_submit(event: Event):
-    from violetear.dom import Document
+    from violetear.dom import DOM
 
     # Get values from DOM
-    name = Document.find("name-input").value
-    age = int(Document.find("age-input").value)
+    name = DOM.find("name-input").value
+    age = int(DOM.find("age-input").value)
 
     # Call the Server Stub!
     # This looks like a local call, but it does a fetch() under the hood.

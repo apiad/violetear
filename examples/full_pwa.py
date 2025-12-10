@@ -46,16 +46,16 @@ style.select("button:hover").rules(background="#3700b3")
 # This function runs in the browser (compiled to the client bundle).
 @app.client
 async def change_color(event: Event):
-    from violetear.dom import Document
+    from violetear.dom import DOM
     import random
 
     colors = ["#ffebee", "#e3f2fd", "#e8f5e9", "#fff3e0", "#f3e5f5"]
     # We select the element by ID and change its style
-    card = Document.find("my-card")
+    card = DOM.find("my-card")
     card.style(background_color=random.choice(colors))
 
     # Update text
-    status = Document.find("status")
+    status = DOM.find("status")
     status.text = "Color changed from Python!"
 
 
