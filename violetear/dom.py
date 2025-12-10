@@ -82,15 +82,6 @@ class DOMElement:
                 self._el.classList.remove(cls)
         return self
 
-    def toggle(self, *classes: str) -> "DOMElement":
-        if IS_BROWSER and self._el:
-            for cls in classes:
-                if cls in self._el.classList:
-                    self._el.classList.remove(cls)
-                else:
-                    self._el.classList.add(cls)
-        return self
-
     def on(self, event: str, handler: Callable) -> "DOMElement":
         """Attaches a Python event listener."""
         if IS_BROWSER and self._el:
@@ -112,6 +103,87 @@ class DOMElement:
     def raw(self):
         """Returns the underlying JS element."""
         return self._el
+
+    def attr(self, name: str, value: Any = None) -> Union[str, "DOMElement", None]:
+        """
+        Get or Set an HTML attribute.
+        - attr("src") -> returns value
+        - attr("src", "img.jpg") -> sets value and returns self
+        """
+        if IS_BROWSER and self._el:
+            if value is None:
+                return self._el.getAttribute(name)
+            self._el.setAttribute(name, str(value))
+            return self
+
+        # Mock return for server-side safety
+        return self if value is not None else None
+
+    def prop(self, name: str, value: Any = None) -> Any:
+        """
+        Get or Set a JavaScript property (e.g. checked, disabled, valueAsDate).
+        Distinct from attributes (html).
+        """
+        if IS_BROWSER and self._el:
+            if value is None:
+                return getattr(self._el, name, None)
+            setattr(self._el, name, value)
+            return self
+
+        return self if value is not None else None
+
+    def toggle(self, cls: str, force: Optional[bool] = None) -> "DOMElement":
+        """
+        Toggles a class.
+        If 'force' is True, adds it. If False, removes it.
+        If None, inverts current state.
+        """
+        if IS_BROWSER and self._el:
+            if force is True:
+                self._el.classList.add(cls)
+            elif force is False:
+                self._el.classList.remove(cls)
+            else:
+                # Standard toggle behavior
+                if self._el.classList.contains(cls):
+                    self._el.classList.remove(cls)
+                else:
+                    self._el.classList.add(cls)
+        return self
+
+    def serialize(self) -> dict:
+        """
+        Scrapes all named input, select, and textarea elements within this element
+        and returns a dictionary of their values.
+        Handles checkboxes and radio buttons correctly.
+        """
+        data = {}
+        if IS_BROWSER and self._el:
+            inputs = self._el.querySelectorAll("input, select, textarea")
+
+            for i in range(inputs.length):
+                el = inputs.item(i)
+                name = el.name
+                if not name:
+                    continue
+
+                # Handle Checkbox
+                if el.type == "checkbox":
+                    if el.checked:
+                        data[name] = True
+                    # Optional: Handle unchecked state if needed,
+                    # but usually omitted in serialization
+
+                # Handle Radio
+                elif el.type == "radio":
+                    if el.checked:
+                        data[name] = el.value
+
+                # Handle standard inputs
+                else:
+                    data[name] = el.value
+
+        return data
 
 
 class DOM:
