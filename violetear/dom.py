@@ -8,7 +8,7 @@ if IS_BROWSER:
     from js import document, console
     from pyodide.ffi import create_proxy
 else:
-    raise RuntimeError(
+    raise ImportError(
         "Module violetear.dom is only supposed to be used in the browser."
     )
 

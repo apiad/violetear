@@ -19,7 +19,6 @@ from typing import (
 
 import textwrap
 from typing import Self
-from violetear.dom import Event
 from violetear.helpers import flatten
 from violetear.style import Style
 from violetear.stylesheet import StyleSheet
@@ -126,7 +125,7 @@ class Element(Markup):
         self._attrs.update(attrs)
         return self
 
-    def on(self, event: str, handler: Callable[[Event]]) -> Self:
+    def on(self, event: str, handler: Callable) -> Self:
         """
         Binds a python function to a DOM event.
         Serializes the function name to a data attribute.
