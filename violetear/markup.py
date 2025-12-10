@@ -61,12 +61,82 @@ class Markup(abc.ABC):
         fp.write(value)
 
 
+class ElementBuilder:
+    """
+    Helper class returned by the 'with element as e:' context manager.
+    It allows creating siblings attached to the parent element using a fluent syntax.
+    """
+    def __init__(self, parent: Element):
+        self._parent = parent
+
+        # Register common HTML tags as methods on this instance
+        # This allows: e.div(...), e.h1(...)
+        self.div = self._factory("div")
+        self.section = self._factory("section")
+        self.header = self._factory("header")
+        self.footer = self._factory("footer")
+        self.main = self._factory("main")
+        self.nav = self._factory("nav")
+
+        self.h1 = self._factory("h1")
+        self.h2 = self._factory("h2")
+        self.h3 = self._factory("h3")
+        self.h4 = self._factory("h4")
+        self.h5 = self._factory("h5")
+        self.h6 = self._factory("h6")
+
+        self.p = self._factory("p")
+        self.span = self._factory("span")
+        self.a = self._factory("a")
+        self.img = self._factory("img")
+
+        self.ul = self._factory("ul")
+        self.ol = self._factory("ol")
+        self.li = self._factory("li")
+
+        self.table = self._factory("table")
+        self.thead = self._factory("thead")
+        self.tbody = self._factory("tbody")
+        self.tr = self._factory("tr")
+        self.td = self._factory("td")
+        self.th = self._factory("th")
+
+        self.form = self._factory("form")
+        self.input = self._factory("input")
+        self.button = self._factory("button")
+        self.label = self._factory("label")
+        self.select = self._factory("select")
+        self.option = self._factory("option")
+        self.textarea = self._factory("textarea")
+
+    def tag(self, name: str, *content, **kwargs) -> Element:
+        """
+        Explicitly create a tag that isn't pre-defined.
+        Usage: e.tag("my-custom-component", ...)
+        """
+        el = Element(name, *content, **kwargs)
+        self._parent.add(el)
+        return el
+
+    def _factory(self, tag_name: str):
+        """
+        Internal helper that returns a function to create a specific tag.
+        """
+        def wrapper(*content, **kwargs) -> Element:
+            return self.tag(tag_name, *content, **kwargs)
+
+        # improved debugging representation
+        wrapper.__name__ = tag_name
+        wrapper.__qualname__ = f"ElementBuilder.{tag_name}"
+        return wrapper
+
+
 class Element(Markup):
     def __init__(
         self,
         tag: str,
-        *content: Element,
         text: str | None = None,
+        *content: Element,
         classes: str | List[str] | None = None,
         id: str | None = None,
         style: Style | None = None,
@@ -88,6 +158,20 @@ class Element(Markup):
         self._style = style or Style()
         self._parent = parent
         self._attrs = attrs
+
+    def __enter__(self) -> ElementBuilder:
+        """
+        Enables the syntax:
+        with doc.body as e:
+            e.h1("Title")
+        """
+        return ElementBuilder(self)
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        """
+        Standard context manager exit.
+        """
+        return False  # Propagate exceptions if they occur
 
     def id(self, id: str) -> Self:
         self._id = id

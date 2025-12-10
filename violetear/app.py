@@ -357,9 +357,33 @@ class App:
             await self.socket_manager.connect(client_id, websocket)
             try:
                 while True:
-                    # Keep the connection alive.
-                    # We can also listen for client-to-server messages here if needed later.
-                    await websocket.receive()
+                    # Listen for messages from the client
+                    message = await websocket.receive_text()
+
+                    try:
+                        data = json.loads(message)
+                    except json.JSONDecodeError:
+                        print(f"[Violetear] ⚠️ Received invalid JSON from client {client_id}")
+                        continue
+
+                    # Dispatch 'realtime' function calls
+                    if data.get("type") == "realtime":
+                        func_name = data.get("func")
+                        args = data.get("args", [])
+                        kwargs = data.get("kwargs", {})
+
+                        if func_name in self.server.realtime_functions:
+                            func = self.server.realtime_functions[func_name]
+
+                            # Execute the function (Fire-and-forget from client perspective)
+                            # We await it here so the server processes it safely within this connection's loop
+                            try:
+                                await func(*args, **kwargs)
+                            except Exception as e:
+                                print(f"[Violetear] ❌ Error executing realtime function '{func_name}': {e}")
+                        else:
+                            print(f"[Violetear] ⚠️ Warning: Client {client_id} tried to call unknown realtime function '{func_name}'")
+
             except (WebSocketDisconnect, RuntimeError):
                 await self.socket_manager.disconnect(client_id)
 
