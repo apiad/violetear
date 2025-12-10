@@ -7,7 +7,7 @@ app = App(title="Auto Updating PWA")
 print(app.version)
 
 
-@app.route("/", pwa=True)
+@app.view("/", pwa=True)
 def index():
     doc = Document(title=f"Auto PWA")
     doc.body.extend(

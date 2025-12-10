@@ -1,19 +1,27 @@
+import asyncio
+from contextlib import asynccontextmanager
+import functools
 import os
 import inspect
 import hashlib
 import json
 from pathlib import Path
 from textwrap import dedent
-from typing import Any, Callable, Dict, List, Union
+from typing import Any, Callable, Dict, List, Set, Union
 import uuid
+
+from .stylesheet import StyleSheet
+from .markup import Document, StyleResource
+from .pwa import Manifest, ServiceWorker
 
 
 # --- Optional Server Dependencies ---
 try:
     from pydantic import create_model
-    from fastapi import FastAPI, APIRouter, Request, Response
+    from fastapi import FastAPI, Request, Response
     from fastapi.responses import HTMLResponse, FileResponse
-    from fastapi.staticfiles import StaticFiles
+    from fastapi import WebSocket, WebSocketDisconnect
+
     import uvicorn
 
     HAS_SERVER = True
@@ -25,9 +33,246 @@ except ImportError:
     )
 
 
-from .stylesheet import StyleSheet
-from .markup import Document, StyleResource
-from .pwa import Manifest, ServiceWorker
+class ServerRegistry:
+    """
+    Registry for Server-Side Logic (RPC, Realtime, Events).
+    """
+
+    def __init__(self, app: "App"):
+        self.app = app
+        self.rpc_functions: Dict[str, Callable] = {}
+        self.realtime_functions: Dict[str, Callable] = {}
+        self.event_handlers: Dict[str, List[Callable]] = {}
+
+    def rpc(self, func: Callable):
+        """
+        Decorator for functions exposed to the client via HTTP (Fetch).
+        The client awaits the result.
+        """
+        if not inspect.iscoroutinefunction(func):
+            raise ValueError(f"RPC function '{func.__name__}' must be async")
+
+        self.rpc_functions[func.__name__] = func
+
+        # Delegate the actual FastAPI route generation to the App
+        self.app._register_rpc_route(func)
+
+        return func
+
+    def realtime(self, func: Callable):
+        """
+        Decorator for functions exposed to the client via WebSocket.
+        Fire-and-forget.
+        """
+        if not inspect.iscoroutinefunction(func):
+            raise ValueError(f"Realtime function '{func.__name__}' must be async")
+
+        @functools.wraps(func)
+        async def wrapper(*args, **kwargs):
+            result = await func(*args, **kwargs)
+
+            if result is not None:
+                print(
+                    f"⚠️ [Violetear] Warning: Realtime function '{func.__name__}' returned a value, but the client will not receive it."
+                )
+
+            return result
+
+        # Preserve identity
+        self.realtime_functions[func.__name__] = wrapper
+        return wrapper
+
+    def on(self, event: str):
+        """
+        Decorator for event handlers (e.g., 'connect', 'disconnect', 'custom_event').
+        """
+
+        def decorator(func: Callable):
+            if not inspect.iscoroutinefunction(func):
+                raise ValueError(f"Event handler '{func.__name__}' must be async")
+
+            if event not in self.event_handlers:
+                self.event_handlers[event] = []
+
+            self.event_handlers[event].append(func)
+            return func
+
+        return decorator
+
+
+class ClientFunctionStub:
+    """
+    Wraps a client-side function to prevent execution on the server.
+    """
+
+    def __init__(self, func: Callable, is_callback: bool = False):
+        self.func = func
+        self.__name__ = func.__name__
+        self.__doc__ = func.__doc__
+
+        if is_callback:
+            self.__is_violetear_callback__ = True
+
+    def __call__(self, *args, **kwargs):
+        raise RuntimeError(
+            f"❌ Client function '{self.__name__}' cannot be called from the Server.\n"
+            "It is meant to run in the Browser."
+        )
+
+    def __repr__(self):
+        try:
+            self.__is_violetear_callback__
+            return f"<client.callback:{self.__name__})>"
+        except:
+            return f"<client:{self.__name__})>"
+
+
+class ClientRealtimeStub(ClientFunctionStub):
+    """
+    Wraps a client-side realtime function to allow Server -> Client RPC.
+    """
+
+    def __init__(self, func: Callable, app: "App"):
+        super().__init__(func)
+        self.app = app
+
+    async def broadcast(self, *args, **kwargs):
+        """
+        Triggers this function on ALL connected clients.
+        """
+        # Note: socket_manager must be initialized on the app
+        await self.app.socket_manager.broadcast(self.__name__, args, kwargs)
+
+    async def invoke(self, client_id: str, *args, **kwargs):
+        """
+        Triggers this function on a SPECIFIC client.
+        """
+        await self.app.socket_manager.invoke(client_id, self.__name__, args, kwargs)
+
+    def __repr__(self):
+        return f"<client.realtime:{self.__name__})>"
+
+
+class ClientRegistry:
+    """
+    Registry for Client-Side Logic.
+    """
+
+    def __init__(self, app: "App"):
+        self.app = app
+        self.code_functions: Dict[str, Callable] = {}
+        self.callback_names: Set[str] = set()
+        self.realtime_functions: Dict[str, Callable] = {}
+        self.event_handlers: Dict[str, List[str]] = {}
+
+    def _register(self, func: Callable):
+        """Helper to register the raw function source."""
+        # Unwrap if it's already a stub (in case of decorator stacking)
+        if isinstance(func, ClientFunctionStub):
+            func = func.func
+
+        if not inspect.iscoroutinefunction(func):
+            raise ValueError(f"Client function '{func.__name__}' must be async")
+
+        self.code_functions[func.__name__] = func
+        return func
+
+    def __call__(self, func: Callable):
+        """
+        Base Decorator: @app.client
+        Marks a function to be transpiled to the browser.
+        """
+        func = self._register(func)
+        return ClientFunctionStub(func)
+
+    def callback(self, func: Callable):
+        """
+        Decorator: @app.client.callback
+        Marks a function as safe to attach to DOM events.
+        """
+        func = self._register(func)
+        self.callback_names.add(func.__name__)
+        return ClientFunctionStub(func, is_callback=True)
+
+    def realtime(self, func: Callable):
+        """
+        Decorator: @app.client.realtime
+        Marks a function as invokable by the server.
+        Returns a wrapper with .invoke() and .broadcast() methods.
+        """
+        func = self._register(func)
+        self.realtime_functions[func.__name__] = func
+        return ClientRealtimeStub(func, self.app)
+
+    def on(self, event: str):
+        """
+        Decorator: @app.client.on("event_name")
+        Registers a client-side event handler.
+        """
+
+        def decorator(func: Callable):
+            func = self._register(func)
+
+            if event not in self.event_handlers:
+                self.event_handlers[event] = []
+
+            self.event_handlers[event].append(func.__name__)
+
+            return ClientFunctionStub(func)
+
+        return decorator
+
+
+class SocketManager:
+    def __init__(self, app: "App"):
+        # Keep track of active connections
+        self.active_connections: dict[str, WebSocket] = {}
+        self.app = app
+
+    async def connect(self, client_id: str, websocket: WebSocket):
+        await websocket.accept()
+        self.active_connections[client_id] = websocket
+        await self.app.emit("connect", client_id)
+
+    async def disconnect(self, client_id: str):
+        self.active_connections.pop(client_id)
+        await self.app.emit("disconnect", client_id)
+
+    async def broadcast(self, func_name: str, args: tuple, kwargs: dict):
+        """
+        Sends a command to all connected clients to run a specific function.
+        """
+        payload = json.dumps(
+            {"type": "rpc", "func": func_name, "args": args, "kwargs": kwargs}
+        )
+
+        # Iterate over all connections and send the message
+        # We use a copy of the list to avoid modification errors during iteration
+        for client_id, connection in list(self.active_connections.items()):
+            try:
+                await connection.send_text(payload)
+            except Exception:
+                # If sending fails (e.g. client disconnected), remove it
+                await self.disconnect(client_id)
+
+    async def invoke(self, client_id: str, func_name: str, args: tuple, kwargs: dict):
+        """
+        Sends a command to a specific client to run a specific function.
+        """
+        payload = json.dumps(
+            {"type": "rpc", "func": func_name, "args": args, "kwargs": kwargs}
+        )
+
+        if not client_id in self.active_connections:
+            raise KeyError("Invalid client id. Did it disconnect?")
+
+        connection = self.active_connections[client_id]
+
+        try:
+            await connection.send_text(payload)
+        except Exception:
+            # If sending fails (e.g. client disconnected), remove it
+            await self.disconnect(client_id)
 
 
 class App:
@@ -44,11 +289,7 @@ class App:
         version: str | None = None,
     ):
         self.title = title
-        self.api = FastAPI(title=title)
 
-        # Automatic Versioning Strategy:
-        # If version is None, generate a random hash (Startup ID).
-        # This ensures every server restart invalidates the cache.
         if version is None:
             self.version = uuid.uuid4().hex[:8]
         else:
@@ -60,6 +301,14 @@ class App:
         self.favicon = favicon
         self.fade_in = fade_in
 
+        @asynccontextmanager
+        async def lifespan(api: FastAPI):
+            await self.emit("startup")
+            yield
+            await self.emit("shutdown")
+
+        self.api = FastAPI(title=title, version=self.version, lifespan=lifespan)
+
         # Standard path for browser favicon requests
         @self.api.get("/favicon.ico", include_in_schema=False)
         async def get_favicon():
@@ -67,17 +316,6 @@ class App:
 
         # Registry of served styles to prevent duplicate route registration
         self.served_styles: Dict[str, StyleSheet] = {}
-
-        # Registry for client- and server-side functions
-        self.client_functions: Dict[str, Callable] = {}
-        self.server_functions: Dict[str, Callable] = {}
-
-        # Names of client-side functions to run on load
-        self.startup_functions: List[str] = []
-
-        # Registry for connect and disconnect handlers
-        self.connect_functions: list[Callable] = []
-        self.disconnect_functions: list[Callable] = []
 
         # PWA Registry: route_scope_hash -> (Manifest, ServiceWorker)
         self.pwa_registry: Dict[str, tuple[Manifest, ServiceWorker]] = {}
@@ -125,36 +363,15 @@ class App:
             except (WebSocketDisconnect, RuntimeError):
                 await self.socket_manager.disconnect(client_id)
 
-    def client(self, func: Callable):
-        """Decorator to mark a function to be compiled to the client."""
-        if not inspect.iscoroutinefunction(func):
-            raise ValueError("func must be async")
+        # Client and Server registries
+        self.client = ClientRegistry(self)
+        self.server = ServerRegistry(self)
 
-        self.client_functions[func.__name__] = func
-        return ClientFunctionWrapper(self, func)
-
-    def startup(self, func: Callable):
-        """
-        Decorator to mark a function to run automatically when the client loads.
-        Also registers it as a client function.
-        """
-        if not inspect.iscoroutinefunction(func):
-            raise ValueError("func must be async")
-
-        self.client(func)
-        self.startup_functions.append(func.__name__)
-        return func
-
-    def server(self, func: Callable):
+    def _register_rpc_route(self, func: Callable):
         """
         Decorator to expose a function as a server-side RPC endpoint.
         The client bundle will receive a stub that calls this endpoint via fetch.
         """
-        if not inspect.iscoroutinefunction(func):
-            raise ValueError("func must be async")
-
-        self.server_functions[func.__name__] = func
-
         # 1. Introspect the function to find arguments
         sig = inspect.signature(func)
         fields = {}
@@ -192,32 +409,6 @@ class App:
         route_path = f"/_violetear/rpc/{func.__name__}"
         self.api.post(route_path)(wrapper)
 
-        return func
-
-    def connect(self, func: Callable):
-        """
-        Decorator to register a function to run
-        everytime a client connects.
-
-        The callable receives a single parameter `client_id:str`.
-        """
-        if not inspect.iscoroutinefunction(func):
-            raise ValueError("Connect callbacks must be async")
-
-        self.connect_functions.append(func)
-
-    def disconnect(self, func: Callable):
-        """
-        Decorator to register a function to run
-        everytime a client disconnects.
-
-        The callable receives a single parameter `client_id:str`.
-        """
-        if not inspect.iscoroutinefunction(func):
-            raise ValueError("Connect callbacks must be async")
-
-        self.disconnect_functions.append(func)
-
     def style(self, path: str, sheet: StyleSheet):
         """
         Registers a stylesheet to be served by the app at a specific path.
@@ -252,40 +443,34 @@ class App:
     def _generate_server_stubs(self) -> str:
         """
         Generates client-side Python stubs for server functions.
-        These stubs use fetch() to call the RPC endpoints.
+        These stubs delegate to the helper functions in client.py.
         """
         stubs = []
 
-        for name, func in self.server_functions.items():
-            # Introspect the function to support positional arguments in the stub
+        # 1. RPC Stubs (HTTP POST)
+        # These call the server and await a response.
+        for name, func in self.server.rpc_functions.items():
             sig = inspect.signature(func)
             arg_names = [p.name for p in sig.parameters.values()]
 
-            # We generate a Python async function that wraps the fetch call
             stub = dedent(
                 f"""
                 async def {name}(*args, **kwargs):
-                    import json
-                    from pyodide.http import pyfetch
-
-                    # Map positional args to their names (captured from server signature)
                     arg_names = {arg_names!r}
-                    payload = {{k: v for k, v in zip(arg_names, args)}}
-                    payload.update(kwargs)
+                    return await _call_rpc("{name}", arg_names, args, kwargs)
+                """
+            )
+            stubs.append(stub)
 
-                    # Perform RPC
-                    response = await pyfetch(
-                        "/_violetear/rpc/{name}",
-                        method="POST",
-                        headers={{"Content-Type": "application/json"}},
-                        body=json.dumps(payload)
-                    )
-
-                    if not response.ok:
-                        raise Exception(f"RPC Error: {{response.status}} {{response.statusText}}")
-
-                    # Automatically convert JSON response back to Python objects (dicts/lists)
-                    return await response.json()
+        # 2. Realtime Stubs (WebSocket)
+        # These send a fire-and-forget message.
+        for name, func in self.server.realtime_functions.items():
+            # Realtime functions don't need arg mapping on the client side
+            # because they just forward *args directly to the socket payload.
+            stub = dedent(
+                f"""
+                async def {name}(*args, **kwargs):
+                    return await _call_realtime("{name}", args, kwargs)
                 """
             )
             stubs.append(stub)
@@ -341,7 +526,7 @@ class App:
 
         # 4. Extract User Functions
         user_code = []
-        for name, func in self.client_functions.items():
+        for name, func in self.client.code_functions.items():
             code = inspect.getsource(func).split("\n")
             code = [c for c in code if not c.startswith("@")]  # remove decorators
             user_code.append("\n".join(code))
@@ -361,7 +546,7 @@ class App:
             )
         )
 
-        for name in self.client_functions.keys():
+        for name in self.client.realtime_functions.keys():
             safety_checks.append(f"{name}.broadcast = _server_only_broadcast")
             safety_checks.append(f"{name}.invoke = _server_only_invoke")
 
@@ -375,7 +560,7 @@ class App:
         init_code = "# --- Init ---\nhydrate(globals())"
 
         # Run startup functions
-        for func_name in self.startup_functions:
+        for func_name in self.client.event_handlers.get("ready", []):
             init_code += f"\nawait {func_name}()"
 
         return "\n\n".join(
@@ -541,9 +726,19 @@ class App:
                 script.src = self._version_url(script.src)
                 sw.add_assets(script.src)
 
-    def route(
-        self, path: str, methods: List[str] = ["GET"], pwa: bool | Manifest = False
-    ):
+    async def emit(self, event: str, *args, **kwargs):
+        """
+        Emits a custom event on the server, invoking
+        callbacks registered with @app.server.on(event).
+        """
+        handlers = [
+            c(*args, **kwargs) for c in self.server.event_handlers.get(event, [])
+        ]
+
+        if handlers:
+            await asyncio.gather(*handlers)
+
+    def view(self, path: str, pwa: bool | Manifest = False):
         """
         Decorator to register a route.
 
@@ -553,164 +748,35 @@ class App:
         if pwa:
             self._register_pwa(path, pwa)
 
-        def decorator(func: Callable):
-            @self.api.api_route(path, methods=methods)
+        def decorator(func: Callable[[], str | Document]):
+            @self.api.get(path)
             async def wrapper(request: Request):
                 # 1. Handle Request (POST/GET)
-                if request.method == "POST":
-                    form_data = await request.form()
-                    # Simple check if function accepts arguments
-                    if inspect.signature(func).parameters:
-                        response = func(form_data)
-                    else:
-                        response = func()
-                else:
-                    response = func()
-
-                # Await if async
-                if inspect.isawaitable(response):
-                    response = await response
+                doc = func()
 
                 # 2. Handle Document Rendering
-                if isinstance(response, Document):
+                if isinstance(doc, Document):
                     # Check if this doc uses any new stylesheets we need to serve
-                    self._register_document_styles(response)
+                    self._register_document_styles(doc)
 
                     # Check if this document contains Python bindings
-                    if response.body.has_bindings() or self.client_functions:
-                        self._inject_client_side(response)
+                    if self.client.code_functions:
+                        self._inject_client_side(doc)
 
                     # Inject PWA tags if enabled for this route
                     if pwa:
-                        self._inject_pwa_tags(response, path)
+                        self._inject_pwa_tags(doc, path)
 
                     # Render the HTML (which will contain <link href="..."> tags)
-                    return HTMLResponse(response.render())
+                    return HTMLResponse(doc.render())
 
-                # 3. Return raw response (JSON, Dict, etc.)
-                return response
+                else:
+                    return HTMLResponse(doc)
 
             return wrapper
 
         return decorator
 
-    def mount_static(self, directory: str, path: str = "/static"):
-        """Mounts a static file directory."""
-        if os.path.isdir(directory):
-            self.api.mount(path, StaticFiles(directory=directory), name="static")
-
     def run(self, host="0.0.0.0", port=8000, **kwargs):
         """Helper to run via uvicorn programmatically."""
         uvicorn.run(self.api, host=host, port=port, **kwargs)
-
-
-class ClientFunctionWrapper:
-    """
-    Wraps a client-side function to provide Server-Side RPC capabilities.
-
-    When you define:
-        @app.client
-        async def my_func(...): ...
-
-    This wrapper ensures that:
-    1. Calling `await my_func(...)` on the server runs the function (or warns).
-    2. Calling `await my_func.broadcast(...)` triggers the WebSocket dispatcher.
-    """
-
-    def __init__(self, app: "App", func: Callable):
-        self.app = app
-        self.func = func
-        # Mimic the original function's identity
-        self.__name__ = func.__name__
-        self.__doc__ = func.__doc__
-
-    def __call__(self, *args, **kwargs):
-        """
-        Standard call: await my_func(...)
-        Executes the function logic locally (useful for testing or shared logic).
-        """
-        raise RuntimeError(
-            f"Cannot call client-side functions in the server! Did you meant {self.func.__name__}.broadcast(...)?"
-        )
-
-    async def broadcast(self, *args, **kwargs):
-        """
-        RPC Call: await my_func.broadcast(...)
-
-        Tells the server to instructing ALL connected clients to run this function.
-        """
-        await self.app.socket_manager.broadcast(
-            func_name=self.__name__, args=args, kwargs=kwargs
-        )
-
-    async def invoke(self, client_id, *args, **kwargs):
-        """
-        RPC Call: await my_func.invoke("1234-", ...)
-
-        Tells the server to instructing an specific client to run this function.
-        You can get client ids from @connect handlers.
-        """
-        await self.app.socket_manager.invoke(
-            client_id=client_id, func_name=self.__name__, args=args, kwargs=kwargs
-        )
-
-
-# Add this class to violetear/app.py
-
-from fastapi import WebSocket, WebSocketDisconnect
-
-
-class SocketManager:
-    def __init__(self, app: App):
-        # Keep track of active connections
-        self.active_connections: dict[str, WebSocket] = {}
-        self.app = app
-
-    async def connect(self, client_id: str, websocket: WebSocket):
-        await websocket.accept()
-        self.active_connections[client_id] = websocket
-
-        for func in self.app.connect_functions:
-            await func(client_id)
-
-    async def disconnect(self, client_id: str):
-        self.active_connections.pop(client_id)
-
-        for func in self.app.disconnect_functions:
-            await func(client_id)
-
-    async def broadcast(self, func_name: str, args: tuple, kwargs: dict):
-        """
-        Sends a command to all connected clients to run a specific function.
-        """
-        payload = json.dumps(
-            {"type": "rpc", "func": func_name, "args": args, "kwargs": kwargs}
-        )
-
-        # Iterate over all connections and send the message
-        # We use a copy of the list to avoid modification errors during iteration
-        for client_id, connection in list(self.active_connections.items()):
-            try:
-                await connection.send_text(payload)
-            except Exception:
-                # If sending fails (e.g. client disconnected), remove it
-                await self.disconnect(client_id)
-
-    async def invoke(self, client_id: str, func_name: str, args: tuple, kwargs: dict):
-        """
-        Sends a command to a specific client to run a specific function.
-        """
-        payload = json.dumps(
-            {"type": "rpc", "func": func_name, "args": args, "kwargs": kwargs}
-        )
-
-        if not client_id in self.active_connections:
-            raise KeyError("Invalid client id. Did it disconnect?")
-
-        connection = self.active_connections[client_id]
-
-        try:
-            await connection.send_text(payload)
-        except Exception:
-            # If sending fails (e.g. client disconnected), remove it
-            await self.disconnect(client_id)

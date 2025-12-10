@@ -7,8 +7,8 @@ app = App(title="Interactive Python Demo")
 
 # 2. Define Client-Side Code
 # This function is compiled into the bundle and sent to the browser.
-@app.client
-def on_button_click(event):
+@app.client.callback
+async def on_button_click(event):
     # This print shows up in the Browser DevTools Console!
     print("Hello from Client-Side Python!")
 
@@ -19,7 +19,7 @@ def on_button_click(event):
 
 
 # 3. Define Server-Side Route
-@app.route("/")
+@app.view("/")
 def home():
     doc = Document(title="Client-Side Demo")
 

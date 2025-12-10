@@ -13,7 +13,7 @@ class UserData(BaseModel):
 
 
 # 2. Define the Server Logic
-@app.server
+@app.server.rpc
 async def create_user(name: str, age: int) -> UserData:
     # This runs on the SERVER.
     # Pydantic validation happens automatically here!
@@ -24,7 +24,7 @@ async def create_user(name: str, age: int) -> UserData:
 
 
 # 3. Define the Client Logic
-@app.client
+@app.client.callback
 async def on_submit(event: Event):
     from violetear.dom import Document
 
@@ -42,7 +42,7 @@ async def on_submit(event: Event):
 
 
 # 4. The UI
-@app.route("/")
+@app.view("/")
 def index():
     doc = Document(title="RPC Demo")
 

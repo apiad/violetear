@@ -61,7 +61,7 @@ async def change_color(event: Event):
 
 # --- 3. Define Route ---
 # pwa=True enables the Service Worker
-@app.route("/", pwa=True)
+@app.view("/", pwa=True)
 def index():
     doc = Document(title="Cached PWA")
 

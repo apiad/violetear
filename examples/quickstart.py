@@ -29,7 +29,7 @@ style.select(".btn:hover").rule("opacity", "0.8")
 
 
 # --- 2. THE SERVER (FastAPI RPC) ---
-@app.server
+@app.server.rpc
 async def report_count(current_count: int, action: str):
     """
     This runs on the server.
@@ -42,7 +42,7 @@ async def report_count(current_count: int, action: str):
 # --- 3. THE CLIENT (Pyodide Browser) ---
 
 
-@app.client
+@app.client.callback
 async def handle_change(event: Event):
     """
     Runs in the browser.
@@ -69,7 +69,7 @@ async def handle_change(event: Event):
     await report_count(current_count=new_value, action=action)
 
 
-@app.startup
+@app.client.on("ready")
 async def init_counter():
     """
     Runs automatically when the page loads (Client-Side).
@@ -89,7 +89,7 @@ async def init_counter():
 # --- 4. THE UI (Server-Side Rendered) ---
 
 
-@app.route("/")
+@app.view("/")
 def index():
     doc = Document(title="Violetear Counter")
     doc.style(style, href="/style.css")  # Link our style

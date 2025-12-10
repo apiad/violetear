@@ -19,6 +19,7 @@ from typing import (
 
 import textwrap
 from typing import Self
+from violetear.dom import Event
 from violetear.helpers import flatten
 from violetear.style import Style
 from violetear.stylesheet import StyleSheet
@@ -111,13 +112,15 @@ class Element(Markup):
         self._attrs.update(attrs)
         return self
 
-    def on(self, event: str, handler: Callable) -> Self:
+    def on(self, event: str, handler: Callable[[Event]]) -> Self:
         """
         Binds a python function to a DOM event.
         Serializes the function name to a data attribute.
         """
-        if not hasattr(handler, "__name__"):
-            raise ValueError("Event handler must be a named function")
+        print(handler)
+
+        if not hasattr(handler, "__is_violetear_callback__"):
+            raise ValueError("Event handler must be created with @app.client.callback")
 
         # We store it as a special attribute for the client runtime to find
         self._attrs[f"data-on-{event}"] = handler.__name__

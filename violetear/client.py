@@ -119,3 +119,41 @@ def hydrate(scope):
                 el.addEventListener(event_name, proxy)
 
     setup_socket_listener(scope)
+
+
+async def _call_rpc(func_name, arg_names, args, kwargs):
+    """
+    Helper to perform an HTTP RPC call to the server.
+    Maps positional arguments to their names to satisfy Pydantic models.
+    """
+    from pyodide.http import pyfetch
+
+    # Map positional args to names
+    payload = {k: v for k, v in zip(arg_names, args)}
+    payload.update(kwargs)
+
+    response = await pyfetch(
+        f"/_violetear/rpc/{func_name}",
+        method="POST",
+        headers={"Content-Type": "application/json"},
+        body=json.dumps(payload)
+    )
+
+    if not response.ok:
+        raise Exception(f"RPC Error: {response.status} {response.statusText}")
+
+    return await response.json()
+
+
+async def _call_realtime(func_name, args, kwargs):
+    """
+    Helper to send a fire-and-forget message via WebSocket.
+    """
+    payload = {
+        "type": "realtime",
+        "func": func_name,
+        "args": args,
+        "kwargs": kwargs
+    }
+
+    window.violetear_socket.send(json.dumps(payload))

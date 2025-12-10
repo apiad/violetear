@@ -8,7 +8,7 @@ app = App(title="Live Ping", version="v1")
 
 
 # --- 1. Client Side (Updates the UI) ---
-@app.client
+@app.client.realtime
 async def update_counter(count: int):
     # This runs in the User's Browser
     from violetear.dom import Document
@@ -18,12 +18,12 @@ async def update_counter(count: int):
     el.style(color="red" if count % 2 == 0 else "blue")
 
 
-@app.connect
+@app.server.on("connect")
 async def enter(id: str):
     print(f"Client connected {id}")
 
 
-@app.disconnect
+@app.server.on("disconnect")
 async def exit(id: str):
     print(f"Client disconnected {id}")
 
@@ -41,21 +41,13 @@ async def background_pinger():
 
 
 # --- Lifecycle Management ---
-@asynccontextmanager
-async def lifespan(api):
-    # Startup
-    task = asyncio.create_task(background_pinger())
-    yield
-    # Shutdown (optional cleanup)
-    task.cancel()
-
-
-# Hook into the internal FastAPI router to register lifespan
-app.api.router.lifespan_context = lifespan
+@app.server.on("startup")
+async def start_pinger():
+    asyncio.create_task(background_pinger())
 
 
 # --- 3. The UI (HTML) ---
-@app.route("/")
+@app.view("/")
 def home():
     # 1. Create the Document
     doc = Document(title="Live Counter")

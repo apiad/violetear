@@ -15,7 +15,7 @@ theme.select(".card").background(Colors.White).padding(20).rounded(10).shadow(
 
 
 # 3. Define your Routes (The "Controller")
-@app.route("/")
+@app.view("/")
 def index():
     doc = Document(title="My Styled App")
 
