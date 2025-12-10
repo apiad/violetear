@@ -136,7 +136,7 @@ async def _call_rpc(func_name, arg_names, args, kwargs):
         f"/_violetear/rpc/{func_name}",
         method="POST",
         headers={"Content-Type": "application/json"},
-        body=json.dumps(payload)
+        body=json.dumps(payload),
     )
 
     if not response.ok:
@@ -149,11 +149,6 @@ async def _call_realtime(func_name, args, kwargs):
     """
     Helper to send a fire-and-forget message via WebSocket.
     """
-    payload = {
-        "type": "realtime",
-        "func": func_name,
-        "args": args,
-        "kwargs": kwargs
-    }
+    payload = {"type": "realtime", "func": func_name, "args": args, "kwargs": kwargs}
 
     window.violetear_socket.send(json.dumps(payload))

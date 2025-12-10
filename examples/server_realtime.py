@@ -2,11 +2,13 @@ from violetear import App, Document
 
 app = App(title="Realtime Fire-and-Forget")
 
+
 # 1. Server-Side Realtime Handler
 # Receives the message from the client (no return value sent back)
 @app.server.realtime
 async def log_on_server(msg: str):
     print(f"🔥 SERVER RECEIVED: {msg}")
+
 
 # 2. Client-Side Callback
 # Must use @app.client.callback to be valid for .on() binding
@@ -16,6 +18,7 @@ async def on_click_ping(event):
 
     # Fire-and-forget call to the server
     await log_on_server("Hello from the Browser!")
+
 
 # 3. View with Fluent Syntax + Explicit Event Binding
 @app.view("/")
@@ -32,6 +35,7 @@ def index():
         e.button("Send Ping").on("click", on_click_ping)
 
     return doc
+
 
 if __name__ == "__main__":
     app.run()

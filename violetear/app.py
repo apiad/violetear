@@ -363,7 +363,9 @@ class App:
                     try:
                         data = json.loads(message)
                     except json.JSONDecodeError:
-                        print(f"[Violetear] ⚠️ Received invalid JSON from client {client_id}")
+                        print(
+                            f"[Violetear] ⚠️ Received invalid JSON from client {client_id}"
+                        )
                         continue
 
                     # Dispatch 'realtime' function calls
@@ -380,9 +382,13 @@ class App:
                             try:
                                 await func(*args, **kwargs)
                             except Exception as e:
-                                print(f"[Violetear] ❌ Error executing realtime function '{func_name}': {e}")
+                                print(
+                                    f"[Violetear] ❌ Error executing realtime function '{func_name}': {e}"
+                                )
                         else:
-                            print(f"[Violetear] ⚠️ Warning: Client {client_id} tried to call unknown realtime function '{func_name}'")
+                            print(
+                                f"[Violetear] ⚠️ Warning: Client {client_id} tried to call unknown realtime function '{func_name}'"
+                            )
 
             except (WebSocketDisconnect, RuntimeError):
                 await self.socket_manager.disconnect(client_id)
