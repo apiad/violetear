@@ -4,9 +4,68 @@ import uuid
 
 from violetear.storage import session
 
-# Pyiodide-specific imports that don't work in the IDE
-from js import document, window, WebSocket, console  # type: ignore
-from pyodide.ffi import create_proxy  # type: ignore
+# We use a try/except block for these imports so this file
+# doesn't crash if imported in a non-browser environment (like for testing).
+try:
+    from js import document, window, WebSocket, console, Object # type: ignore
+    from pyodide.ffi import create_proxy, to_js # type: ignore
+except ImportError:
+    pass
+
+
+# --- THE REACTIVE REGISTRY ---
+class ReactiveRegistry:
+    """
+    The central Pub/Sub engine for the client.
+    Maps 'State Paths' (e.g. 'Ui.theme') to 'Subscriber Callbacks'.
+    """
+
+    # storage: { "path": { "subscription_id": callback_function } }
+    _subscribers = {}
+    _sub_counter = 0
+
+    @staticmethod
+    def bind(path: str, callback):
+        """
+        Subscribes a callback function to a specific state path.
+        Returns an 'unsubscribe' function that the caller must use to clean up.
+        """
+        if path not in ReactiveRegistry._subscribers:
+            ReactiveRegistry._subscribers[path] = {}
+
+        # Generate a unique ID for this subscription
+        sub_id = ReactiveRegistry._sub_counter
+        ReactiveRegistry._sub_counter += 1
+
+        # Store the callback
+        ReactiveRegistry._subscribers[path][sub_id] = callback
+
+        # Return the cleanup closure
+        def unsubscribe():
+            if path in ReactiveRegistry._subscribers:
+                # Remove this specific subscription
+                ReactiveRegistry._subscribers[path].pop(sub_id, None)
+
+                # Clean up empty keys to save memory
+                if not ReactiveRegistry._subscribers[path]:
+                    del ReactiveRegistry._subscribers[path]
+
+        return unsubscribe
+
+    @staticmethod
+    def notify(path: str, new_value):
+        """
+        Called by ReactiveProxy (from state.py) when a value changes.
+        Triggers all registered callbacks for that path.
+        """
+        if path in ReactiveRegistry._subscribers:
+            # Iterate over a copy of values in case a callback modifies the list
+            for callback in list(ReactiveRegistry._subscribers[path].values()):
+                try:
+                    # We pass the raw value to the callback
+                    callback(new_value)
+                except Exception as e:
+                    print(f"[Violetear] Error in reactive update for '{path}': {str(e)}")
 
 
 def get_client_id():
@@ -37,7 +96,7 @@ def setup_socket_listener(scope):
     print("Setting up sockets")
 
     def on_open(event):
-        console.log(f"[Violetear] ✅ Connected to Live RPC at {url}")
+        print(f"[Violetear] ✅ Connected to Live RPC at {url}")
 
     def on_message(event):
         """
@@ -65,10 +124,10 @@ def setup_socket_listener(scope):
                     )
 
         except Exception as e:
-            console.error(f"[Violetear] ❌ RPC Error: {str(e)}")
+            print(f"[Violetear] ❌ RPC Error: {str(e)}")
 
     def on_close(event):
-        console.log("[Violetear] 🔌 Connection lost. Reconnecting in 3s...")
+        print("[Violetear] 🔌 Connection lost. Reconnecting in 3s...")
         # Use create_proxy for the timeout callback too
         retry = create_proxy(lambda: setup_socket_listener(scope))
         window.setTimeout(retry, 3000)
@@ -93,7 +152,7 @@ def hydrate(scope):
             if func_name in scope:
                 await scope[func_name](event)
             else:
-                console.error(f"Handler '{func_name}' not found")
+                print(f"Handler '{func_name}' not found")
 
         return handler
 
