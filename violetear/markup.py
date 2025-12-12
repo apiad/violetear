@@ -117,8 +117,30 @@ class Element(Markup):
         self._style = style
         return self
 
-    def text(self, text: str) -> Self:
-        self._text = text
+    def text(self, text: str | Any) -> Self:
+        """
+        Sets the text content of the element.
+        UPDATED: Checks if 'text' is a Reactive Proxy to create a binding.
+        """
+        # Duck-typing check for ReactiveProxy/LeafProxy to avoid circular imports
+        if hasattr(text, "_path") and hasattr(text, "current_value"):
+            # 1. Bind: Tell client to update 'innerText' when this path changes
+            self._attrs["data-bind-text"] = text._path
+
+            # 2. Render: Output the current static value for the initial HTML
+            self._text = str(text.current_value)
+        else:
+            self._text = text
+
+        return self
+
+    def value(self, val: Any) -> Self:
+        """
+        Sets the 'value' attribute.
+        UPDATED: Saves the value (potentially a Proxy) to _attrs.
+        _render() will handle generating the 'data-bind-value' attribute.
+        """
+        self._attrs["value"] = val
         return self
 
     def attrs(self, **attrs) -> Element:
@@ -130,8 +152,6 @@ class Element(Markup):
         Binds a python function to a DOM event.
         Serializes the function name to a data attribute.
         """
-        print(handler)
-
         if not hasattr(handler, "__is_violetear_callback__"):
             raise ValueError("Event handler must be created with @app.client.callback")
 
@@ -167,7 +187,16 @@ class Element(Markup):
             parts.append(self._style.inline())
 
         for key, value in self._attrs.items():
-            parts.append(f'{key}="{str(value)}"')
+            # UPDATED: Attribute Binding Logic
+            # If the attribute value is a State Proxy, we render TWO attributes.
+            if hasattr(value, "_path") and hasattr(value, "current_value"):
+                # 1. The Standard Attribute (e.g., href="/home", value="light")
+                parts.append(f'{key}="{str(value.current_value)}"')
+
+                # 2. The Binding Attribute (e.g., data-bind-href="Router.path")
+                parts.append(f'data-bind-{key}="{value._path}"')
+            else:
+                parts.append(f'{key}="{str(value)}"')
 
         tag_line = " ".join(parts)
 

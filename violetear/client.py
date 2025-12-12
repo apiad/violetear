@@ -1,8 +1,7 @@
 import asyncio
 import json
 import uuid
-
-from violetear.storage import session
+import sys
 
 # We use a try/except block for these imports so this file
 # doesn't crash if imported in a non-browser environment (like for testing).
@@ -12,6 +11,7 @@ try:
 except ImportError:
     pass
 
+from violetear.storage import session
 
 # --- THE REACTIVE REGISTRY ---
 class ReactiveRegistry:
@@ -25,7 +25,7 @@ class ReactiveRegistry:
     _sub_counter = 0
 
     @staticmethod
-    def bind(path: str, callback):
+    def bind(path: str, callback: callable):
         """
         Subscribes a callback function to a specific state path.
         Returns an 'unsubscribe' function that the caller must use to clean up.
@@ -65,149 +65,180 @@ class ReactiveRegistry:
                     # We pass the raw value to the callback
                     callback(new_value)
                 except Exception as e:
-                    print(f"[Violetear] Error in reactive update for '{path}': {str(e)}")
+                    console.error(f"[Violetear] Error in reactive update for '{path}': {str(e)}")
 
 
-def get_client_id():
-    client_id = session.get("VIOLETEAR_ID")
-
-    if client_id is None:
-        client_id = str(uuid.uuid4())
-
-    session["VIOLETEAR_ID"] = client_id
-    return client_id
-
-
-def get_socket_url():
-    """Calculates the correct WebSocket URL based on the current page."""
-    protocol = "wss" if window.location.protocol == "https:" else "ws"
-    host = window.location.host
-    client_id = get_client_id()
-    return f"{protocol}://{host}/_violetear/ws?client_id={client_id}"
-
-
-def setup_socket_listener(scope):
-    """
-    Establishes a WebSocket connection to the server for RPC.
-    """
-    url = get_socket_url()
-    socket = WebSocket.new(url)
-
-    print("Setting up sockets")
-
-    def on_open(event):
-        print(f"[Violetear] ✅ Connected to Live RPC at {url}")
-
-    def on_message(event):
-        """
-        Handles incoming RPC commands from the server.
-        """
-        try:
-            # event.data is a string coming from the server
-            data = json.loads(event.data)
-
-            if data.get("type") == "rpc":
-                func_name = data["func"]
-                args = data.get("args", [])
-                kwargs = data.get("kwargs", {})
-
-                # 1. Find the function in the client's global scope
-                if func_name in scope:
-                    func = scope[func_name]
-
-                    # 2. Schedule the execution
-                    # Use asyncio to ensure it runs properly in the Pyodide loop
-                    asyncio.create_task(func(*args, **kwargs))
-                else:
-                    console.warn(
-                        f"[Violetear] ⚠️ RPC Warning: Function '{func_name}' not found in client scope."
-                    )
-
-        except Exception as e:
-            print(f"[Violetear] ❌ RPC Error: {str(e)}")
-
-    def on_close(event):
-        print("[Violetear] 🔌 Connection lost. Reconnecting in 3s...")
-        # Use create_proxy for the timeout callback too
-        retry = create_proxy(lambda: setup_socket_listener(scope))
-        window.setTimeout(retry, 3000)
-
-    # Use create_proxy to ensure these python functions aren't garbage collected
-    # while the JS side still needs them.
-    socket.onopen = create_proxy(on_open)
-    socket.onmessage = create_proxy(on_message)
-    socket.onclose = create_proxy(on_close)
-
-    # Keep reference to socket on window to prevent it from being GC'd
-    window.violetear_socket = socket
-
+# --- HYDRATION LOGIC ---
 
 def hydrate(scope):
     """
-    Scans the DOM for [data-on-event] attributes and binds them to Python functions.
+    Bootstraps the application in the browser.
+    1. Scans DOM for Event Listeners (data-on-*)
+    2. Scans DOM for Reactive Bindings (data-bind-*)
+    3. Connects Websockets
     """
 
+    # 1. Event Listeners (Original Logic)
+    _hydrate_events(scope)
+
+    # 2. Reactive Bindings (New Logic)
+    _hydrate_bindings(scope)
+
+    # 3. Networking
+    setup_socket_listener(scope)
+
+
+def _hydrate_bindings(scope):
+    """
+    Scans the DOM for 'data-bind-[attr]="State.Path"'.
+    Connects the DOM element to the ReactiveRegistry.
+    """
+    elements = document.querySelectorAll("*")
+
+    for i in range(elements.length):
+        el = elements.item(i)
+
+        # Iterate over all attributes of the element
+        # attributes is a NamedNodeMap, we need to be careful iterating it
+        for attr in list(el.attributes):
+            name = attr.name # e.g. "data-bind-class"
+            path = attr.value # e.g. "UiState.theme"
+
+            if name.startswith("data-bind-"):
+                # Extract the target property: "class", "text", "style.display"
+                target_prop = name.replace("data-bind-", "")
+
+                # Create a specific updater for this element and property
+                updater = _create_dom_updater(el, target_prop)
+
+                # Register with the Registry
+                # Note: Hydration bindings are usually permanent for the page life,
+                # so we don't strictly need to capture the unsubscribe handle here,
+                # unless we plan to support removing these elements dynamically later.
+                ReactiveRegistry.bind(path, updater)
+
+
+def _create_dom_updater(el, prop):
+    """
+    Factory that returns a callback function to update a specific DOM node.
+    """
+
+    # Strategy pattern for different binding types
+    if prop == "text":
+        return lambda val: setattr(el, "innerText", str(val))
+
+    elif prop == "html":
+        return lambda val: setattr(el, "innerHTML", str(val))
+
+    elif prop == "value":
+        # For input fields
+        return lambda val: setattr(el, "value", str(val))
+
+    elif prop == "class":
+        # Replaces the entire class string (be careful!)
+        # Better strategy: 'data-bind-class-active="Ui.isActive"'
+        return lambda val: setattr(el, "className", str(val))
+
+    else:
+        # Default: Set as an attribute (e.g. src, href, disabled)
+        # Handle boolean attributes for accessibility
+        def attr_updater(val):
+            if val is False or val is None:
+                el.removeAttribute(prop)
+            else:
+                el.setAttribute(prop, str(val))
+        return attr_updater
+
+
+def _hydrate_events(scope):
+    """
+    Scans for [data-on-event] and attaches python handlers.
+    """
     def create_handler(func_name):
         async def handler(event):
             if func_name in scope:
                 await scope[func_name](event)
             else:
-                print(f"Handler '{func_name}' not found")
-
+                console.error(f"Handler '{func_name}' not found")
         return handler
 
     elements = document.querySelectorAll("*")
-
     for i in range(elements.length):
         el = elements.item(i)
-        for attr in el.attributes:
+        for attr in list(el.attributes):
             name = attr.name
             if name.startswith("data-on-"):
                 event_name = name.replace("data-on-", "")
                 func_name = attr.value
 
-                # Bind the event using create_proxy
                 handler = create_handler(func_name)
                 proxy = create_proxy(handler)
 
-                # Store proxy on element to prevent GC (optional but good practice)
+                # Prevent GC
                 if not hasattr(el, "_py_listeners"):
                     el._py_listeners = []
                 el._py_listeners.append(proxy)
 
                 el.addEventListener(event_name, proxy)
 
-    setup_socket_listener(scope)
 
+# --- NETWORKING & RPC (Existing Logic) ---
+
+def get_client_id():
+    client_id = session.get("VIOLETEAR_ID")
+    if client_id is None:
+        client_id = str(uuid.uuid4())
+        session["VIOLETEAR_ID"] = client_id
+    return client_id
+
+def get_socket_url():
+    protocol = "wss" if window.location.protocol == "https:" else "ws"
+    host = window.location.host
+    client_id = get_client_id()
+    return f"{protocol}://{host}/_violetear/ws?client_id={client_id}"
+
+def setup_socket_listener(scope):
+    url = get_socket_url()
+    socket = WebSocket.new(url)
+
+    def on_message(event):
+        try:
+            data = json.loads(event.data)
+            if data.get("type") == "rpc":
+                func_name = data["func"]
+                args = data.get("args", [])
+                kwargs = data.get("kwargs", {})
+                if func_name in scope:
+                    func = scope[func_name]
+                    asyncio.create_task(func(*args, **kwargs))
+                else:
+                    console.warn(f"[Violetear] Function '{func_name}' not found.")
+        except Exception as e:
+            console.error(f"[Violetear] RPC Error: {str(e)}")
+
+    def on_close(event):
+        # simple reconnect logic
+        retry = create_proxy(lambda: setup_socket_listener(scope))
+        window.setTimeout(retry, 3000)
+
+    socket.onmessage = create_proxy(on_message)
+    socket.onclose = create_proxy(on_close)
+    window.violetear_socket = socket
 
 async def _call_rpc(func_name, arg_names, args, kwargs):
-    """
-    Helper to perform an HTTP RPC call to the server.
-    Maps positional arguments to their names to satisfy Pydantic models.
-    """
     from pyodide.http import pyfetch
-
-    # Map positional args to names
     payload = {k: v for k, v in zip(arg_names, args)}
     payload.update(kwargs)
-
     response = await pyfetch(
         f"/_violetear/rpc/{func_name}",
         method="POST",
         headers={"Content-Type": "application/json"},
         body=json.dumps(payload),
     )
-
     if not response.ok:
-        raise Exception(f"RPC Error: {response.status} {response.statusText}")
-
+        raise Exception(f"RPC Error: {response.status}")
     return await response.json()
 
-
 async def _call_realtime(func_name, args, kwargs):
-    """
-    Helper to send a fire-and-forget message via WebSocket.
-    """
     payload = {"type": "realtime", "func": func_name, "args": args, "kwargs": kwargs}
-
     window.violetear_socket.send(json.dumps(payload))

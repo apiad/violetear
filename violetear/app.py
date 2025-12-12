@@ -7,12 +7,13 @@ import hashlib
 import json
 from pathlib import Path
 from textwrap import dedent
-from typing import Any, Callable, Dict, List, Set, Union
+from typing import Any, Callable, Dict, List, Set, Union, cast
 import uuid
 
 from .stylesheet import StyleSheet
-from .markup import Document, StyleResource
+from .markup import Document
 from .pwa import Manifest, ServiceWorker
+from .state import ReactiveProxy, local
 
 
 # --- Optional Server Dependencies ---
@@ -161,9 +162,14 @@ class ClientRegistry:
     def __init__(self, app: "App"):
         self.app = app
         self.code_functions: Dict[str, Callable] = {}
+        self.state_classes: Dict[str, type] = {}
         self.callback_names: Set[str] = set()
         self.realtime_functions: Dict[str, Callable] = {}
         self.event_handlers: Dict[str, List[str]] = {}
+
+    def register_state(self, cls: type):
+        """Registers a class to be transpiled to the client."""
+        self.state_classes[cls.__name__] = cls
 
     def _register(self, func: Callable):
         """Helper to register the raw function source."""
@@ -397,6 +403,16 @@ class App:
         self.client = ClientRegistry(self)
         self.server = ServerRegistry(self)
 
+    # UPDATED: self.local wrapper
+    # This intercepts the decorator to register the class before passing it
+    # to the logic in state.py
+    def local[T](self, cls: type[T]) -> T:
+        # 1. Register source code for the bundle
+        self.client.register_state(cls)
+
+        # 2. Return the server-side proxy
+        return local(cls)
+
     def _register_rpc_route(self, func: Callable):
         """
         Decorator to expose a function as a server-side RPC endpoint.
@@ -514,29 +530,57 @@ class App:
         # 1. Mock the 'app' object
         header = "class Event: pass"
 
-        # 2. Inject violetear.dom module
-        # This allows 'from violetear.dom import Document' to work in the browser
+        # 2. Inject violetear.state module
+        state_path = Path(__file__).parent / "state.py"
+        with open(state_path, "r") as f:
+            state_source = f.read()
+
+        state_injection = dedent(
+            f"""
+            import sys, types
+
+            # 1. Create or Get 'violetear' parent package
+            if "violetear" not in sys.modules:
+                m_violetear = types.ModuleType("violetear")
+                sys.modules["violetear"] = m_violetear
+            else:
+                m_violetear = sys.modules["violetear"]
+
+            # 2. Create 'violetear.state'
+            m_state = types.ModuleType("violetear.state")
+            sys.modules["violetear.state"] = m_state
+
+            # 3. Link child to parent (Critical for imports to work)
+            m_violetear.state = m_state
+
+            # 4. Execute source
+            exec({repr(state_source)}, m_state.__dict__)
+
+            # 5. Global Import (Makes 'violetear' available in this script)
+            import violetear.state
+            """
+        )
+
+        # 3. Inject violetear.dom module
         dom_path = Path(__file__).parent / "dom.py"
         with open(dom_path, "r") as f:
             dom_source = f.read()
 
         dom_injection = dedent(
             f"""
-            import sys, types
-            # Create virtual module 'violetear'
-            m_violetear = types.ModuleType("violetear")
-            sys.modules["violetear"] = m_violetear
-
-            # Create virtual module 'violetear.dom'
             m_dom = types.ModuleType("violetear.dom")
             sys.modules["violetear.dom"] = m_dom
 
-            # Execute source
+            # Link to parent
+            sys.modules["violetear"].dom = m_dom
+
             exec({repr(dom_source)}, m_dom.__dict__)
+
+            import violetear.dom
             """
         )
 
-        # Inject Storage
+        # 4. Inject Storage
         storage_path = Path(__file__).parent / "storage.py"
         with open(storage_path, "r") as f:
             storage_source = f.read()
@@ -545,61 +589,89 @@ class App:
             f"""
             m_storage = types.ModuleType("violetear.storage")
             sys.modules["violetear.storage"] = m_storage
+
+            # Link to parent
+            sys.modules["violetear"].storage = m_storage
+
             exec({repr(storage_source)}, m_storage.__dict__)
+
+            import violetear.storage
             """
         )
 
-        # 3. Read the Client Runtime (Hydration logic)
+        # 5. Read the Client Runtime
         runtime_path = Path(__file__).parent / "client.py"
         with open(runtime_path, "r") as f:
             runtime_code = f.read()
 
-        # 4. Extract User Functions
+        # 6. Generate State Classes (with dataclass re-application)
+        state_code = []
+        for name, cls in self.client.state_classes.items():
+            source = inspect.getsource(cls)
+            lines = source.split("\n")
+
+            # Check for dataclass
+            is_dataclass = "@dataclass" in source
+
+            # Strip decorators to avoid 'app' definition errors
+            clean_lines = [l for l in lines if not l.strip().startswith("@")]
+
+            # Reconstruct class
+            state_code.append("\n".join(clean_lines))
+
+            # Re-apply dataclass
+            if is_dataclass:
+                state_code.append(f"{name} = dataclass({name})")
+
+            # Apply Reactive Proxy
+            # Now safe because we imported violetear.state above
+            state_code.append(f"{name} = violetear.state.local({name})")
+
+        # 7. Extract User Functions
         user_code = []
         for name, func in self.client.code_functions.items():
             code = inspect.getsource(func).split("\n")
-            code = [c for c in code if not c.startswith("@")]  # remove decorators
+            code = [c for c in code if not c.startswith("@")]
             user_code.append("\n".join(code))
 
-        # --- SAFETY INJECTION START ---
-        # We attach a dummy .broadcast() method to client functions running in the browser.
-        # This prevents confusion if a user tries to call await my_func.broadcast() in client code.
+        # --- Safety Checks & Server Stubs ---
         safety_checks = []
         safety_checks.append(
             dedent(
                 """
                 def _server_only_broadcast(*args, **kwargs):
-                    raise RuntimeError("❌ .broadcast() cannot be called from the Client (Browser).\\nIt must be called from the Server to trigger client updates.")
+                    raise RuntimeError("❌ .broadcast() cannot be called from the Client.")
                 def _server_only_invoke(*args, **kwargs):
-                    raise RuntimeError("❌ .invoke() cannot be called from the Client (Browser).\\nIt must be called from the Server to trigger client updates.")
+                    raise RuntimeError("❌ .invoke() cannot be called from the Client.")
                 """
             )
         )
-
         for name in self.client.realtime_functions.keys():
             safety_checks.append(f"{name}.broadcast = _server_only_broadcast")
             safety_checks.append(f"{name}.invoke = _server_only_invoke")
 
         safety_code = "\n".join(safety_checks)
-        # --- SAFETY INJECTION END ---
-
-        # 5. Generate Server Stubs
         server_stubs = self._generate_server_stubs()
 
-        # 6. Initialization
+        # 8. Initialization
         init_code = "# --- Init ---\nhydrate(globals())"
-
-        # Run startup functions
         for func_name in self.client.event_handlers.get("ready", []):
             init_code += f"\nawait {func_name}()"
 
+        # Global Imports for the Bundle
+        # Ensure standard library + violetear components are ready
+        imports = "from dataclasses import dataclass, field\nimport datetime\nimport json"
+
         return "\n\n".join(
             [
+                imports,
                 header,
+                state_injection,
                 dom_injection,
                 storage_injection,
                 runtime_code,
-                "\n\n".join(user_code),
+                "\n".join(state_code),
+                "\n".join(user_code),
                 safety_code,
                 server_stubs,
                 init_code,

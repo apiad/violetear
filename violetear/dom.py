@@ -8,9 +8,9 @@ if IS_BROWSER:
     from js import document, console
     from pyodide.ffi import create_proxy
 else:
-    raise ImportError(
-        "Module violetear.dom is only supposed to be used in the browser."
-    )
+    # On the server, we don't strictly raise ImportError anymore to allow
+    # safe imports, but we disable functionality.
+    pass
 
 
 class DOMElement:
@@ -21,53 +21,122 @@ class DOMElement:
 
     def __init__(self, js_element):
         self._el = js_element
+        # Track active bindings to prevent "Zombie Updates"
+        # Maps property_name -> cleanup_function
+        self._active_bindings = {}
+
+    def _bind_property(self, prop_name: str, proxy_obj):
+        """
+        Helper: Binds a specific DOM property to a State Proxy.
+        Removes any existing binding on that property first.
+        """
+        if not IS_BROWSER:
+            return
+
+        # 1. Unbind previous owner if exists
+        if prop_name in self._active_bindings:
+            self._active_bindings[prop_name]()
+            del self._active_bindings[prop_name]
+
+        # 2. Bind new owner
+        # Lazy import to avoid circular dependencies
+        from violetear.client import ReactiveRegistry
+
+        # We define a specialized updater based on the property name
+        updater = self._get_updater_for_prop(prop_name)
+
+        # Register and store the cleanup function
+        # We bind to the proxy's PATH
+        unsubscribe = ReactiveRegistry.bind(proxy_obj._path, updater)
+        self._active_bindings[prop_name] = unsubscribe
+
+    def _get_updater_for_prop(self, prop: str):
+        """Returns a lambda that knows how to update the specific DOM property."""
+        if prop == "innerText":
+            return lambda val: setattr(self._el, "innerText", str(val))
+        elif prop == "innerHTML":
+            return lambda val: setattr(self._el, "innerHTML", str(val))
+        elif prop == "value":
+            return lambda val: setattr(self._el, "value", str(val))
+        elif prop.startswith("style."):
+            style_name = prop.split(".")[1]
+            return lambda val: self._el.style.setProperty(style_name, str(val))
+        elif prop.startswith("attr."):
+            attr_name = prop.split(".")[1]
+            return lambda val: self._el.setAttribute(attr_name, str(val))
+        elif prop.startswith("prop."):
+            prop_name = prop.split(".")[1]
+            return lambda val: setattr(self._el, prop_name, val)
+        return lambda val: None
 
     @property
     def text(self) -> str:
         if IS_BROWSER and self._el:
             return self._el.innerText
-
         return ""
 
     @text.setter
-    def text(self, content: str):
-        """Sets innerText."""
+    def text(self, content: Any):
+        """Sets innerText. Supports Reactive Binding."""
         if IS_BROWSER and self._el:
-            self._el.innerText = str(content)
+            # Check for Proxy (duck typing)
+            if hasattr(content, "_path") and hasattr(content, "current_value"):
+                self._bind_property("innerText", content)
+                self._el.innerText = str(content.current_value)
+            else:
+                # Manual assignment? Clear old bindings!
+                if "innerText" in self._active_bindings:
+                    self._active_bindings["innerText"]()
+                    del self._active_bindings["innerText"]
+                self._el.innerText = str(content)
 
-    def html(self, content: str) -> "DOMElement":
-        """Sets innerHTML."""
+    def html(self, content: Any) -> "DOMElement":
+        """Sets innerHTML. Supports Reactive Binding."""
         if IS_BROWSER and self._el:
-            self._el.innerHTML = str(content)
+            if hasattr(content, "_path") and hasattr(content, "current_value"):
+                self._bind_property("innerHTML", content)
+                self._el.innerHTML = str(content.current_value)
+            else:
+                if "innerHTML" in self._active_bindings:
+                    self._active_bindings["innerHTML"]()
+                self._el.innerHTML = str(content)
         return self
 
     @property
     def value(self) -> Any:
-        """
-        Gets the current value.
-        """
         if IS_BROWSER and self._el:
             return self._el.value
-
         return object()
 
     @value.setter
-    def value(self, value: str):
-        """
-        Sets the value
-        """
+    def value(self, value: Any):
+        """Sets value. Supports Reactive Binding."""
         if IS_BROWSER and self._el:
-            self._el.value = str(value)
+            if hasattr(value, "_path") and hasattr(value, "current_value"):
+                self._bind_property("value", value)
+                self._el.value = str(value.current_value)
+            else:
+                if "value" in self._active_bindings:
+                    self._active_bindings["value"]()
+                self._el.value = str(value)
 
     def style(self, **kwargs) -> "DOMElement":
         """
-        Sets CSS styles using snake_case or kebab-case.
-        Example: .style(background_color="red", margin_top="10px")
+        Sets CSS styles. Supports Reactive Binding per property.
         """
         if IS_BROWSER and self._el:
             for k, v in kwargs.items():
                 key = k.replace("_", "-")
-                self._el.style.setProperty(key, str(v))
+
+                if hasattr(v, "_path") and hasattr(v, "current_value"):
+                    # Bind specific style property
+                    self._bind_property(f"style.{key}", v)
+                    self._el.style.setProperty(key, str(v.current_value))
+                else:
+                    # Manual set - should technically unbind that specific style,
+                    # but granular style unbinding is complex.
+                    # For now, we just overwrite.
+                    self._el.style.setProperty(key, str(v))
         return self
 
     def add(self, *classes: str) -> "DOMElement":
@@ -85,13 +154,11 @@ class DOMElement:
     def on(self, event: str, handler: Callable) -> "DOMElement":
         """Attaches a Python event listener."""
         if IS_BROWSER and self._el:
-            # Create a persistent proxy for the handler
             proxy = create_proxy(handler)
             self._el.addEventListener(event, proxy)
         return self
 
     def click(self, handler: Callable) -> "DOMElement":
-        """Shorthand for .on('click', ...)"""
         return self.on("click", handler)
 
     def append(self, element: "DOMElement") -> "DOMElement":
@@ -99,52 +166,42 @@ class DOMElement:
             self._el.appendChild(element._el)
         return self
 
-    @property
-    def raw(self):
-        """Returns the underlying JS element."""
-        return self._el
-
     def attr(self, name: str, value: Any = None) -> Union[str, "DOMElement", None]:
-        """
-        Get or Set an HTML attribute.
-        - attr("src") -> returns value
-        - attr("src", "img.jpg") -> sets value and returns self
-        """
+        """Get or Set attribute. Supports Binding."""
         if IS_BROWSER and self._el:
             if value is None:
                 return self._el.getAttribute(name)
-            self._el.setAttribute(name, str(value))
-            return self
 
-        # Mock return for server-side safety
+            if hasattr(value, "_path") and hasattr(value, "current_value"):
+                self._bind_property(f"attr.{name}", value)
+                self._el.setAttribute(name, str(value.current_value))
+            else:
+                self._el.setAttribute(name, str(value))
+            return self
         return self if value is not None else None
 
     def prop(self, name: str, value: Any = None) -> Any:
-        """
-        Get or Set a JavaScript property (e.g. checked, disabled, valueAsDate).
-        Distinct from attributes (html).
-        """
+        """Get or Set JS Property. Supports Binding."""
         if IS_BROWSER and self._el:
             if value is None:
                 return getattr(self._el, name, None)
-            setattr(self._el, name, value)
-            return self
 
+            if hasattr(value, "_path") and hasattr(value, "current_value"):
+                self._bind_property(f"prop.{name}", value)
+                setattr(self._el, name, value.current_value)
+            else:
+                setattr(self._el, name, value)
+            return self
         return self if value is not None else None
 
+    # ... (toggle, serialize, and DOM static class remain unchanged) ...
     def toggle(self, cls: str, force: Optional[bool] = None) -> "DOMElement":
-        """
-        Toggles a class.
-        If 'force' is True, adds it. If False, removes it.
-        If None, inverts current state.
-        """
         if IS_BROWSER and self._el:
             if force is True:
                 self._el.classList.add(cls)
             elif force is False:
                 self._el.classList.remove(cls)
             else:
-                # Standard toggle behavior
                 if self._el.classList.contains(cls):
                     self._el.classList.remove(cls)
                 else:
@@ -152,60 +209,34 @@ class DOMElement:
         return self
 
     def serialize(self) -> dict:
-        """
-        Scrapes all named input, select, and textarea elements within this element
-        and returns a dictionary of their values.
-        Handles checkboxes and radio buttons correctly.
-        """
         data = {}
         if IS_BROWSER and self._el:
             inputs = self._el.querySelectorAll("input, select, textarea")
-
             for i in range(inputs.length):
                 el = inputs.item(i)
                 name = el.name
-                if not name:
-                    continue
-
-                # Handle Checkbox
+                if not name: continue
                 if el.type == "checkbox":
-                    if el.checked:
-                        data[name] = True
-                    # Optional: Handle unchecked state if needed,
-                    # but usually omitted in serialization
-
-                # Handle Radio
+                    if el.checked: data[name] = True
                 elif el.type == "radio":
-                    if el.checked:
-                        data[name] = el.value
-
-                # Handle standard inputs
+                    if el.checked: data[name] = el.value
                 else:
                     data[name] = el.value
-
         return data
 
-
 class DOM:
-    """
-    Static entry point for DOM selection.
-    """
-
     @staticmethod
     def find(id: str) -> DOMElement:
-        """Finds a single element by ID."""
         if IS_BROWSER:
             el = document.getElementById(id)
             if not el:
-                console.warn(f"Violetear: Element with id='{id}' not found")
-                # Return a dummy wrapper to prevent crashes on chaining
+                # console.warn(f"Violetear: Element with id='{id}' not found")
                 return DOMElement(None)
             return DOMElement(el)
         return DOMElement(None)
 
     @staticmethod
     def query(selector: str) -> List[DOMElement]:
-        """Finds all elements matching a CSS selector."""
         if IS_BROWSER:
             els = document.querySelectorAll(selector)
             return [DOMElement(e) for e in els]
@@ -213,7 +244,6 @@ class DOM:
 
     @staticmethod
     def create(tag: str) -> DOMElement:
-        """Creates a new detached element."""
         if IS_BROWSER:
             return DOMElement(document.createElement(tag))
         return DOMElement(None)
@@ -224,7 +254,6 @@ class DOM:
             return DOMElement(document.body)
         return DOMElement(None)
 
-
 class ProxyElement(Protocol):
     """
     Lightweight protocol for typing DOM elements
@@ -232,6 +261,7 @@ class ProxyElement(Protocol):
 
     id: str
     classes: list[str]
+    value: Any
 
 
 class Event(Protocol):
