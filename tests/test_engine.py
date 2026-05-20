@@ -183,6 +183,47 @@ def test_reactive_class_binding_via_classes_kwarg():
     assert 'data-bind-class="UiState.theme"' in html
 
 
+def test_client_on_connect_handler_registered_in_bundle():
+    """@app.client.on("connect") handlers are registered in the bundle before hydration,
+    so the socket's onopen dispatch finds them. We pin the bundle output rather than
+    drive Pyodide; that's a later slice."""
+    app = App(title="Connect", version="conn1")
+
+    @app.client.on("connect")
+    async def hello():
+        pass
+
+    @app.view("/")
+    def home():
+        return Document(title="x")
+
+    client = TestClient(app.api)
+    bundle = client.get("/_violetear/bundle.py").text
+
+    assert "_register_client_event('connect', hello)" in bundle
+    # Registration must come before hydrate() so it precedes the socket opening.
+    assert bundle.index("_register_client_event('connect', hello)") < bundle.index("hydrate(globals())")
+    compile(bundle, "<bundle>", "exec")
+
+
+def test_client_on_disconnect_handler_registered_in_bundle():
+    app = App(title="Disconnect", version="conn2")
+
+    @app.client.on("disconnect")
+    async def bye():
+        pass
+
+    @app.view("/")
+    def home():
+        return Document(title="x")
+
+    client = TestClient(app.api)
+    bundle = client.get("/_violetear/bundle.py").text
+
+    assert "_register_client_event('disconnect', bye)" in bundle
+    compile(bundle, "<bundle>", "exec")
+
+
 def test_reactive_class_binding_via_class_name_alias():
     """`class_name=` (React-style) is honored as an alias for `classes=`.
 

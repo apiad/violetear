@@ -182,7 +182,28 @@ def _hydrate_events(scope):
                 el.addEventListener(event_name, proxy)
 
 
-# --- NETWORKING & RPC (Existing Logic) ---
+# --- CLIENT-SIDE LIFECYCLE EVENT BUS ---
+# Bundle init code registers user-defined handlers here BEFORE the socket
+# is opened, so onopen/onclose dispatch can find them without a race.
+
+_CLIENT_EVENT_HANDLERS: dict = {}
+
+
+def _register_client_event(event: str, handler):
+    """Register a client-side handler for a lifecycle event ('connect', 'disconnect')."""
+    _CLIENT_EVENT_HANDLERS.setdefault(event, []).append(handler)
+
+
+async def _dispatch_client_event(event: str, *args):
+    """Run all registered handlers for an event. Errors are logged, not raised."""
+    for handler in list(_CLIENT_EVENT_HANDLERS.get(event, [])):
+        try:
+            await handler(*args)
+        except Exception as e:
+            console.error(f"[Violetear] Error in client '{event}' handler: {str(e)}")
+
+
+# --- NETWORKING & RPC ---
 
 def get_client_id():
     client_id = session.get("VIOLETEAR_ID")
@@ -201,6 +222,10 @@ def setup_socket_listener(scope):
     url = get_socket_url()
     socket = WebSocket.new(url)
 
+    def on_open(event):
+        # Fire all @app.client.on("connect") handlers once the socket is live.
+        asyncio.create_task(_dispatch_client_event("connect"))
+
     def on_message(event):
         try:
             data = json.loads(event.data)
@@ -217,10 +242,12 @@ def setup_socket_listener(scope):
             console.error(f"[Violetear] RPC Error: {str(e)}")
 
     def on_close(event):
-        # simple reconnect logic
+        # Fire all @app.client.on("disconnect") handlers, then reconnect.
+        asyncio.create_task(_dispatch_client_event("disconnect"))
         retry = create_proxy(lambda: setup_socket_listener(scope))
         window.setTimeout(retry, 3000)
 
+    socket.onopen = create_proxy(on_open)
     socket.onmessage = create_proxy(on_message)
     socket.onclose = create_proxy(on_close)
     window.violetear_socket = socket

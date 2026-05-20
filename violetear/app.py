@@ -657,7 +657,14 @@ class App:
         server_stubs = self._generate_server_stubs()
 
         # 8. Initialization
-        init_code = "# --- Init ---\nhydrate(globals())"
+        # Register socket-lifecycle handlers BEFORE the socket opens, so
+        # onopen/onclose dispatch can find them with no race.
+        init_code = "# --- Init ---"
+        for event in ("connect", "disconnect"):
+            for func_name in self.client.event_handlers.get(event, []):
+                init_code += f"\n_register_client_event({event!r}, {func_name})"
+        init_code += "\nhydrate(globals())"
+        # "ready" fires once, after hydration completes.
         for func_name in self.client.event_handlers.get("ready", []):
             init_code += f"\nawait {func_name}()"
 
