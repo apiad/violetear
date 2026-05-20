@@ -38,7 +38,7 @@ violetear/          package source
   presets.py        FlexGrid, SemanticDesign, UtilitySystem, Atomic
 tests/              pytest suite
 docs/               quarto docs site + example .py files (consumed by test_examples.py)
-examples/           hand-written demos (hello_world, reactivity, full_pwa, …)
+examples/           canonical demos, one per tier (01_static → 05_realtime)
 issues/             design docs for unimplemented features
 .github/workflows/  CI (ruff format-check + pytest on push/PR)
 roadmap.md          v1.0 roadmap (Phases 1-4)
