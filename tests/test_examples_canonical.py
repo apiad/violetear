@@ -51,3 +51,50 @@ def test_01_static_renders_html_and_css(tmp_path):
     assert "modern-normalize" in css
     assert ".swatch-chip" in css
     assert ".tokens-heading" in css
+
+
+# -- 02_ssr --------------------------------------------------------------------
+
+
+def test_02_ssr_guestbook_round_trips_an_entry():
+    """Tier 2: GET shows form + empty state; POST appends + redirects; subsequent GET shows the entry."""
+    from fastapi.testclient import TestClient
+
+    mod = _load("02_ssr.py")
+    # Reset the in-memory store between test runs in case other tests touched it.
+    mod.entries.clear()
+
+    client = TestClient(mod.app.api)
+
+    # Empty state
+    r = client.get("/")
+    assert r.status_code == 200
+    assert "No entries yet" in r.text
+    assert "<form" in r.text and 'method="post"' in r.text
+    # Confirm the for_= leak fix held — no underscore-suffixed attrs in output.
+    assert "for_=" not in r.text
+
+    # Served stylesheet route
+    r = client.get("/style.css")
+    assert r.status_code == 200
+    assert r.headers["content-type"].startswith("text/css")
+    assert ".entry-name" in r.text
+
+    # POST and follow redirect
+    r = client.post(
+        "/entries",
+        data={"name": "Alex", "message": "hello"},
+        follow_redirects=False,
+    )
+    assert r.status_code == 303
+    assert r.headers["location"] == "/"
+
+    # Entry now visible
+    r = client.get("/")
+    assert "Alex" in r.text
+    assert "hello" in r.text
+    assert "No entries yet" not in r.text
+
+    # Pydantic-ish enforcement: missing field is rejected by FastAPI Form(...)
+    r = client.post("/entries", data={"name": "Alex"})
+    assert r.status_code == 422

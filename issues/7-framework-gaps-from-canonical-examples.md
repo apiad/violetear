@@ -43,6 +43,16 @@ Running log of small framework limitations and ergonomic friction discovered whi
 
 **Impact.** Trips up new users; forces a context-manager-or-`HTML.*` pattern that's slightly more verbose than necessary.
 
+## 7.4 — `Element.attrs(**kwargs)` doesn't strip trailing underscores
+
+**Tier(s):** 02
+
+**Symptom.** Calling `.attrs(for_="name")` renders `for_="name"` (with trailing underscore) in the HTML, not `for="name"`. Same would apply to any HTML attribute whose name collides with a Python keyword (`class`, `for`, `type` is fine, `is`, etc.). Workaround in tier 2: use the nested `<label>text<input/></label>` pattern, which doesn't need a `for=` attribute.
+
+**Where to fix.** `violetear/markup.py:Element._render` — when iterating `self._attrs`, transform the key with something like `key = key.rstrip("_") if key != "_" else key` before writing the attribute. Same logic could also live in `Element.attrs()` and the `__init__` kwargs sink — pick one to be the canonical normalization point. Note that gap 7.3-adjacent: `Element.__init__` already handles `class_name` → `classes` aliasing manually; a generic underscore-strip would be consistent.
+
+**Impact.** Reference examples can't use `for=` / `class=` via kwargs without producing invalid HTML. Subtle because the form still submits (browsers ignore unknown attrs), so the bug is silent until someone inspects the rendered HTML.
+
 ---
 
 Add entries here as more examples land.
