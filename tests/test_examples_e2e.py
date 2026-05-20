@@ -148,3 +148,44 @@ def test_03_interactive_precise_mode_rpc_roundtrip(example_server, page):
     assert errors == [], "Browser errors during precise-mode RPC:\n  " + "\n  ".join(
         errors
     )
+
+
+@pytest.mark.e2e
+def test_04_pwa_tick_loop_decrements_seconds(example_server, page):
+    """Tier 4: load the pomodoro app, hydrate, click Start, confirm the
+    countdown actually advances after ~1.5s. This is the single test that
+    proves the long-running asyncio loop runs in Pyodide AND that a non-
+    callback `@app.client` function can mutate a reactive proxy (the two
+    novel surfaces in tier 4 beyond what tier 3 covered)."""
+    base = example_server("04_pwa.py")
+    errors = _collect_browser_errors(page)
+
+    page.goto(base + "/")
+
+    page.wait_for_function(
+        "() => document.getElementById('violetear-cloak') === null",
+        timeout=HYDRATION_TIMEOUT_MS,
+    )
+
+    # Initial state: time display shows the work-mode default 25:00.
+    # `inner_text` trims the SSR-rendered surrounding whitespace.
+    time_el = page.locator('[data-bind-text="PomodoroState.time_display"]')
+    assert time_el.inner_text().strip() == "25:00"
+
+    # Click Start. The tick loop runs in the background while we wait.
+    page.locator('button[data-on-click="start"]').click()
+
+    # Within 3 seconds the time should have decremented by at least 1s
+    # (i.e. shown anything other than "25:00"). Tolerant of timing jitter
+    # in Pyodide / CI.
+    page.wait_for_function(
+        "() => document.querySelector('[data-bind-text=\"PomodoroState.time_display\"]').textContent.trim() !== '25:00'",
+        timeout=3_000,
+    )
+
+    # Pause so the loop stops and we don't churn for the rest of the suite.
+    page.locator('button[data-on-click="pause"]').click()
+
+    assert errors == [], "Browser errors during pomodoro tick:\n  " + "\n  ".join(
+        errors
+    )

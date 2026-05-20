@@ -9,6 +9,7 @@ See `issues/6-canonical-examples-design.md` for the design.
 """
 
 import ast
+import hashlib
 import importlib.util
 import sys
 from pathlib import Path
@@ -152,3 +153,69 @@ def test_03_interactive_ssr_bindings_and_rpc_and_bundle():
     r = client.get("/_violetear/bundle.py")
     assert r.status_code == 200
     compile(r.text, "<bundle-03>", "exec", flags=COMPILE_ASYNC)
+
+
+# -- 04_pwa --------------------------------------------------------------------
+
+
+def test_04_pwa_manifest_serviceworker_and_bundle():
+    """Tier 4: SSR markup carries reactive bindings + a `data-mode` button trio,
+    the per-route manifest endpoint serves the expected JSON, the Service
+    Worker script lists the bundle URL in its asset cache, and the bundle
+    compiles."""
+    from fastapi.testclient import TestClient
+
+    mod = _load("04_pwa.py")
+    client = TestClient(mod.app.api)
+
+    # SSR markup — reactive bindings on the time display, mode label, sessions
+    # counter; mode buttons carry `data-mode` (not `data_mode` — gap 7.4).
+    r = client.get("/")
+    assert r.status_code == 200
+    html = r.text
+    assert 'data-bind-text="PomodoroState.time_display"' in html
+    assert 'data-bind-text="PomodoroState.mode"' in html
+    assert 'data-bind-text="PomodoroState.sessions"' in html
+    assert 'data-on-click="start"' in html
+    assert 'data-on-click="pause"' in html
+    assert 'data-on-click="reset"' in html
+    assert 'data-on-click="switch_mode"' in html
+    assert 'data-mode="work"' in html
+    assert 'data-mode="short"' in html
+    assert 'data-mode="long"' in html
+    # Initial render shows the default work duration.
+    assert "25:00" in html
+    # PWA glue: manifest link + SW registration injected into the page.
+    assert "/manifest.json" in html
+    assert "/sw.js" in html
+
+    # Manifest endpoint — JSON with the values we passed to Manifest(...).
+    scope_hash = hashlib.md5(b"/").hexdigest()[:8]
+    r = client.get(f"/_violetear/pwa/{scope_hash}/manifest.json")
+    assert r.status_code == 200
+    manifest = r.json()
+    assert manifest["name"] == "Pomodoro"
+    assert manifest["short_name"] == "🍅"
+    assert manifest["theme_color"] == "#dc2626"
+    assert manifest["display"] == "standalone"
+    # _register_pwa rewrites start_url + scope to the view's path.
+    assert manifest["scope"] == "/"
+    assert manifest["start_url"] == "/"
+
+    # Service Worker endpoint — script lists the bundle URL in ASSETS.
+    r = client.get(f"/_violetear/pwa/{scope_hash}/sw.js")
+    assert r.status_code == 200
+    sw = r.text
+    assert "CACHE_NAME" in sw
+    assert "/_violetear/bundle.py" in sw
+    # Pyodide files are pre-cached too so the app loads offline after first visit.
+    assert "/_violetear/pyodide/pyodide.js" in sw
+    # Cache name includes the pinned app version (1.0.0) so it stays stable
+    # across server restarts (the reason we pinned version=).
+    assert "1.0.0" in sw
+
+    # Bundle compiles — same canary as 03 but now exercising the PWA bundle
+    # too (the long-running `tick()` loop has top-level await semantics).
+    r = client.get("/_violetear/bundle.py")
+    assert r.status_code == 200
+    compile(r.text, "<bundle-04>", "exec", flags=COMPILE_ASYNC)
