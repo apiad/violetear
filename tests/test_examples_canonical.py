@@ -220,3 +220,122 @@ def test_04_pwa_manifest_serviceworker_and_bundle():
     r = client.get("/_violetear/bundle.py")
     assert r.status_code == 200
     compile(r.text, "<bundle-04>", "exec", flags=COMPILE_ASYNC)
+
+
+# -- 05_realtime ---------------------------------------------------------------
+
+
+def test_05_realtime_chat_broadcast_and_targeted_invoke():
+    """Tier 5: two concurrent WS clients see each other's joins and messages
+    via `.broadcast(...)`, and a targeted `.invoke(client_id, ...)` reaches
+    only the requesting client.
+
+    Exercises every realtime wire path in one test:
+    - `@app.server.on("connect")` (lifecycle, both clients)
+    - `@app.server.realtime` (client → server fire-and-forget)
+    - `@app.client.realtime.broadcast(...)` (server → all clients)
+    - `@app.client.realtime.invoke(cid, ...)` (server → one client)
+    - SSR markup (the chat / sidebar / compose / rename scaffold).
+    """
+    from fastapi.testclient import TestClient
+
+    mod = _load("05_realtime.py")
+    # Reset module-level shared state in case a prior test touched it.
+    mod.messages.clear()
+    mod.users.clear()
+
+    client = TestClient(mod.app.api)
+
+    # SSR scaffold — IDs the client-side DOM mutation hooks into.
+    r = client.get("/")
+    assert r.status_code == 200
+    html = r.text
+    assert 'id="chat-log"' in html
+    assert 'id="user-list"' in html
+    assert 'id="message-input"' in html
+    assert 'id="name-input"' in html
+    assert 'data-on-click="on_send_click"' in html
+    assert 'data-on-click="on_rename_click"' in html
+
+    # Bundle compiles (top-level await from on("connect")/on("ready") handlers).
+    r = client.get("/_violetear/bundle.py")
+    assert r.status_code == 200
+    compile(r.text, "<bundle-05>", "exec", flags=COMPILE_ASYNC)
+
+    # Two-client wire-protocol round trip.
+    with client.websocket_connect("/_violetear/ws?client_id=alice") as ws_a:
+        # Alice's connect handler fires two broadcasts: the join system message
+        # via receive_message, then the user-list update via set_user_list.
+        env = ws_a.receive_json()
+        assert env["type"] == "rpc"
+        assert env["func"] == "receive_message"
+        assert env["kwargs"]["msg"]["text"] == "anon-alice joined"
+        assert env["kwargs"]["msg"]["from_name"] == "system"
+
+        env = ws_a.receive_json()
+        assert env["func"] == "set_user_list"
+        assert env["kwargs"]["users"] == {"alice": "anon-alice"}
+
+        with client.websocket_connect("/_violetear/ws?client_id=bob") as ws_b:
+            # Alice receives bob's join broadcast (the second client's connect
+            # fan-out reaches the first — the spec's headline test case).
+            env = ws_a.receive_json()
+            assert env["func"] == "receive_message"
+            assert env["kwargs"]["msg"]["text"] == "anon-bob joined"
+            env = ws_a.receive_json()
+            assert env["func"] == "set_user_list"
+            assert env["kwargs"]["users"] == {"alice": "anon-alice", "bob": "anon-bob"}
+
+            # Bob receives the same broadcasts (he's connected; broadcast goes
+            # to all). Drain so subsequent assertions are aligned.
+            _ = ws_b.receive_json()
+            _ = ws_b.receive_json()
+
+            # Client-to-server fire-and-forget: alice posts a message.
+            ws_a.send_json(
+                {
+                    "type": "realtime",
+                    "func": "post_message",
+                    "args": [],
+                    "kwargs": {"client_id": "alice", "text": "hello world"},
+                }
+            )
+            # Both clients receive the broadcast.
+            env_b = ws_b.receive_json()
+            assert env_b["func"] == "receive_message"
+            assert env_b["kwargs"]["msg"]["text"] == "hello world"
+            assert env_b["kwargs"]["msg"]["from_name"] == "anon-alice"
+            env_a = ws_a.receive_json()
+            assert env_a["kwargs"]["msg"]["text"] == "hello world"
+
+            # Targeted invoke: bob asks for history. Only bob receives the
+            # receive_history envelope — alice's queue stays empty for it.
+            ws_b.send_json(
+                {
+                    "type": "realtime",
+                    "func": "request_history",
+                    "args": [],
+                    "kwargs": {"client_id": "bob"},
+                }
+            )
+            env = ws_b.receive_json()
+            assert env["func"] == "receive_history"
+            # Three system messages (alice joined, bob joined) + one chat message.
+            assert len(env["kwargs"]["messages"]) == 3
+            assert env["kwargs"]["messages"][-1]["text"] == "hello world"
+            assert set(env["kwargs"]["users"]) == {"alice", "bob"}
+
+            # Rename: alice changes her display name, both clients see it.
+            ws_a.send_json(
+                {
+                    "type": "realtime",
+                    "func": "set_name",
+                    "args": [],
+                    "kwargs": {"client_id": "alice", "new_name": "Alex"},
+                }
+            )
+            env_a = ws_a.receive_json()
+            env_b = ws_b.receive_json()
+            assert env_a["func"] == "set_user_list"
+            assert env_a["kwargs"]["users"]["alice"] == "Alex"
+            assert env_b["kwargs"]["users"]["alice"] == "Alex"

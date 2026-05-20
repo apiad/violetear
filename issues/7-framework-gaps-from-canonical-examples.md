@@ -89,6 +89,18 @@ Running log of small framework limitations and ergonomic friction discovered whi
 
 **Impact.** Reference examples can't use `for=` / `class=` via kwargs without producing invalid HTML. Subtle because the form still submits (browsers ignore unknown attrs), so the bug is silent until someone inspects the rendered HTML.
 
+## 7.8 — `get_client_id()` returns a `Thing` proxy on subsequent calls
+
+**Tier(s):** 05 (caught by Playwright e2e — silent in unit tests)
+
+**Symptom.** `violetear.client.get_client_id()` is documented as returning a `str`. On first call (no session storage entry) it does — it generates a UUID, writes it via `session["VIOLETEAR_ID"] = client_id`, and returns the bare `str`. On every subsequent call it goes through `session.get("VIOLETEAR_ID")`, which returns a `storage.Thing` wrapper (the auto-persist proxy used for nested object mutation tracking) — not a `str`. Calling `_call_realtime(..., kwargs={"client_id": <Thing>})` then `json.dumps` the kwargs and blows up: `TypeError: Object of type Thing is not JSON serializable`. The error surfaces only in Pyodide at runtime; unit tests using `TestClient.websocket_connect` pass the client_id directly as a string and never hit this path.
+
+**Workaround applied.** Coerce explicitly at every call site in 05_realtime: `client_id=str(get_client_id())`. `Thing.__repr__` returns `f"{self._data}"`, so `str(Thing("abc"))` returns `"abc"`. Verbose, but works today.
+
+**Where to fix in the framework.** `violetear/client.py:get_client_id` — make the function always return a plain `str`. Either unwrap before returning (`if hasattr(client_id, "unwrap"): client_id = client_id.unwrap()`) or read through a path that bypasses `Thing` wrapping for primitive values. The latter is structurally cleaner — `StorageAPI.__getitem__` wraps everything in `Thing` even when the underlying value is a primitive string/number, which makes sense for dict/list mutation tracking but is overkill for primitives. A `StorageAPI.get_raw(key)` that skips the wrap would let internal helpers like `get_client_id` avoid the proxy entirely.
+
+**Larger lesson.** Functions that promise a primitive return type but actually return a smart-wrapper on some code paths are a bug magnet — they pass through arithmetic, comparisons, and string formatting fine but explode at the first json/pickle boundary. Type-annotated `-> str` is a check the framework's own helpers should satisfy strictly.
+
 ---
 
 Add entries here as more examples land.

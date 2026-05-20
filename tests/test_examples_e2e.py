@@ -203,3 +203,44 @@ def test_04_pwa_tick_loop_decrements_seconds(example_server, page):
     assert errors == [], "Browser errors during pomodoro tick:\n  " + "\n  ".join(
         errors
     )
+
+
+@pytest.mark.e2e
+def test_05_realtime_chat_message_round_trips_to_dom(example_server, page):
+    """Tier 5: load the chat app, hydrate, send a message, and confirm the
+    server's broadcast comes back through the WebSocket and lands in the DOM
+    via the `@app.client.realtime` handler. This is the one path tier 5 adds
+    over tier 4: server→client RPC over WS rather than client-only state."""
+    base = example_server("05_realtime.py")
+    errors = _collect_browser_errors(page)
+
+    page.goto(base + "/")
+
+    page.wait_for_function(
+        "() => document.getElementById('violetear-cloak') === null",
+        timeout=HYDRATION_TIMEOUT_MS,
+    )
+
+    # On socket-open the client calls request_history, which the server
+    # responds to via receive_history.invoke(...). That handler populates
+    # #chat-log with at least one row (the connect-time system join msg).
+    page.wait_for_function(
+        "() => document.querySelectorAll('#chat-log .chat-row').length >= 1",
+        timeout=5_000,
+    )
+
+    # Send a message — the broadcast should come back to us and append.
+    page.fill("#message-input", "hello e2e")
+    page.locator('button[data-on-click="on_send_click"]').click()
+
+    page.wait_for_function(
+        "() => Array.from(document.querySelectorAll('#chat-log .chat-text')).some(el => el.textContent.trim() === 'hello e2e')",
+        timeout=5_000,
+    )
+
+    # And the input clears after send.
+    assert page.input_value("#message-input") == ""
+
+    assert errors == [], "Browser errors during chat round-trip:\n  " + "\n  ".join(
+        errors
+    )
