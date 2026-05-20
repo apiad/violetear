@@ -114,7 +114,6 @@ colors = [
 # With these definitions we can create all our color styles in single loop.
 
 for cls, color in zip("normal primary success warning error info".split(), colors):
-
     # First, the text style will simply define the color for each `.text.<cls>` selector.
     # For example, `.text.primary` will get a dark blue color.
 

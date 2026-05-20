@@ -1,6 +1,7 @@
 """
 Tests for the WebSocket lifecycle, realtime dispatch, and reverse-RPC envelope.
 """
+
 import time
 
 from fastapi.testclient import TestClient
@@ -71,12 +72,14 @@ def test_realtime_message_dispatches_to_server_function():
     client = TestClient(app.api)
 
     with client.websocket_connect("/_violetear/ws?client_id=xyz") as ws:
-        ws.send_json({
-            "type": "realtime",
-            "func": "record",
-            "args": ["click", 7],
-            "kwargs": {},
-        })
+        ws.send_json(
+            {
+                "type": "realtime",
+                "func": "record",
+                "args": ["click", 7],
+                "kwargs": {},
+            }
+        )
         ack_msg = ws.receive_json()
 
     assert ack_msg["type"] == "rpc"
@@ -135,9 +138,10 @@ def test_reverse_rpc_invoke_targets_specific_client():
 
     client = TestClient(app.api)
 
-    with client.websocket_connect("/_violetear/ws?client_id=a") as ws_a, \
-         client.websocket_connect("/_violetear/ws?client_id=b") as ws_b:
-
+    with (
+        client.websocket_connect("/_violetear/ws?client_id=a") as ws_a,
+        client.websocket_connect("/_violetear/ws?client_id=b") as ws_b,
+    ):
         r = client.post("/_violetear/rpc/kick_one", json={"target": "b"})
         assert r.status_code == 200
 

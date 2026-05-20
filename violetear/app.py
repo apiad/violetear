@@ -670,7 +670,9 @@ class App:
 
         # Global Imports for the Bundle
         # Ensure standard library + violetear components are ready
-        imports = "from dataclasses import dataclass, field\nimport datetime\nimport json"
+        imports = (
+            "from dataclasses import dataclass, field\nimport datetime\nimport json"
+        )
 
         return "\n\n".join(
             [

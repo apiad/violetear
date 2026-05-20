@@ -6,12 +6,13 @@ import sys
 # We use a try/except block for these imports so this file
 # doesn't crash if imported in a non-browser environment (like for testing).
 try:
-    from js import document, window, WebSocket, console, Object # type: ignore
-    from pyodide.ffi import create_proxy, to_js # type: ignore
+    from js import document, window, WebSocket, console, Object  # type: ignore
+    from pyodide.ffi import create_proxy, to_js  # type: ignore
 except ImportError:
     pass
 
 from violetear.storage import session
+
 
 # --- THE REACTIVE REGISTRY ---
 class ReactiveRegistry:
@@ -65,10 +66,13 @@ class ReactiveRegistry:
                     # We pass the raw value to the callback
                     callback(new_value)
                 except Exception as e:
-                    console.error(f"[Violetear] Error in reactive update for '{path}': {str(e)}")
+                    console.error(
+                        f"[Violetear] Error in reactive update for '{path}': {str(e)}"
+                    )
 
 
 # --- HYDRATION LOGIC ---
+
 
 def hydrate(scope):
     """
@@ -101,8 +105,8 @@ def _hydrate_bindings(scope):
         # Iterate over all attributes of the element
         # attributes is a NamedNodeMap, we need to be careful iterating it
         for attr in list(el.attributes):
-            name = attr.name # e.g. "data-bind-class"
-            path = attr.value # e.g. "UiState.theme"
+            name = attr.name  # e.g. "data-bind-class"
+            path = attr.value  # e.g. "UiState.theme"
 
             if name.startswith("data-bind-"):
                 # Extract the target property: "class", "text", "style.display"
@@ -147,6 +151,7 @@ def _create_dom_updater(el, prop):
                 el.removeAttribute(prop)
             else:
                 el.setAttribute(prop, str(val))
+
         return attr_updater
 
 
@@ -154,12 +159,14 @@ def _hydrate_events(scope):
     """
     Scans for [data-on-event] and attaches python handlers.
     """
+
     def create_handler(func_name):
         async def handler(event):
             if func_name in scope:
                 await scope[func_name](event)
             else:
                 console.error(f"Handler '{func_name}' not found")
+
         return handler
 
     elements = document.querySelectorAll("*")
@@ -205,6 +212,7 @@ async def _dispatch_client_event(event: str, *args):
 
 # --- NETWORKING & RPC ---
 
+
 def get_client_id():
     client_id = session.get("VIOLETEAR_ID")
     if client_id is None:
@@ -212,11 +220,13 @@ def get_client_id():
         session["VIOLETEAR_ID"] = client_id
     return client_id
 
+
 def get_socket_url():
     protocol = "wss" if window.location.protocol == "https:" else "ws"
     host = window.location.host
     client_id = get_client_id()
     return f"{protocol}://{host}/_violetear/ws?client_id={client_id}"
+
 
 def setup_socket_listener(scope):
     url = get_socket_url()
@@ -252,8 +262,10 @@ def setup_socket_listener(scope):
     socket.onclose = create_proxy(on_close)
     window.violetear_socket = socket
 
+
 async def _call_rpc(func_name, arg_names, args, kwargs):
     from pyodide.http import pyfetch
+
     payload = {k: v for k, v in zip(arg_names, args)}
     payload.update(kwargs)
     response = await pyfetch(
@@ -265,6 +277,7 @@ async def _call_rpc(func_name, arg_names, args, kwargs):
     if not response.ok:
         raise Exception(f"RPC Error: {response.status}")
     return await response.json()
+
 
 async def _call_realtime(func_name, args, kwargs):
     payload = {"type": "realtime", "func": func_name, "args": args, "kwargs": kwargs}

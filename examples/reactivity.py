@@ -7,6 +7,7 @@ from violetear.dom import Event
 # --- 1. Instantiate the App ---
 app = App(title="Reactive Engine Demo")
 
+
 # --- 2. Define the Reactive State ---
 @app.local
 @dataclass
@@ -15,10 +16,12 @@ class UiState:
     username: str = "Guest"
     theme: str = "light"
 
+
 # --- 3. Define Client-Side Logic ---
 @app.client.callback
 async def increment(event: Event):
     UiState.count += 1
+
 
 @app.client.callback
 async def toggle_theme(event: Event):
@@ -27,15 +30,18 @@ async def toggle_theme(event: Event):
     else:
         UiState.theme = "light"
 
+
 @app.client.callback
 async def update_name(event: Event):
     UiState.username = event.target.value
+
 
 @app.client.callback
 async def reset_all(event: Event):
     UiState.count = 0
     UiState.username = "Guest"
     UiState.theme = "light"
+
 
 # --- 4. Define the View ---
 @app.view("/")
@@ -58,7 +64,6 @@ def home():
 
     # --- Build the UI ---
     with doc.body as b:
-
         # Container with inline styles using the Style() fluent API
         container_style = (
             Style()
@@ -70,24 +75,22 @@ def home():
         )
 
         # We chain .style() BEFORE the context manager
-        with b.div(class_name=UiState.theme, id="app-container").style(container_style) as container:
-
+        with b.div(class_name=UiState.theme, id="app-container").style(
+            container_style
+        ) as container:
             container.h1("Reactive Engine Demo")
 
             # Card Style
             card_style = (
-                Style()
-                .border(width="1px", color="#ccc")
-                .padding("20px")
-                .rounded("8px")
+                Style().border(width="1px", color="#ccc").padding("20px").rounded("8px")
             )
 
             with container.div().style(card_style) as card:
                 # Text Binding
                 card.p().text("Current Count: ").add(
                     card.span()
-                        .text(UiState.count)
-                        .style(Style().font(weight="bold", size="20px"))
+                    .text(UiState.count)
+                    .style(Style().font(weight="bold", size="20px"))
                 )
 
                 card.button("Increment").on("click", increment).style(
@@ -99,21 +102,23 @@ def home():
                 form.label("Enter your name: ")
 
                 # Value Binding
-                form.input(type="text").on("input", update_name).value(UiState.username).style(
-                    Style().padding("8px").margin(left="10px")
-                )
+                form.input(type="text").on("input", update_name).value(
+                    UiState.username
+                ).style(Style().padding("8px").margin(left="10px"))
 
                 form.p("Hello, ").add(
                     form.span()
-                        .text(UiState.username)
-                        .style(Style().font(weight="bold"))
+                    .text(UiState.username)
+                    .style(Style().font(weight="bold"))
                 )
 
             # Controls Section
             with container.div().style(Style().margin(top="20px")) as controls:
                 btn_style = Style().padding("8px 16px").rule("cursor", "pointer")
 
-                controls.button("Toggle Theme").on("click", toggle_theme).style(btn_style)
+                controls.button("Toggle Theme").on("click", toggle_theme).style(
+                    btn_style
+                )
 
                 controls.button("Reset").on("click", reset_all).style(
                     # Extend the base button style with margin
@@ -121,6 +126,7 @@ def home():
                 )
 
     return doc
+
 
 if __name__ == "__main__":
     app.run(port=8000)

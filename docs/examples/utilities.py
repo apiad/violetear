@@ -67,7 +67,7 @@ for color in Colors.basic_palette():
     sheet.select(f".{color.name.lower()}").color(color)
 
     for i in range(1, 10):
-        sheet.select(f".{color.name.lower()}-{i*100}").color(color.lit(i / 10))
+        sheet.select(f".{color.name.lower()}-{i * 100}").color(color.lit(i / 10))
 
 # Again, check the CSS file and you'll lots and lots of color styles.
 
@@ -153,7 +153,11 @@ sheet.extend(
         clss="shadow",
         variants=range(1, 6),
         rule=lambda style, v: style.color(Colors.Black).shadow(  # :hl:
-            Colors.Black, x=v, y=v, blur=v, spread=v / 2  # :hl:
+            Colors.Black,
+            x=v,
+            y=v,
+            blur=v,
+            spread=v / 2,  # :hl:
         ),  # :hl:
     )
 )
@@ -172,7 +176,7 @@ sheet.extend(
     UtilitySystem().define(
         variants=[Colors.basic_palette(), range(1, 10)],
         rule=lambda style, color, value: style.color(color.shade(value / 10)),
-        name=lambda color, value: f"bg-{color.name.lower()}-{value*100}",
+        name=lambda color, value: f"bg-{color.name.lower()}-{value * 100}",
     )
 )
 

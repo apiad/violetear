@@ -1,6 +1,7 @@
 """
 Tests for PWA route registration, manifest serving, and Service Worker scope.
 """
+
 import hashlib
 import json
 

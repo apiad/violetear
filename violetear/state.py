@@ -13,6 +13,7 @@ class LeafProxy:
     It implements standard dunder methods to behave like the underlying
     primitive in most contexts (comparisons, f-strings, math).
     """
+
     def __init__(self, value: Any, path: str):
         self._value = value
         self._path = path
@@ -74,6 +75,7 @@ class ReactiveProxy:
     A recursive proxy that wraps state objects (classes, dicts, lists).
     It tracks the 'path' to the property being accessed to enable automatic binding.
     """
+
     def __init__(self, target: Any, path: str = ""):
         # We use object.__setattr__ to avoid triggering our own __setattr__ trap
         object.__setattr__(self, "_target", target)
@@ -152,6 +154,7 @@ class ReactiveProxy:
         Lazily imports the client registry to avoid circular imports.
         """
         from violetear.client import ReactiveRegistry
+
         # We unwrap LeafProxies before sending to the registry if needed,
         # though the registry usually handles the raw value.
         val = new_value._value if isinstance(new_value, LeafProxy) else new_value

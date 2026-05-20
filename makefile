@@ -10,11 +10,11 @@ bugfix:
 
 .PHONY: format
 format:
-	black . && git commit -am "Apply code formatting"
+	uv run ruff format . && git commit -am "Apply code formatting"
 
 .PHONY: format-check
 format-check:
-	black --check .
+	uv run ruff format --check .
 
 .PHONY: type-check
 type-check:
@@ -23,10 +23,10 @@ type-check:
 .PHONY: test-unit test-all
 
 test-unit: format-check
-	pytest tests --cov=violetear
+	uv run pytest tests --cov=violetear
 
 test-all: format-check
-	pytest --cov=violetear
+	uv run pytest --cov=violetear
 
 .PHONY: docker-build
 docker-build:

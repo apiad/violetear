@@ -490,13 +490,13 @@ class Style:
     ) -> Style:
         if columns is not None:
             if isinstance(columns, tuple):
-                columns = f"{columns[0]} / {columns[1]+1}"
+                columns = f"{columns[0]} / {columns[1] + 1}"
 
             self.rule("grid-column", columns)
 
         if rows is not None:
             if isinstance(rows, tuple):
-                rows = f"{rows[0]} / {rows[1]+1}"
+                rows = f"{rows[0]} / {rows[1] + 1}"
 
             self.rule("grid-row", rows)
 
@@ -696,7 +696,7 @@ class Style:
         rules = "\n".join(f"{attr}: {value};" for attr, value in self._rules.items())
 
         selector = self.selector.css() if self.selector is not None else ""
-        return f"{selector} {{\n{textwrap.indent(rules, 4*' ')}\n}}"
+        return f"{selector} {{\n{textwrap.indent(rules, 4 * ' ')}\n}}"
 
     # #### `Style.inline`
 

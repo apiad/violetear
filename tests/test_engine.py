@@ -8,6 +8,7 @@ of state/dom internals; those follow in slice 2.
 Browser-only branches (the IS_BROWSER guards in state.py, dom.py, client.py)
 are NOT exercised here — they require a Pyodide simulator and are deferred.
 """
+
 from dataclasses import dataclass
 
 import pytest
@@ -202,7 +203,9 @@ def test_client_on_connect_handler_registered_in_bundle():
 
     assert "_register_client_event('connect', hello)" in bundle
     # Registration must come before hydrate() so it precedes the socket opening.
-    assert bundle.index("_register_client_event('connect', hello)") < bundle.index("hydrate(globals())")
+    assert bundle.index("_register_client_event('connect', hello)") < bundle.index(
+        "hydrate(globals())"
+    )
     compile(bundle, "<bundle>", "exec")
 
 

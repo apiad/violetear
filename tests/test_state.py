@@ -4,6 +4,7 @@ Unit tests for the reactive state proxy (violetear/state.py).
 Server-side branches only — IS_BROWSER paths (ReactiveRegistry.notify) are
 skipped here; they need a Pyodide simulator and live in a later slice.
 """
+
 from dataclasses import dataclass, field
 
 from violetear.state import LeafProxy, ReactiveProxy, local

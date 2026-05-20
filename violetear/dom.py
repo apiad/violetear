@@ -215,14 +215,18 @@ class DOMElement:
             for i in range(inputs.length):
                 el = inputs.item(i)
                 name = el.name
-                if not name: continue
+                if not name:
+                    continue
                 if el.type == "checkbox":
-                    if el.checked: data[name] = True
+                    if el.checked:
+                        data[name] = True
                 elif el.type == "radio":
-                    if el.checked: data[name] = el.value
+                    if el.checked:
+                        data[name] = el.value
                 else:
                     data[name] = el.value
         return data
+
 
 class DOM:
     @staticmethod
@@ -253,6 +257,7 @@ class DOM:
         if IS_BROWSER:
             return DOMElement(document.body)
         return DOMElement(None)
+
 
 class ProxyElement(Protocol):
     """

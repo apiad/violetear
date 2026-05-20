@@ -100,7 +100,7 @@ ul = (
 )
 
 for i in range(5):  # :ref:li:
-    ul.create("li").text(f"The {i+1}th element!")  # :ref:li:
+    ul.create("li").text(f"The {i + 1}th element!")  # :ref:li:
 
 # Then chain another call to create a `ul` and style it:
 
@@ -127,7 +127,7 @@ div = (
     .create("ul")
     .spawn(5, "li")  # :hl:
     .each(
-        lambda i, item: item.text(f"The {i+1}th element").style(  # :ref:spawn2:
+        lambda i, item: item.text(f"The {i + 1}th element").style(  # :ref:spawn2:
             Style().color(Colors.Blue.shade(i / 5))  # :ref:spawn2:
         )  # :ref:spawn2:
     )
@@ -224,10 +224,12 @@ class Menu(Component):  # :hl:
             .create("ul")  # :ref:menu_compose:
             .spawn(self.entries, "li")  # :ref:menu_compose:
             .each(  # :ref:menu_compose:
-                lambda key, item: item.classes("menu-item")  # :ref:menu_compose:
-                .create("a")  # :ref:menu_compose:
-                .text(key)  # :ref:menu_compose:
-                .attrs(href=self.entries[key])  # :ref:menu_compose:
+                lambda key, item: (
+                    item.classes("menu-item")  # :ref:menu_compose:
+                    .create("a")  # :ref:menu_compose:
+                    .text(key)  # :ref:menu_compose:
+                    .attrs(href=self.entries[key])
+                )  # :ref:menu_compose:
             )  # :ref:menu_compose:
         )
 

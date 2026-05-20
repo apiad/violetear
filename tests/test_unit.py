@@ -1,6 +1,7 @@
 """
 Unit-level tests for ClientFunctionStub safety semantics and Element helpers.
 """
+
 import pytest
 
 from violetear import App

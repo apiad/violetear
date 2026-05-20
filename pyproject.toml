@@ -27,7 +27,7 @@ packages = ["violetear"]
 
 [dependency-groups]
 dev = [
-    "black>=25.11.0",
+    "ruff>=0.13.0",
     "pytest>=9.0.2",
     "pytest-cov>=7.0.0",
 ]
