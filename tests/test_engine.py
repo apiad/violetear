@@ -202,8 +202,10 @@ def test_client_on_connect_handler_registered_in_bundle():
     bundle = client.get("/_violetear/bundle.py").text
 
     assert "_register_client_event('connect', hello)" in bundle
-    # Registration must come before hydrate() so it precedes the socket opening.
-    assert bundle.index("_register_client_event('connect', hello)") < bundle.index(
+    # The init-code call site (last occurrence — earlier matches may be inside
+    # comments/docstrings) registers the handler before hydrate() opens the
+    # socket. We assert on the rindex pair to ignore the prose-level mentions.
+    assert bundle.rindex("_register_client_event('connect', hello)") < bundle.rindex(
         "hydrate(globals())"
     )
     compile(bundle, "<bundle>", "exec")

@@ -42,9 +42,10 @@ class UiState:
     mode: str = "quick"
 
 
-# Rough client-only constants (quick mode).
-QUICK_FT_PER_M = 3.281
-QUICK_IN_PER_M = 39.37
+# Conversion constants are inlined into each client function rather than
+# defined at module scope. The bundle generator transpiles function source
+# (inspect.getsource) but does not pull surrounding module-level names — see
+# gap 7.7 in issues/7. Once that's fixed we can hoist these back up.
 
 
 # ---------------------------------------------------------------------------
@@ -82,8 +83,8 @@ async def recompute_from_meters(m: float):
         UiState.feet = float(result["feet"])
         UiState.inches = float(result["inches"])
     else:
-        UiState.feet = m * QUICK_FT_PER_M
-        UiState.inches = m * QUICK_IN_PER_M
+        UiState.feet = m * 3.281
+        UiState.inches = m * 39.37
 
 
 @app.client.callback
@@ -111,9 +112,9 @@ async def on_feet_change(event: Event):
         UiState.meters = m
         UiState.inches = float(result["inches"])
     else:
-        m = v / QUICK_FT_PER_M
+        m = v / 3.281
         UiState.meters = m
-        UiState.inches = m * QUICK_IN_PER_M
+        UiState.inches = m * 39.37
     await save_state()
 
 
@@ -130,9 +131,9 @@ async def on_inches_change(event: Event):
         UiState.meters = m
         UiState.feet = float(result["feet"])
     else:
-        m = v / QUICK_IN_PER_M
+        m = v / 39.37
         UiState.meters = m
-        UiState.feet = m * QUICK_FT_PER_M
+        UiState.feet = m * 3.281
     await save_state()
 
 

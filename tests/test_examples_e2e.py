@@ -70,3 +70,47 @@ def test_03_interactive_loads_with_no_pyodide_errors(example_server, page):
     # hydration. The meters input was server-rendered with value="1.0".
     meters_value = page.input_value('input[data-bind-value="UiState.meters"]')
     assert meters_value == "1.0"
+
+
+@pytest.mark.e2e
+def test_03_interactive_reactive_update_propagates(example_server, page):
+    """After hydration, typing in the meters input must propagate through the
+    reactive proxy (`UiState.meters = v` → `ReactiveRegistry.notify(...)` →
+    DOM updates the feet/inches inputs via their data-bind-value updaters).
+
+    Hydration-only smoke (above) doesn't exercise the proxy.notify code path
+    — the notify only fires on a *write*. This test fills the input and
+    waits for a downstream binding to reflect the new value.
+    """
+    base = example_server("03_interactive.py")
+    errors = _collect_browser_errors(page)
+
+    page.goto(base + "/")
+    page.wait_for_function(
+        "() => document.getElementById('violetear-cloak') === null",
+        timeout=HYDRATION_TIMEOUT_MS,
+    )
+
+    # Type "2" in meters — feet should propagate to ~2 * 3.281 = 6.562.
+    page.fill('input[data-bind-value="UiState.meters"]', "2")
+
+    # Wait for the feet field to reflect the new value. A value > 6 is
+    # sufficient — we just need a downstream binding to confirm the
+    # mutation reached the DOM.
+    try:
+        page.wait_for_function(
+            "() => parseFloat(document.querySelector('input[data-bind-value=\"UiState.feet\"]').value) > 6",
+            timeout=5_000,
+        )
+    finally:
+        # Surface any console errors that fired during interaction even if
+        # the wait timed out — they're more informative than the timeout
+        # message alone.
+        if errors:
+            raise AssertionError(
+                "Browser errors during reactive update:\n  " + "\n  ".join(errors)
+            )
+
+    assert errors == [], "Browser errors during reactive update:\n  " + "\n  ".join(
+        errors
+    )

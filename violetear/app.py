@@ -693,10 +693,34 @@ class App:
             """
         )
 
-        # 5. Read the Client Runtime
+        # 5. Read the Client Runtime and inject as violetear.client
         runtime_path = Path(__file__).parent / "client.py"
         with open(runtime_path, "r") as f:
             runtime_code = f.read()
+
+        client_injection = dedent(
+            f"""
+            m_client = types.ModuleType("violetear.client")
+            sys.modules["violetear.client"] = m_client
+
+            # Link to parent so `from violetear.client import X` resolves —
+            # state.py's _notify_client and dom.py's _bind_property both do this
+            # lazy import at runtime when a reactive write fires.
+            sys.modules["violetear"].client = m_client
+
+            exec({repr(runtime_code)}, m_client.__dict__)
+
+            import violetear.client
+            # Re-export the names the bundle's init_code and user code call at
+            # module scope (hydrate(globals()) and _register_client_event(...)).
+            from violetear.client import (
+                hydrate,
+                ReactiveRegistry,
+                _register_client_event,
+                _dispatch_client_event,
+            )
+            """
+        )
 
         # 6. Generate State Classes (with dataclass re-application)
         # dedent() lets us pull definitions from nested scopes (factories, tests)
@@ -775,7 +799,7 @@ class App:
                 state_injection,
                 dom_injection,
                 storage_injection,
-                runtime_code,
+                client_injection,
                 "\n".join(state_code),
                 "\n".join(user_code),
                 safety_code,

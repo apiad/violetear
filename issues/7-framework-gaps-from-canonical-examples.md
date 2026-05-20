@@ -43,6 +43,18 @@ Running log of small framework limitations and ergonomic friction discovered whi
 
 **Impact.** Trips up new users; forces a context-manager-or-`HTML.*` pattern that's slightly more verbose than necessary.
 
+## 7.7 — Bundle drops user module-level constants
+
+**Tier(s):** 03 (caught by e2e Playwright test, not unit tests)
+
+**Symptom.** User defines `QUICK_FT_PER_M = 3.281` at module scope, then references it inside a `@app.client` function. Bundle generator calls `inspect.getsource(func)` which preserves the function body but the surrounding module-level `QUICK_FT_PER_M = ...` line is never copied. At Pyodide exec, the function body raises `NameError: name 'QUICK_FT_PER_M' is not defined`. Same class as 7.6 (the `store` import bug) — anything the user defines at module level outside of `@app.local` and `@app.client.*` decorators is invisible to the bundle.
+
+**Workaround applied.** Inlined the constants into each function body. Cosmetically uglier but works today.
+
+**Where to fix in the framework.** At `App.client.code_functions` registration time (the `_register` method), additionally scan the function's source for free variables and capture their module-level bindings. The bundle generator then emits `<NAME> = <VALUE>` lines for each captured constant before the user functions. This is a real AST exercise but tractable — `func.__globals__` already holds the captured environment.
+
+**Larger lesson** (echoing 7.6). The bundle generator's "transpile this function in isolation" model is fundamentally lossy. Anything that's not under a violetear decorator gets dropped. A structurally cleaner approach: snapshot the *entire user module's source* (via `inspect.getsource(sys.modules[func.__module__])`) and inject that as a module into the bundle, stripping decorator lines and the `app = App(...)` line. Then user code looks normal and behaves normally.
+
 ## 7.6 — Bundle doesn't re-export common violetear globals into module scope
 
 **Tier(s):** 03 (caught in browser, not by tests)
