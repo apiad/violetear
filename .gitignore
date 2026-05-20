@@ -128,3 +128,7 @@ dmypy.json
 # Pyre type checker
 .pyre/
 .issues-sync-state
+
+# Generated outputs from canonical examples (run-locally artifacts)
+examples/*.html
+examples/*.css
