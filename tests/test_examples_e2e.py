@@ -172,8 +172,18 @@ def test_04_pwa_tick_loop_decrements_seconds(example_server, page):
     time_el = page.locator('[data-bind-text="PomodoroState.time_display"]')
     assert time_el.inner_text().strip() == "25:00"
 
-    # Click Start. The tick loop runs in the background while we wait.
-    page.locator('button[data-on-click="start"]').click()
+    # The toggle button starts labeled "Start" and flips to "Pause" once running.
+    toggle_btn = page.locator('button[data-on-click="toggle"]')
+    assert toggle_btn.inner_text().strip() == "Start"
+
+    # Click to start. The tick loop runs in the background while we wait.
+    toggle_btn.click()
+
+    # The button text should flip to "Pause" reactively once running=True.
+    page.wait_for_function(
+        "() => document.querySelector('button[data-on-click=\"toggle\"]').textContent.trim() === 'Pause'",
+        timeout=3_000,
+    )
 
     # Within 3 seconds the time should have decremented by at least 1s
     # (i.e. shown anything other than "25:00"). Tolerant of timing jitter
@@ -183,8 +193,12 @@ def test_04_pwa_tick_loop_decrements_seconds(example_server, page):
         timeout=3_000,
     )
 
-    # Pause so the loop stops and we don't churn for the rest of the suite.
-    page.locator('button[data-on-click="pause"]').click()
+    # Click again to pause — the loop stops and the label flips back.
+    toggle_btn.click()
+    page.wait_for_function(
+        "() => document.querySelector('button[data-on-click=\"toggle\"]').textContent.trim() === 'Start'",
+        timeout=3_000,
+    )
 
     assert errors == [], "Browser errors during pomodoro tick:\n  " + "\n  ".join(
         errors

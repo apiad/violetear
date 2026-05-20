@@ -52,6 +52,7 @@ class PomodoroState:
     running: bool = False
     sessions: int = 0
     time_display: str = "25:00"
+    toggle_label: str = "Start"
 
 
 # ---------------------------------------------------------------------------
@@ -110,6 +111,7 @@ async def tick():
             PomodoroState.mode = next_mode
             PomodoroState.seconds_left = durations[next_mode]
             PomodoroState.running = False
+            PomodoroState.toggle_label = "Start"
             await render_time()
             await save_state()
             return
@@ -119,17 +121,19 @@ async def tick():
 
 
 @app.client.callback
-async def start(event: Event):
+async def toggle(event: Event):
+    # Single Start/Pause button. The label flips so the user can always see
+    # whether the timer is running. When starting, await tick() — the loop
+    # owns the running coroutine until it sees running=False (set here on
+    # the next click) or seconds_left hits zero.
     if bool(PomodoroState.running):
+        PomodoroState.running = False
+        PomodoroState.toggle_label = "Start"
+        await save_state()
         return
     PomodoroState.running = True
+    PomodoroState.toggle_label = "Pause"
     await tick()
-
-
-@app.client.callback
-async def pause(event: Event):
-    PomodoroState.running = False
-    await save_state()
 
 
 @app.client.callback
@@ -137,6 +141,7 @@ async def reset(event: Event):
     # Reset to the full duration of the current mode. Stops the timer.
     durations = {"work": 1500, "short": 300, "long": 900}
     PomodoroState.running = False
+    PomodoroState.toggle_label = "Start"
     PomodoroState.seconds_left = durations[str(PomodoroState.mode)]
     await render_time()
     await save_state()
@@ -151,6 +156,7 @@ async def switch_mode(event: Event):
     if new_mode not in durations:
         return
     PomodoroState.running = False
+    PomodoroState.toggle_label = "Start"
     PomodoroState.mode = new_mode
     PomodoroState.seconds_left = durations[new_mode]
     await render_time()
@@ -170,6 +176,7 @@ async def restore():
         PomodoroState.sessions = int(saved.sessions)
     # Always restore paused — user clicks start to resume.
     PomodoroState.running = False
+    PomodoroState.toggle_label = "Start"
     await render_time()
 
 
@@ -288,14 +295,11 @@ def index():
             # Current mode label below the time.
             page.div(classes="mode-label").text(PomodoroState.mode)
 
-            # Primary controls.
+            # Primary controls — toggle (Start/Pause flips reactively) + Reset.
             with page.div(classes="controls") as controls:
-                controls.button(text="Start", classes="control-primary").attrs(
-                    type="button"
-                ).on("click", start)
-                controls.button(text="Pause", classes="control-secondary").attrs(
-                    type="button"
-                ).on("click", pause)
+                controls.button(classes="control-primary").attrs(type="button").text(
+                    PomodoroState.toggle_label
+                ).on("click", toggle)
                 controls.button(text="Reset", classes="control-secondary").attrs(
                     type="button"
                 ).on("click", reset)

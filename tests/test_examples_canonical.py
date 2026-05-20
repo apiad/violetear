@@ -176,8 +176,9 @@ def test_04_pwa_manifest_serviceworker_and_bundle():
     assert 'data-bind-text="PomodoroState.time_display"' in html
     assert 'data-bind-text="PomodoroState.mode"' in html
     assert 'data-bind-text="PomodoroState.sessions"' in html
-    assert 'data-on-click="start"' in html
-    assert 'data-on-click="pause"' in html
+    # The toggle button label flips between Start and Pause reactively.
+    assert 'data-bind-text="PomodoroState.toggle_label"' in html
+    assert 'data-on-click="toggle"' in html
     assert 'data-on-click="reset"' in html
     assert 'data-on-click="switch_mode"' in html
     assert 'data-mode="work"' in html
