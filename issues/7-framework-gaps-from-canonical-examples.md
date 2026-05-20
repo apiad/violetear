@@ -89,17 +89,25 @@ Running log of small framework limitations and ergonomic friction discovered whi
 
 **Impact.** Reference examples can't use `for=` / `class=` via kwargs without producing invalid HTML. Subtle because the form still submits (browsers ignore unknown attrs), so the bug is silent until someone inspects the rendered HTML.
 
-## 7.8 — `get_client_id()` returns a `Thing` proxy on subsequent calls
+## 7.8 — `get_client_id()` returned a `Thing` proxy on subsequent calls (FIXED)
 
 **Tier(s):** 05 (caught by Playwright e2e — silent in unit tests)
 
-**Symptom.** `violetear.client.get_client_id()` is documented as returning a `str`. On first call (no session storage entry) it does — it generates a UUID, writes it via `session["VIOLETEAR_ID"] = client_id`, and returns the bare `str`. On every subsequent call it goes through `session.get("VIOLETEAR_ID")`, which returns a `storage.Thing` wrapper (the auto-persist proxy used for nested object mutation tracking) — not a `str`. Calling `_call_realtime(..., kwargs={"client_id": <Thing>})` then `json.dumps` the kwargs and blows up: `TypeError: Object of type Thing is not JSON serializable`. The error surfaces only in Pyodide at runtime; unit tests using `TestClient.websocket_connect` pass the client_id directly as a string and never hit this path.
+**Symptom.** `violetear.client.get_client_id()` promised `-> str` but only delivered on the first call. It seeded `session["VIOLETEAR_ID"]` with a fresh UUID string, then on subsequent calls read it back via `session.get(...)` — which goes through `StorageAPI.__getitem__` and returns a `storage.Thing` wrapper (not a `str`). Calling `_call_realtime(..., kwargs={"client_id": <Thing>})` would then fail at `json.dumps` with `TypeError: Object of type Thing is not JSON serializable`. Silent in unit tests because `TestClient.websocket_connect` passes a string `client_id` directly; only the real Pyodide path hit the read-back.
 
-**Workaround applied.** Coerce explicitly at every call site in 05_realtime: `client_id=str(get_client_id())`. `Thing.__repr__` returns `f"{self._data}"`, so `str(Thing("abc"))` returns `"abc"`. Verbose, but works today.
+**Fix applied.** Rewrote `get_client_id` to use a module-level `_CLIENT_ID` cache instead of sessionStorage round-tripping. Side benefits documented under gap 7.9.
 
-**Where to fix in the framework.** `violetear/client.py:get_client_id` — make the function always return a plain `str`. Either unwrap before returning (`if hasattr(client_id, "unwrap"): client_id = client_id.unwrap()`) or read through a path that bypasses `Thing` wrapping for primitive values. The latter is structurally cleaner — `StorageAPI.__getitem__` wraps everything in `Thing` even when the underlying value is a primitive string/number, which makes sense for dict/list mutation tracking but is overkill for primitives. A `StorageAPI.get_raw(key)` that skips the wrap would let internal helpers like `get_client_id` avoid the proxy entirely.
+## 7.9 — `client_id` collision when two tabs share sessionStorage
 
-**Larger lesson.** Functions that promise a primitive return type but actually return a smart-wrapper on some code paths are a bug magnet — they pass through arithmetic, comparisons, and string formatting fine but explode at the first json/pickle boundary. Type-annotated `-> str` is a check the framework's own helpers should satisfy strictly.
+**Tier(s):** 05 (reported by Alex during real-browser multi-user testing — silent in single-client and isolated-context tests)
+
+**Symptom.** Two browser tabs that share `sessionStorage` (this happens whenever Chrome's "Duplicate Tab" feature is used — the duplicated tab inherits the original's sessionStorage) end up with the **same** `VIOLETEAR_ID` value. Both tabs connect to `/_violetear/ws?client_id=<same>`. The server's `SocketManager.connect` does `self.active_connections[client_id] = websocket` — the second tab's connect *overwrites* the first. From then on, broadcasts iterate `active_connections.items()` and find only one entry per `client_id`; the first tab's WS is still open on the wire but the server has lost its reference. User-visible effect: messages reach only the most-recently-connected tab. Reproduces deterministically by pre-seeding two Playwright contexts with the same `VIOLETEAR_ID` (commit 80fc920 + manual debug).
+
+**Fix applied (client side).** `get_client_id` no longer persists across page loads. A module-level `_CLIENT_ID = None` is initialized at bundle exec; the first call sets it to a fresh `uuid4()`; subsequent calls return the cached value. Each browser tab runs its own Pyodide instance, so the cache is per-tab — and duplicating a tab gives the new one a fresh Pyodide → fresh `_CLIENT_ID`. Also incidentally fixes gap 7.8 (no more `Thing` round-trip).
+
+**Tradeoff.** A tab that reloads now gets a *new* `client_id` rather than reclaiming its previous one. For the chat example that's fine (no per-client persistent state). Apps that need a stable id across reloads should layer their own (e.g. a server-issued cookie, or an explicit `localStorage` write that the user opts into per-app).
+
+**Server-side residual gap.** Even with the client fix, the server still trusts a client-supplied `client_id` query param and would overwrite an existing entry if two clients ever sent the same one. A stricter server would reject the duplicate (HTTP 409 / WS close), or multiplex (`active_connections[client_id] = list[WebSocket]`) and broadcast to all sockets for an id. For v1 the client-side fix is enough; revisit when adding auth or when the realtime pattern grows beyond fire-and-forget.
 
 ---
 

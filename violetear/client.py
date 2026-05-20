@@ -213,12 +213,21 @@ async def _dispatch_client_event(event: str, *args):
 # --- NETWORKING & RPC ---
 
 
-def get_client_id():
-    client_id = session.get("VIOLETEAR_ID")
-    if client_id is None:
-        client_id = str(uuid.uuid4())
-        session["VIOLETEAR_ID"] = client_id
-    return client_id
+# Module-level cache. Each browser tab gets its own Pyodide instance, so this
+# is per-tab — and we deliberately do NOT persist it in sessionStorage. Chrome
+# copies sessionStorage on "Duplicate Tab", which would let two tabs share the
+# same client_id and collide in the server's `active_connections` dict (the
+# second connect overwrites the first; broadcasts then reach only one tab).
+# A fresh UUID per page load also sidesteps the `Thing`-proxy round-trip that
+# made the storage-backed version return a non-str on subsequent calls.
+_CLIENT_ID: str | None = None
+
+
+def get_client_id() -> str:
+    global _CLIENT_ID
+    if _CLIENT_ID is None:
+        _CLIENT_ID = str(uuid.uuid4())
+    return _CLIENT_ID
 
 
 def get_socket_url():

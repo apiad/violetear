@@ -159,14 +159,9 @@ async def on_socket_connect():
     # WS is now live — ask the server to push our initial state. The server
     # responds via receive_history.invoke(client_id=...) so only this client
     # gets it (proves the targeted-invoke wire path).
-    #
-    # `str(get_client_id())` because on second call `get_client_id()` returns
-    # a `Thing` proxy (read through session storage) rather than a bare str,
-    # and `_call_realtime` json.dumps the kwargs — Thing isn't serializable
-    # (see issues/7.8). str() coerces via Thing.__repr__ → the wrapped value.
     from violetear.client import get_client_id
 
-    await request_history(client_id=str(get_client_id()))
+    await request_history(client_id=get_client_id())
 
 
 @app.client.on("ready")
@@ -174,7 +169,7 @@ async def on_ready():
     # Surface the default name in the rename field so the user can edit it.
     from violetear.client import get_client_id
 
-    my_id = str(get_client_id())
+    my_id = get_client_id()
     name_input = DOM.find("name-input")
     name_input.value = f"anon-{my_id[:6]}"
 
@@ -187,7 +182,7 @@ async def on_send_click(event: Event):
     text = str(text_el.value or "")
     if not text.strip():
         return
-    await post_message(client_id=str(get_client_id()), text=text)
+    await post_message(client_id=get_client_id(), text=text)
     text_el.value = ""
 
 
@@ -199,7 +194,7 @@ async def on_rename_click(event: Event):
     new_name = str(name_el.value or "")
     if not new_name.strip():
         return
-    await set_name(client_id=str(get_client_id()), new_name=new_name)
+    await set_name(client_id=get_client_id(), new_name=new_name)
 
 
 # ---------------------------------------------------------------------------
