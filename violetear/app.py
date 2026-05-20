@@ -5,15 +5,85 @@ import os
 import inspect
 import hashlib
 import json
+import threading
 from pathlib import Path
 from textwrap import dedent
 from typing import Any, Callable, Dict, List, Set, Union, cast
+from urllib.request import urlretrieve
 import uuid
 
 from .stylesheet import StyleSheet
 from .markup import Document
 from .pwa import Manifest, ServiceWorker
 from .state import ReactiveProxy, local
+
+
+# --- Pyodide local hosting ---
+# We serve Pyodide assets from the same origin as the app instead of a CDN, so:
+# (a) the dev iteration loop isn't gated on a ~10MB CDN round-trip every page
+#     load (browser cache helps but isn't always honored mid-iteration);
+# (b) Service Workers can pre-cache Pyodide for fully offline PWA support;
+# (c) air-gapped deployments work after a single download per machine.
+
+PYODIDE_VERSION = "0.29.0"
+PYODIDE_FILES = (
+    "pyodide.js",
+    "pyodide.asm.js",
+    "pyodide.asm.wasm",
+    "python_stdlib.zip",
+    "pyodide-lock.json",
+)
+PYODIDE_CDN_BASE = f"https://cdn.jsdelivr.net/pyodide/v{PYODIDE_VERSION}/full/"
+
+
+def _pyodide_cache_dir() -> Path:
+    """Resolve the local Pyodide cache directory.
+
+    Honors ``VIOLETEAR_PYODIDE_CACHE`` env override; otherwise defaults to
+    ``~/.cache/violetear/pyodide-<version>/``. Version is part of the path so
+    bumping ``PYODIDE_VERSION`` produces a clean new cache (no stale files).
+    """
+    override = os.environ.get("VIOLETEAR_PYODIDE_CACHE")
+    if override:
+        return Path(override)
+    return Path.home() / ".cache" / "violetear" / f"pyodide-{PYODIDE_VERSION}"
+
+
+_pyodide_download_lock = threading.Lock()
+
+
+def _ensure_pyodide_cached() -> Path:
+    """Download missing Pyodide assets to the local cache. Returns the cache path.
+
+    Idempotent: existing files are not re-downloaded. Thread-safe via a module
+    lock so concurrent first-requests coalesce. Uses ``.partial`` rename for
+    atomic completion — a crashed download leaves no half-baked file behind.
+    """
+    cache = _pyodide_cache_dir()
+    cache.mkdir(parents=True, exist_ok=True)
+
+    missing = [f for f in PYODIDE_FILES if not (cache / f).exists()]
+    if not missing:
+        return cache
+
+    with _pyodide_download_lock:
+        # Re-check inside the lock — another thread may have raced ahead.
+        missing = [f for f in PYODIDE_FILES if not (cache / f).exists()]
+        if not missing:
+            return cache
+
+        print(
+            f"[violetear] Downloading Pyodide v{PYODIDE_VERSION} to {cache} "
+            f"(~14MB, one-time per machine)…"
+        )
+        for fname in missing:
+            print(f"[violetear]   {fname}")
+            tmp = cache / f"{fname}.partial"
+            urlretrieve(PYODIDE_CDN_BASE + fname, tmp)
+            tmp.rename(cache / fname)
+        print("[violetear] Pyodide cache ready.")
+
+    return cache
 
 
 # --- Optional Server Dependencies ---
@@ -319,6 +389,22 @@ class App:
         @self.api.get("/favicon.ico", include_in_schema=False)
         async def get_favicon():
             return FileResponse(self.favicon)
+
+        # Pyodide assets served from origin. Cache is populated lazily on the
+        # first request — no work happens at App() construction time.
+        @self.api.get("/_violetear/pyodide/{filename}")
+        async def get_pyodide_asset(filename: str):
+            if filename not in PYODIDE_FILES:
+                return Response(status_code=404)
+            try:
+                cache = _ensure_pyodide_cached()
+            except Exception as e:
+                return Response(
+                    status_code=503,
+                    content=f"Pyodide download failed: {e}",
+                    media_type="text/plain",
+                )
+            return FileResponse(cache / filename)
 
         # Registry of served styles to prevent duplicate route registration
         self.served_styles: Dict[str, StyleSheet] = {}
@@ -714,8 +800,10 @@ class App:
             )
             doc.script(content=cloak_script)
 
-        # 2. Load Pyodide (from CDN)
-        doc.script(src="https://cdn.jsdelivr.net/pyodide/v0.29.0/full/pyodide.js")
+        # 2. Load Pyodide from the local origin route. loadPyodide() defaults
+        # its indexURL to the directory where pyodide.js was loaded from, so
+        # all subsequent fetches (wasm, stdlib, lock file) hit our route too.
+        doc.script(src="/_violetear/pyodide/pyodide.js")
 
         # 3. Bootstrap Script
         # We update this to remove the cloak once hydration is complete.
@@ -785,6 +873,13 @@ class App:
             self._version_url("/_violetear/bundle.py"),
             self._version_url("/favicon.ico"),
         )
+
+        # Pre-cache Pyodide assets so the PWA loads fully offline after first
+        # visit. These URLs are stable across versions (not version-bumped) so
+        # we don't apply self._version_url to them — the Pyodide files
+        # themselves are pinned by PYODIDE_VERSION on the server side.
+        for fname in PYODIDE_FILES:
+            sw.add_assets(f"/_violetear/pyodide/{fname}")
 
         self.pwa_registry[scope_hash] = (manifest, sw)
 

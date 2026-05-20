@@ -227,6 +227,81 @@ def test_client_on_disconnect_handler_registered_in_bundle():
     compile(bundle, "<bundle>", "exec")
 
 
+def test_pyodide_route_serves_from_local_cache(tmp_path, monkeypatch):
+    """Pyodide is served from `/_violetear/pyodide/<file>` via a local disk cache.
+
+    We seed the cache with stub files via the VIOLETEAR_PYODIDE_CACHE env override
+    so the test runs without downloading ~14MB from the CDN.
+    """
+    monkeypatch.setenv("VIOLETEAR_PYODIDE_CACHE", str(tmp_path))
+    # Seed all expected files so the route succeeds.
+    from violetear.app import PYODIDE_FILES
+
+    for fname in PYODIDE_FILES:
+        (tmp_path / fname).write_text(f"// stub for {fname}\n")
+
+    app = App(title="Pyodide", version="pyodide1")
+
+    @app.view("/")
+    def home():
+        return Document(title="x")
+
+    client = TestClient(app.api)
+
+    # Each declared file is served and matches what we wrote on disk.
+    for fname in PYODIDE_FILES:
+        r = client.get(f"/_violetear/pyodide/{fname}")
+        assert r.status_code == 200, fname
+        assert f"stub for {fname}" in r.text
+
+    # Unknown filenames are 404 — the route is a whitelist, not a directory walk.
+    r = client.get("/_violetear/pyodide/etc/passwd")
+    assert r.status_code == 404
+    r = client.get("/_violetear/pyodide/random.js")
+    assert r.status_code == 404
+
+
+def test_injected_client_script_points_at_local_pyodide_route():
+    """When the app has client code, the injected <script src=...> uses
+    `/_violetear/pyodide/pyodide.js` (origin), not the CDN URL."""
+    app = App(title="Local Pyodide", version="pyodide2")
+
+    @app.client.callback
+    async def noop(event):
+        pass
+
+    @app.view("/")
+    def home():
+        return Document(title="x")
+
+    client = TestClient(app.api)
+    html = client.get("/").text
+    assert "/_violetear/pyodide/pyodide.js" in html
+    assert "cdn.jsdelivr.net" not in html
+
+
+def test_pwa_service_worker_precaches_pyodide_assets(tmp_path, monkeypatch):
+    """PWA-enabled apps add Pyodide files to the SW asset list so the app
+    loads fully offline after first visit."""
+    monkeypatch.setenv("VIOLETEAR_PYODIDE_CACHE", str(tmp_path))
+
+    app = App(title="PWA Offline", version="pwaoff")
+
+    @app.view("/", pwa=True)
+    def home():
+        return Document(title="x")
+
+    import hashlib
+    from violetear.app import PYODIDE_FILES
+
+    h = hashlib.md5(b"/").hexdigest()[:8]
+    client = TestClient(app.api)
+    sw = client.get(f"/_violetear/pwa/{h}/sw.js").text
+
+    for fname in PYODIDE_FILES:
+        assert f"/_violetear/pyodide/{fname}" in sw, fname
+
+
 def test_reactive_class_binding_via_class_name_alias():
     """`class_name=` (React-style) is honored as an alias for `classes=`.
 
