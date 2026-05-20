@@ -114,3 +114,37 @@ def test_03_interactive_reactive_update_propagates(example_server, page):
     assert errors == [], "Browser errors during reactive update:\n  " + "\n  ".join(
         errors
     )
+
+
+@pytest.mark.e2e
+def test_03_interactive_precise_mode_rpc_roundtrip(example_server, page):
+    """Toggling to precise mode + typing routes the conversion through the
+    server-side RPC stub (`_call_rpc` in the bundle). Catches regressions in
+    the RPC-stub plumbing — different code path from the client-only proxy
+    notify exercised by the reactive-update test above."""
+    base = example_server("03_interactive.py")
+    errors = _collect_browser_errors(page)
+
+    page.goto(base + "/")
+    page.wait_for_function(
+        "() => document.getElementById('violetear-cloak') === null",
+        timeout=HYDRATION_TIMEOUT_MS,
+    )
+
+    # Toggle precise mode via the radio. The on_mode_change callback calls
+    # recompute_from_meters which calls precise_convert (the RPC stub).
+    page.check('input[type="radio"][value="precise"]')
+
+    # Wait for feet to reflect the precise constant (3.28083989501 vs 3.281
+    # in quick mode). After toggling at meters=1.0, feet should be ~3.28084.
+    page.wait_for_function(
+        "() => {"
+        "  const v = parseFloat(document.querySelector('input[data-bind-value=\"UiState.feet\"]').value);"
+        "  return v > 3.2808 && v < 3.2809;"
+        "}",
+        timeout=5_000,
+    )
+
+    assert errors == [], "Browser errors during precise-mode RPC:\n  " + "\n  ".join(
+        errors
+    )
