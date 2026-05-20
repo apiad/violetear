@@ -43,6 +43,18 @@ Running log of small framework limitations and ergonomic friction discovered whi
 
 **Impact.** Trips up new users; forces a context-manager-or-`HTML.*` pattern that's slightly more verbose than necessary.
 
+## 7.5 — Bundle generator's `inspect.getsource` breaks for dynamically-loaded modules
+
+**Tier(s):** 03 (smoke-test infrastructure)
+
+**Symptom.** When an example module is loaded via `importlib.util.spec_from_file_location` *without* being inserted into `sys.modules` first, the bundle endpoint (`/_violetear/bundle.py`) raises `TypeError: <class 'mod.UiState'> is a built-in class` from `inspect.getsource(cls)` in `App._generate_bundle`. Tier 2 (`02_ssr`) didn't surface this because it has no `@app.local` state classes. Tier 3 hits it as soon as the test fetches the bundle.
+
+**Workaround.** In the smoke-test loader, register the module in `sys.modules` before `spec.loader.exec_module(module)`. (Already applied in `tests/test_examples_canonical.py::_load`.)
+
+**Where to fix in the framework.** At `@app.local` / `client.register_state` time, snapshot `inspect.getsource(cls)` and cache the source string on the registered class. At bundle-emit time, prefer the cached source over re-calling `inspect.getsource`. Same pattern for `client.code_functions`. Alternative: have `register_state` accept an explicit `source=` override for callers who know they're in a dynamic-load context.
+
+**Impact.** Mostly bites test infrastructure and any future "import an example dynamically" tooling. End-user apps with module-level definitions are unaffected.
+
 ## 7.4 — `Element.attrs(**kwargs)` doesn't strip trailing underscores
 
 **Tier(s):** 02

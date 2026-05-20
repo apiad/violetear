@@ -8,18 +8,29 @@ the framework changes — not to validate the examples' behavior in depth.
 See `issues/6-canonical-examples-design.md` for the design.
 """
 
+import ast
 import importlib.util
+import sys
 from pathlib import Path
+
+# Top-level `await` is legal in the violetear bundle because Pyodide runs it via
+# `pyodide.runPythonAsync(...)`. Standard `compile()` needs this flag to accept it.
+COMPILE_ASYNC = ast.PyCF_ALLOW_TOP_LEVEL_AWAIT
 
 EXAMPLES_DIR = Path(__file__).resolve().parent.parent / "examples"
 
 
 def _load(filename: str):
-    """Import an example module by filename without it polluting sys.modules."""
-    spec = importlib.util.spec_from_file_location(
-        filename.removesuffix(".py"), EXAMPLES_DIR / filename
-    )
+    """Import an example module by filename and register it in sys.modules.
+
+    Registration is REQUIRED because violetear's bundle generator calls
+    `inspect.getsource(cls)` on `@app.local` state classes; without a sys.modules
+    entry, that raises `TypeError: <class is a built-in class>` (see gap 7.5).
+    """
+    name = filename.removesuffix(".py")
+    spec = importlib.util.spec_from_file_location(name, EXAMPLES_DIR / filename)
     module = importlib.util.module_from_spec(spec)
+    sys.modules[name] = module
     spec.loader.exec_module(module)
     return module
 
@@ -98,3 +109,46 @@ def test_02_ssr_guestbook_round_trips_an_entry():
     # Pydantic-ish enforcement: missing field is rejected by FastAPI Form(...)
     r = client.post("/entries", data={"name": "Alex"})
     assert r.status_code == 422
+
+
+# -- 03_interactive ------------------------------------------------------------
+
+
+def test_03_interactive_ssr_bindings_and_rpc_and_bundle():
+    """Tier 3: SSR emits data-bind-value for each input; RPC returns precise
+    conversion; bundle compiles (the canary for the inspect.getsource issue)."""
+    from fastapi.testclient import TestClient
+
+    mod = _load("03_interactive.py")
+    client = TestClient(mod.app.api)
+
+    # SSR markup — reactive bindings on each input
+    r = client.get("/")
+    assert r.status_code == 200
+    html = r.text
+    assert 'data-bind-value="UiState.meters"' in html
+    assert 'data-bind-value="UiState.feet"' in html
+    assert 'data-bind-value="UiState.inches"' in html
+    # Mode footer is bound via .text()
+    assert 'data-bind-text="UiState.mode"' in html
+    # Event-listener attrs from .on("input", callback)
+    assert 'data-on-input="on_meters_change"' in html
+    assert 'data-on-change="on_mode_change"' in html
+
+    # Served stylesheet
+    r = client.get("/style.css")
+    assert r.status_code == 200
+    assert ".field-input" in r.text
+
+    # RPC endpoint — happy path returns precise conversion
+    r = client.post("/_violetear/rpc/precise_convert", json={"meters": 2.0})
+    assert r.status_code == 200
+    body = r.json()
+    assert abs(body["feet"] - 2.0 * 3.28083989501) < 1e-9
+    assert abs(body["inches"] - 2.0 * 39.3700787402) < 1e-9
+
+    # Bundle compiles — proves the @app.local state class and all client
+    # functions got transpiled without inspect.getsource blowing up.
+    r = client.get("/_violetear/bundle.py")
+    assert r.status_code == 200
+    compile(r.text, "<bundle-03>", "exec", flags=COMPILE_ASYNC)
