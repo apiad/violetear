@@ -136,22 +136,9 @@ def test_bundle_endpoint_returns_compilable_python():
     compile(r.text, "<violetear-bundle>", "exec")
 
 
-@pytest.mark.xfail(
-    reason=(
-        "Bundle generator (_generate_bundle in app.py:632-634) filters decorator lines "
-        "with `c.startswith('@')` instead of `c.strip().startswith('@')`. When a client "
-        "function is defined nested inside another function, its source comes back "
-        "indented; the decorator line survives the filter and the bundle becomes invalid "
-        "Python. Also affects state classes (similar pattern at line 617 uses .strip() "
-        "for the decorator but still leaves class body indentation intact). Pinned as a "
-        "known limitation: real-world usage defines @app.client.* and @app.local at "
-        "module level, where this doesn't bite."
-    ),
-    strict=True,
-)
-def test_bundle_rejects_nested_defs():
-    """Pin the known limitation: the bundle generator only supports module-level
-    state classes and client functions; nested definitions produce invalid bundles."""
+def test_bundle_supports_nested_defs():
+    """Bundle generator dedents source so nested @app.local / @app.client defs
+    (e.g. inside factories or tests) produce valid Python."""
     app = App(title="Nested", version="t6")
 
     @app.local
@@ -169,22 +156,12 @@ def test_bundle_rejects_nested_defs():
 
     client = TestClient(app.api)
     r = client.get("/_violetear/bundle.py")
+    assert r.status_code == 200
     compile(r.text, "<violetear-bundle>", "exec")
 
 
-@pytest.mark.xfail(
-    reason=(
-        "examples/reactivity.py:73 uses class_name= on b.div(...). Element treats "
-        "that as a raw attr (rendered as class_name=\"...\" + data-bind-class_name=...) "
-        "instead of class=/data-bind-class. Reactive class bindings aren't supported "
-        "by markup.py: self._classes lives outside self._attrs, so the proxy-check at "
-        "render time never fires for the class= attribute. Pinned as a known gap "
-        "rather than silently fixed."
-    ),
-    strict=True,
-)
-def test_reactive_class_binding_emits_data_bind_class():
-    """Pin the known gap: there is no first-class way to reactively bind the class= attribute."""
+def test_reactive_class_binding_via_classes_kwarg():
+    """Passing a state proxy to classes= emits class= (static) + data-bind-class= (binding)."""
     app = App(title="Class Binding", version="t5")
 
     @app.local
@@ -196,7 +173,7 @@ def test_reactive_class_binding_emits_data_bind_class():
     def home():
         doc = Document(title="x")
         with doc.body as b:
-            b.div(class_name=UiState.theme, id="app-container")
+            b.div(classes=UiState.theme, id="app-container")
         return doc
 
     client = TestClient(app.api)
@@ -204,3 +181,31 @@ def test_reactive_class_binding_emits_data_bind_class():
 
     assert 'class="light"' in html
     assert 'data-bind-class="UiState.theme"' in html
+
+
+def test_reactive_class_binding_via_class_name_alias():
+    """`class_name=` (React-style) is honored as an alias for `classes=`.
+
+    Pythonistas reach for class_name because `class` is a reserved keyword;
+    we accept it and route through the same reactive-binding path."""
+    app = App(title="Class Name Alias", version="t7")
+
+    @app.local
+    @dataclass
+    class UiState:
+        theme: str = "dark"
+
+    @app.view("/")
+    def home():
+        doc = Document(title="x")
+        with doc.body as b:
+            b.div(class_name=UiState.theme, id="x")
+        return doc
+
+    client = TestClient(app.api)
+    html = client.get("/").text
+
+    assert 'class="dark"' in html
+    assert 'data-bind-class="UiState.theme"' in html
+    # The alias should be consumed, not leaked as a literal HTML attribute.
+    assert "class_name=" not in html

@@ -605,9 +605,11 @@ class App:
             runtime_code = f.read()
 
         # 6. Generate State Classes (with dataclass re-application)
+        # dedent() lets us pull definitions from nested scopes (factories, tests)
+        # — without it, indentation from the source file leaks into the bundle.
         state_code = []
         for name, cls in self.client.state_classes.items():
-            source = inspect.getsource(cls)
+            source = dedent(inspect.getsource(cls))
             lines = source.split("\n")
 
             # Check for dataclass
@@ -630,8 +632,9 @@ class App:
         # 7. Extract User Functions
         user_code = []
         for name, func in self.client.code_functions.items():
-            code = inspect.getsource(func).split("\n")
-            code = [c for c in code if not c.startswith("@")]
+            source = dedent(inspect.getsource(func))
+            code = source.split("\n")
+            code = [c for c in code if not c.strip().startswith("@")]
             user_code.append("\n".join(code))
 
         # --- Safety Checks & Server Stubs ---

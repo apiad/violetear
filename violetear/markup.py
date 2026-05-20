@@ -76,7 +76,19 @@ class Element(Markup):
         self._id = id
         self._text = text
 
-        if isinstance(classes, str):
+        # `class` is a Python keyword, so accept `class_name=` (React-style) as
+        # an alias for the `classes=` parameter when the caller didn't pass one.
+        if classes is None and "class_name" in attrs:
+            classes = attrs.pop("class_name")
+
+        # Reactive class binding: if `classes` is a state proxy, emit both the
+        # static value (split into the initial class list) and a `data-bind-class`
+        # attribute at render time. _class_binding holds the state path.
+        self._class_binding: str | None = None
+        if hasattr(classes, "_path") and hasattr(classes, "current_value"):
+            self._class_binding = classes._path
+            classes = str(classes.current_value).split()
+        elif isinstance(classes, str):
             classes = classes.split()
 
         self._classes = list(classes or [])
@@ -107,10 +119,16 @@ class Element(Markup):
         return self
 
     def classes(self, classes: Union[str, List[str]]) -> Self:
-        if isinstance(classes, str):
+        # Reactive binding: a state proxy passed here behaves like the ctor —
+        # captures the binding path and renders the current value as the
+        # initial class string.
+        if hasattr(classes, "_path") and hasattr(classes, "current_value"):
+            self._class_binding = classes._path
+            classes = str(classes.current_value).split()
+        elif isinstance(classes, str):
             classes = classes.split()
 
-        self._classes = classes
+        self._classes = list(classes)
         return self
 
     def style(self, style: Style) -> Self:
@@ -182,6 +200,9 @@ class Element(Markup):
         if self._classes:
             classes = " ".join(self._classes)
             parts.append(f'class="{classes}"')
+
+        if self._class_binding:
+            parts.append(f'data-bind-class="{self._class_binding}"')
 
         if self._style:
             parts.append(self._style.inline())
