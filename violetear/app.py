@@ -663,6 +663,10 @@ class App:
             exec({repr(dom_source)}, m_dom.__dict__)
 
             import violetear.dom
+            # Re-export common DOM names into the bundle's module scope so user
+            # code's `from violetear.dom import DOM` (or just bare `DOM`) resolves
+            # without each function needing its own lazy import.
+            from violetear.dom import DOM, DOMElement, Event
             """
         )
 
@@ -682,6 +686,10 @@ class App:
             exec({repr(storage_source)}, m_storage.__dict__)
 
             import violetear.storage
+            # Re-export the singleton storage handles into the bundle's module
+            # scope so user code that wrote `from violetear.storage import store`
+            # at module level (the natural Pythonic shape) doesn't NameError.
+            from violetear.storage import store, session
             """
         )
 

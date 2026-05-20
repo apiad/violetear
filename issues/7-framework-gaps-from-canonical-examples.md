@@ -43,6 +43,18 @@ Running log of small framework limitations and ergonomic friction discovered whi
 
 **Impact.** Trips up new users; forces a context-manager-or-`HTML.*` pattern that's slightly more verbose than necessary.
 
+## 7.6 — Bundle doesn't re-export common violetear globals into module scope
+
+**Tier(s):** 03 (caught in browser, not by tests)
+
+**Symptom.** User code writes the idiomatic `from violetear.storage import store` at module level and then uses `store` inside a `@app.client.on("ready")` handler. The bundle generator transpiles the handler via `inspect.getsource(func)`, which preserves the function body but *not* the module-level imports around it. At Pyodide exec time, `store` is undefined → `NameError: name 'store' is not defined`. The bundle compiles cleanly (no syntax error), and the existing smoke tests pass — the failure only manifests when Pyodide actually executes the bundle in a browser. **No automated test would have caught this.**
+
+**Workaround applied.** Added `from violetear.storage import store, session` to the storage injection block, and `from violetear.dom import DOM, DOMElement, Event` to the dom injection block, so those names are available at the bundle's module scope without each user function needing a lazy import.
+
+**Where else this could bite.** Any module-level import the user writes that isn't `dataclasses`, `datetime`, `json`, `violetear.dom.*`, or `violetear.storage.*` will silently fail at runtime. The bundle generator should ideally scan the user's source for module-level imports and replay them at the bundle's top — that's the structurally correct fix.
+
+**Larger lesson.** Unit-level bundle-compile checks are insufficient. We need an end-to-end "actually load this in a real Pyodide" test to catch class-of-bug like this. See planned e2e Playwright slice.
+
 ## 7.5 — Bundle generator's `inspect.getsource` breaks for dynamically-loaded modules
 
 **Tier(s):** 03 (smoke-test infrastructure)
