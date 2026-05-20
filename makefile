@@ -20,13 +20,20 @@ format-check:
 type-check:
 	mypy
 
-.PHONY: test-unit test-all
+.PHONY: test-unit test-all e2e
 
 test-unit: format-check
 	uv run pytest tests --cov=violetear
 
 test-all: format-check
 	uv run pytest --cov=violetear
+
+# End-to-end browser tests via Playwright. Slow (~5s/test for Pyodide load),
+# so kept out of the default `make` gate. Run when you change anything that
+# affects the bundle, hydration, reactive bindings, or Pyodide hosting.
+e2e:
+	uv run playwright install chromium
+	uv run pytest -m e2e -v
 
 .PHONY: docker-build
 docker-build:

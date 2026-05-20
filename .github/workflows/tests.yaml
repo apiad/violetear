@@ -30,3 +30,40 @@ jobs:
 
       - name: Run tests with coverage
         run: uv run pytest --cov=violetear --cov-report=xml --cov-report=term
+
+  e2e:
+    runs-on: ubuntu-latest
+    needs: test
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install uv
+        run: curl -LsSf https://astral.sh/uv/install.sh | sh
+
+      - name: Install dependencies
+        run: uv sync --all-extras --all-groups --no-editable
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('uv.lock') }}
+
+      - name: Cache violetear Pyodide assets
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/violetear
+          key: violetear-pyodide-0.29.0
+
+      - name: Install Playwright Chromium
+        run: uv run playwright install --with-deps chromium
+
+      - name: Run e2e tests
+        run: uv run pytest -m e2e -v

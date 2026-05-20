@@ -30,7 +30,15 @@ dev = [
     "ruff>=0.13.0",
     "pytest>=9.0.2",
     "pytest-cov>=7.0.0",
+    "pytest-playwright>=0.5",
 ]
 
 [tool.setuptools.package-data]
 violetear = ["*.png"]
+
+[tool.pytest.ini_options]
+markers = [
+    "e2e: end-to-end browser tests via Playwright (slow; run separately from the fast unit gate)",
+]
+# Default pytest run excludes e2e — invoke `pytest -m e2e` or `make e2e` to run them.
+addopts = "-m 'not e2e'"
