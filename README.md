@@ -105,13 +105,13 @@ async def init_counter():
     Runs automatically when the page loads (Client-Side).
     Restores the counter from Local Storage so F5 doesn't reset it.
     """
-    from violetear.dom import Document
+    from violetear.dom import DOM
     from violetear.storage import store
 
     # We can access storage like an object!
     saved_count = store.count
     if saved_count is not None:
-        Document.find("display").text = str(saved_count)
+        DOM.find("display").text = str(saved_count)
         print(f"Restored count: {saved_count}")
 ```
 
@@ -125,11 +125,11 @@ async def handle_change(event: Event):
     """
     Runs in the browser on click.
     """
-    from violetear.dom import Document
+    from violetear.dom import DOM
     from violetear.storage import store
 
     # A. Get current state from DOM
-    display = Document.find("display")
+    display = DOM.find("display")
     # We can read/write text content directly
     current_value = int(display.text)
 
@@ -221,7 +221,7 @@ Violetear allows you to turn any route into an installable PWA. This enables you
 
 ### How to Enable PWA
 
-Simply pass `pwa=True` (or a `Manifest` object) to the `@app.route` decorator.
+Simply pass `pwa=True` (or a `Manifest` object) to the `@app.view` decorator.
 
 **Important:** You must define an app `version`. If you don't, Violetear generates a random one on every restart, which will force users to re-download the app every time you deploy.
 
@@ -270,10 +270,10 @@ Create a function decorated with `@app.client.realtime`. This code will be compi
 # This function runs in the User's Browser
 @app.client.realtime
 async def update_alert(message: str, color: str):
-    from violetear.dom import Document
+    from violetear.dom import DOM
 
     # Update the DOM immediately
-    el = Document.find("status-message")
+    el = DOM.find("status-message")
     el.text = message
     el.style(color=color)
 ```
@@ -283,20 +283,22 @@ async def update_alert(message: str, color: str):
 Now the server code can call `update_alert.invoke(...)` for any specific client.
 You can get the appropriate client ID via `@app.server.on("connect")` handlers.
 
-You can also call it for all connected clients using `.broadcast()`. For example, if the server shutdowns and restarts later on, you can inform your clients like this:
+You can also call it for all connected clients using `.broadcast()`. For example, to greet every client as it joins (the `connect` event fires per-client *after* startup, when there's a live socket to deliver to):
 
 ```python
-import asyncio
-
-# Register the background task using standard FastAPI lifespan
-@app.server.on("startup")
-async def start_monitor():
-  # A background task running on the server
-  await update_alert.broadcast(
-      message="Server is alive!",
-      color="green"
-  )
+# Fires once per client, right after their websocket comes up
+@app.server.on("connect")
+async def greet(client_id: str):
+    await update_alert.invoke(
+        client_id,
+        message="Welcome!",
+        color="green",
+    )
 ```
+
+> **Note:** Don't broadcast from `@app.server.on("startup")`. At startup the
+> server has zero active websocket connections — clients only reconnect
+> after startup completes — so any broadcast there silently no-ops.
 
 ### 3. Handle Connections
 
@@ -326,7 +328,7 @@ The long-term vision for Violetear is to become a Python-native, full-stack, pro
   * [ ] **🧭 SPA Engine**: An abstraction (`violetear.spa`) for building Single Page Applications.
   * [ ] **🔀 Client-Side Routing**: Define client-side routes that render specific components into a shell without reloading the page.
   * [ ] **📃 Partial Views**: Define server views that render only partial documents, which can be injected into the client-side DOM dynamically.
-  * [ ] **🗃️ `@app.local`**: Reactive state that lives in the browser (per user). Changes update the DOM automatically.
+  * [x] **🗃️ `@app.local`**: Reactive state that lives in the browser (per user). Changes update the DOM automatically.
   * [ ] **🌐 `@app.shared`**: Real-time state that lives on the server (multiplayer). Changes are synced to all connected clients via **WebSockets**.
 
 ## 🤝 Contribution
@@ -334,8 +336,8 @@ The long-term vision for Violetear is to become a Python-native, full-stack, pro
 `violetear` is open-source and we love contributions!
 
 1.  Fork the repo.
-2.  Install dependencies with `uv sync`.
-3.  Run tests with `make test`.
+2.  Install dependencies with `uv sync --extra server`.
+3.  Run tests with `make` (or `make test-unit`).
 4.  Submit a PR!
 
 ## 📄 License

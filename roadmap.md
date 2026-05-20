@@ -70,9 +70,9 @@ Transform `violetear` into a hybrid, full-stack Python web framework. It will su
 ## Phase 4: PWA Integration
 *Objective: Turn apps into installable software with offline capabilities.*
 
-- [ ] **Manifest Generator**: Create a class to generate `manifest.json` from `App` metadata.
-- [ ] **Route Configuration**: Add `pwa=True` parameter to `@app.route`.
+- [x] **Manifest Generator**: Create a class to generate `manifest.json` from `App` metadata.
+- [x] **Route Configuration**: Add `pwa=True` parameter to `@app.view`.
     - Serves the manifest linked to that specific scope.
     - Injects `<meta>` tags for theme color and icons.
-- [ ] **Service Worker**: Implement a default Service Worker generator.
+- [x] **Service Worker**: Implement a default Service Worker generator.
     - Automatically cache the Pyodide runtime and the app's registered CSS/JS assets (from the Asset Registry).
