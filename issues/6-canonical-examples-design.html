@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="en">
+<!-- META kind=spec title="Canonical Examples for violetear" status=draft date=2026-05-20 source="issues/6-canonical-examples-design.md" -->
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Canonical Examples for violetear — Design</title>
+<style>
+  :root {
+    --ivory:#FAF9F5; --slate:#141413; --clay:#D97757; --oat:#E3DACC;
+    --olive:#788C5D; --rust:#B04A3F; --blue:#4A6FA5;
+    --g150:#F0EEE6; --g300:#D1CFC5; --g500:#87867F; --g700:#3D3D3A;
+    --serif:ui-serif,Georgia,'Times New Roman',serif;
+    --sans:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+    --mono:ui-monospace,'SF Mono',Menlo,Monaco,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{background:var(--ivory);color:var(--g700);font-family:var(--sans);
+    font-size:15px;line-height:1.6;padding:40px 24px 80px}
+  .page{max-width:980px;margin:0 auto}
+  header.doc{border:1.5px solid var(--g300);border-radius:12px;
+    padding:24px 28px;background:#fff;margin-bottom:28px}
+  .kicker{font-family:var(--mono);font-size:12px;color:var(--g500);
+    text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px}
+  h1{font-family:var(--serif);font-weight:500;font-size:28px;
+    line-height:1.25;color:var(--slate);margin-bottom:12px}
+  .meta{display:flex;flex-wrap:wrap;gap:14px;align-items:center;
+    font-size:13px;color:var(--g500)}
+  .badge{display:inline-block;font-family:var(--mono);font-size:11px;
+    padding:2px 9px;border-radius:999px;text-transform:uppercase;
+    letter-spacing:.05em}
+  .badge-ok{background:#E7EEDF;color:var(--olive)}
+  .badge-warn{background:#F6E9D8;color:var(--clay)}
+  .badge-bad{background:#F3DEDB;color:var(--rust)}
+  nav.toc{background:var(--g150);border-radius:10px;padding:14px 20px;
+    margin-bottom:30px;font-size:14px}
+  nav.toc a{color:var(--g700);text-decoration:none;margin-right:18px;
+    white-space:nowrap;line-height:2}
+  nav.toc a:hover{color:var(--clay);text-decoration:underline}
+  section{background:#fff;border:1.5px solid var(--g300);border-radius:12px;
+    padding:22px 28px;margin-bottom:20px}
+  h2{font-family:var(--serif);font-weight:500;font-size:21px;
+    color:var(--slate);margin-bottom:14px}
+  h3{font-size:16px;font-weight:600;color:var(--slate);margin:18px 0 10px}
+  h4{font-size:13px;font-weight:600;color:var(--g500);text-transform:uppercase;
+    letter-spacing:.06em;margin:14px 0 6px}
+  p{margin-bottom:12px}
+  ul,ol{margin:0 0 12px 24px}  li{margin-bottom:4px}
+  table{width:100%;border-collapse:collapse;margin:6px 0 14px;font-size:14px}
+  th,td{text-align:left;padding:8px 12px;border-bottom:1px solid var(--g300);
+    vertical-align:top}
+  th{font-family:var(--mono);font-size:12px;text-transform:uppercase;
+    letter-spacing:.04em;color:var(--g500);background:var(--g150)}
+  code{font-family:var(--mono);font-size:13px;background:var(--g150);
+    padding:1px 5px;border-radius:4px}
+  pre{background:var(--slate);color:var(--ivory);font-family:var(--mono);
+    font-size:12.5px;line-height:1.5;padding:14px 16px;border-radius:8px;
+    overflow-x:auto;margin:6px 0 14px}
+  pre code{background:none;padding:0;color:inherit;font-size:12.5px}
+  details{border:1px solid var(--g300);border-radius:8px;padding:10px 16px;
+    margin:6px 0 14px;background:var(--g150)}
+  details summary{cursor:pointer;font-weight:600;color:var(--g700)}
+  details[open] summary{margin-bottom:10px}
+  footer{margin-top:30px;font-size:12px;color:var(--g500);
+    font-family:var(--mono);text-align:center}
+  a{color:var(--blue)}
+
+  /* ---- example panels ---- */
+  .ex {
+    display:grid; grid-template-columns: 280px 1fr;
+    gap:28px; align-items:start;
+    padding:16px 0 8px;
+  }
+  @media (max-width: 760px) {
+    .ex { grid-template-columns: 1fr; }
+  }
+  .ex-tag {
+    font-family:var(--mono); font-size:11px; color:var(--g500);
+    text-transform:uppercase; letter-spacing:.06em; margin-bottom:4px;
+  }
+  .ex h3 { margin-top:0; }
+
+  /* ---- mockup frames ---- */
+  .mockup {
+    border:1.5px solid var(--g300); border-radius:8px;
+    background:#fff; overflow:hidden;
+    box-shadow: 0 2px 6px rgba(0,0,0,.04);
+  }
+  .mockup-bar {
+    background:var(--g150); padding:6px 12px;
+    font-family:var(--mono); font-size:10.5px; color:var(--g500);
+    border-bottom:1px solid var(--g300);
+    display:flex; align-items:center; gap:8px;
+  }
+  .mockup-bar::before {
+    content: "● ● ●";
+    color: var(--g300);
+    font-size: 9px; letter-spacing: 2px;
+  }
+  .mockup-body {
+    padding:14px; font-family:var(--sans); font-size:11px;
+    min-height:170px; color:var(--g700);
+  }
+  /* tier 1 — design tokens */
+  .m1-title { font-family:var(--serif); font-size:14px; margin-bottom:10px; color:var(--slate); }
+  .m1-swatches { display:flex; gap:4px; margin-bottom:14px; }
+  .m1-swatches span { width:26px; height:26px; border-radius:4px; display:block; }
+  .m1-type { display:flex; gap:10px; align-items:baseline; margin-bottom:14px; color:var(--slate); }
+  .m1-type .m1-h1 { font-size:22px; font-family:var(--serif); }
+  .m1-type .m1-h2 { font-size:15px; font-family:var(--serif); }
+  .m1-type .m1-body { font-size:11px; }
+  .m1-spacing { display:flex; gap:6px; align-items:flex-end; }
+  .m1-spacing span { background:var(--clay); height:14px; display:block; border-radius:2px; }
+  /* tier 2 — guestbook */
+  .m2-entry { padding:5px 0; border-bottom:1px solid var(--g150); font-size:11px; }
+  .m2-entry strong { color:var(--clay); }
+  .m2-form { margin-top:12px; display:flex; flex-direction:column; gap:5px; }
+  .m2-input { border:1px solid var(--g300); border-radius:3px; padding:4px 7px; font-size:10px; background:var(--g150); }
+  .m2-btn { background:var(--olive); color:#fff; padding:4px 10px; border-radius:3px; font-size:10px; align-self:flex-start; margin-top:3px; }
+  /* tier 3 — unit converter */
+  .m3-row { display:flex; align-items:center; gap:10px; margin-bottom:8px; }
+  .m3-row label { width:26px; font-family:var(--mono); color:var(--g500); font-size:10px; }
+  .m3-row .m3-input { flex:1; border:1px solid var(--g300); border-radius:3px; padding:4px 7px; font-family:var(--mono); font-size:11px; }
+  .m3-mode { display:flex; gap:14px; margin-top:14px; font-size:10px; font-family:var(--mono); color:var(--g500); }
+  .m3-mode .on { color:var(--olive); }
+  .m3-mode .on::before { content:"⊙ "; }
+  .m3-mode .off::before { content:"○ "; }
+  /* tier 4 — pomodoro */
+  .m4-modes { display:flex; gap:10px; justify-content:center; font-size:10px; font-family:var(--mono); margin-bottom:8px; }
+  .m4-modes .on { color:var(--rust); font-weight:bold; border-bottom:2px solid var(--rust); padding-bottom:1px; }
+  .m4-modes .off { color:var(--g500); }
+  .m4-timer { font-family:var(--mono); font-size:42px; text-align:center; color:var(--slate); letter-spacing:-1px; margin:6px 0; }
+  .m4-buttons { display:flex; justify-content:center; gap:14px; font-size:14px; color:var(--g700); margin:8px 0 10px; }
+  .m4-sessions { text-align:center; font-size:10px; color:var(--g500); font-family:var(--mono); }
+  /* tier 5 — chat */
+  .m5 { display:grid; grid-template-columns: 1fr 80px; gap:8px; padding:8px; min-height:180px; }
+  .m5-chat { background:var(--g150); border-radius:4px; padding:6px; overflow:hidden; display:flex; flex-direction:column; gap:3px; font-size:10px; }
+  .m5-sys { color:var(--g500); font-style:italic; font-size:9px; }
+  .m5-msg strong { color:var(--clay); }
+  .m5-msg.s2 strong { color:var(--blue); }
+  .m5-input-box { margin-top:auto; border-top:1px solid var(--g300); padding-top:4px; font-size:9px; color:var(--g500); }
+  .m5-users { background:#fff; border:1px solid var(--g300); border-radius:4px; padding:6px; font-size:10px; }
+  .m5-user { padding:2px 0; }
+  .m5-user::before { content:"● "; color:var(--olive); font-size:8px; }
+
+  /* ---- flow diagrams ---- */
+  .flow {
+    display:flex; flex-direction:column; gap:10px;
+    margin:6px 0 12px; font-family:var(--mono); font-size:12px;
+  }
+  .flow-row {
+    display:flex; align-items:center; gap:6px; flex-wrap:wrap;
+  }
+  .flow-node {
+    background:#fff; border:1.5px solid var(--g300); border-radius:5px;
+    padding:5px 10px; white-space:nowrap; color:var(--g700);
+    font-family:var(--mono); font-size:11.5px;
+  }
+  .flow-node.client { background:#DCE6F2; border-color:var(--blue); color:var(--blue); }
+  .flow-node.server { background:#F6E9D8; border-color:var(--clay); color:var(--clay); }
+  .flow-node.state  { background:#E7EEDF; border-color:var(--olive); color:var(--olive); }
+  .flow-node.io     { background:var(--g150); border-color:var(--g500); color:var(--g700); }
+  .flow-node.user   { background:#fff; border-style:dashed; color:var(--g500); }
+  .flow-arrow { color:var(--g500); font-size:14px; font-family:var(--sans); }
+  .flow-branch {
+    margin-left:18px; padding-left:14px; border-left:2px dashed var(--g300);
+    display:flex; flex-direction:column; gap:8px;
+  }
+  .flow-branch-label {
+    color:var(--g500); font-size:10.5px; font-style:italic;
+    font-family:var(--mono); margin-bottom:-2px;
+  }
+  .legend {
+    display:flex; gap:14px; flex-wrap:wrap; margin:0 0 14px;
+    font-size:11px; font-family:var(--mono); color:var(--g500);
+    align-items:center;
+  }
+  .legend .chip {
+    display:inline-block; width:10px; height:10px; border-radius:3px;
+    border:1.5px solid; vertical-align:middle; margin-right:4px;
+  }
+  .legend .chip.client { background:#DCE6F2; border-color:var(--blue); }
+  .legend .chip.server { background:#F6E9D8; border-color:var(--clay); }
+  .legend .chip.state  { background:#E7EEDF; border-color:var(--olive); }
+  .legend .chip.io     { background:var(--g150); border-color:var(--g500); }
+  .legend .chip.user   { background:#fff; border-color:var(--g500); border-style:dashed; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header class="doc">
+    <div class="kicker">Design Spec · Companion</div>
+    <h1>Canonical Examples for violetear</h1>
+    <div class="meta">
+      <span class="badge badge-warn">draft</span>
+      <span>2026-05-20</span>
+      <span>Companion to <code>issues/6-canonical-examples-design.md</code></span>
+    </div>
+  </header>
+
+  <nav class="toc">
+    <a href="#goal">Goal</a>
+    <a href="#legend">Legend</a>
+    <a href="#overview">Overview</a>
+    <a href="#ex1">01 Static</a>
+    <a href="#ex2">02 SSR</a>
+    <a href="#ex3">03 Interactive</a>
+    <a href="#ex4">04 PWA</a>
+    <a href="#ex5">05 Realtime</a>
+    <a href="#conventions">Conventions</a>
+    <a href="#testing">Testing</a>
+    <a href="#removal">Disposition</a>
+    <a href="#order">Build order</a>
+  </nav>
+
+  <section id="goal">
+    <h2>Goal</h2>
+    <p>Replace <code>examples/</code> (currently 9 ad-hoc files with overlapping concerns) with a minimal canonical set of <strong>5 progressively-richer, independent showcases</strong> that together stress-test the entire shipped violetear surface, while each remains simple enough to read end to end.</p>
+    <p>Each example is independent — readable in isolation, no shared helper module, no assumption that the previous example has been read. The progression is in <em>capability tier</em>, not in domain or code reuse.</p>
+  </section>
+
+  <section id="legend">
+    <h2>Legend for flow diagrams</h2>
+    <div class="legend">
+      <span><span class="chip user"></span>user action</span>
+      <span><span class="chip client"></span>client-side (Pyodide)</span>
+      <span><span class="chip server"></span>server-side (FastAPI)</span>
+      <span><span class="chip state"></span>state mutation</span>
+      <span><span class="chip io"></span>I/O artifact</span>
+    </div>
+  </section>
+
+  <section id="overview">
+    <h2>Overview</h2>
+    <table>
+      <thead><tr><th style="width:90px">#</th><th>File</th><th>Tier</th><th>Domain</th></tr></thead>
+      <tbody>
+        <tr><td>01</td><td><code>01_static.py</code></td><td>Pure markup + CSS, no server</td><td>Design-tokens reference page</td></tr>
+        <tr><td>02</td><td><code>02_ssr.py</code></td><td>Server-only, no Pyodide bundle</td><td>Guestbook (GET list + POST add)</td></tr>
+        <tr><td>03</td><td><code>03_interactive.py</code></td><td>SSR + client-side Python, single user</td><td>Unit converter (m / ft / in)</td></tr>
+        <tr><td>04</td><td><code>04_pwa.py</code></td><td>Installable + offline</td><td>Pomodoro timer</td></tr>
+        <tr><td>05</td><td><code>05_realtime.py</code></td><td>Multi-user via WebSocket</td><td>Chat room with presence</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ============ EXAMPLE 01 ============ -->
+  <section id="ex1">
+    <h2>01 · Design tokens reference page</h2>
+    <div class="ex">
+      <div>
+        <div class="ex-tag">Mockup</div>
+        <div class="mockup">
+          <div class="mockup-bar">01_static.html</div>
+          <div class="mockup-body">
+            <div class="m1-title">Design Tokens</div>
+            <div class="m1-swatches">
+              <span style="background:#D97757"></span>
+              <span style="background:#788C5D"></span>
+              <span style="background:#4A6FA5"></span>
+              <span style="background:#B04A3F"></span>
+              <span style="background:#E3DACC"></span>
+              <span style="background:#141413"></span>
+            </div>
+            <div class="m1-type">
+              <span class="m1-h1">Aa</span>
+              <span class="m1-h2">Aa</span>
+              <span class="m1-body">Aa</span>
+            </div>
+            <div class="m1-spacing">
+              <span style="width:4px"></span>
+              <span style="width:8px"></span>
+              <span style="width:16px"></span>
+              <span style="width:24px"></span>
+              <span style="width:32px"></span>
+              <span style="width:48px"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <h3>What it stresses</h3>
+        <ul>
+          <li><code>StyleSheet</code> with many <code>.select(...)</code> rules.</li>
+          <li><code>Style</code> fluent builder (<code>.font</code>, <code>.color</code>, <code>.padding</code>, <code>.background</code>, <code>.border</code>, <code>.rounded</code>, <code>.flexbox</code>).</li>
+          <li>A wide slice of <code>Colors.*</code> named registry.</li>
+          <li>Multiple <code>Unit</code> types (<code>px</code>, <code>rem</code>, <code>%</code>, <code>em</code>).</li>
+          <li><code>Document</code> with <code>head</code> styles, body content tree, <code>HTML.div(...).style(...)</code> chaining, <code>ElementSet.spawn</code> for the swatch grid.</li>
+        </ul>
+
+        <h4>Flow</h4>
+        <div class="flow">
+          <div class="flow-row">
+            <span class="flow-node">Document + StyleSheet</span>
+            <span class="flow-arrow">→</span>
+            <span class="flow-node state">.render()</span>
+            <span class="flow-arrow">→</span>
+            <span class="flow-node io">01_static.html + 01_static.css</span>
+          </div>
+        </div>
+
+        <h4>Verification</h4>
+        <p>Test imports the module, invokes its build function, asserts <code>&lt;!DOCTYPE html&gt;</code> in rendered HTML and a known color hex (e.g. <code>#D97757</code>) in rendered CSS.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ EXAMPLE 02 ============ -->
+  <section id="ex2">
+    <h2>02 · Guestbook (SSR + form POST)</h2>
+    <div class="ex">
+      <div>
+        <div class="ex-tag">Mockup</div>
+        <div class="mockup">
+          <div class="mockup-bar">Guestbook · localhost:8000</div>
+          <div class="mockup-body">
+            <div class="m2-entry"><strong>Alex</strong> · 14:02 · Hello, world!</div>
+            <div class="m2-entry"><strong>Sam</strong> · 14:05 · Nice site.</div>
+            <div class="m2-entry"><strong>Iris</strong> · 14:11 · 👋</div>
+            <div class="m2-form">
+              <input class="m2-input" placeholder="your name"/>
+              <input class="m2-input" placeholder="your message"/>
+              <span class="m2-btn">Add entry</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <h3>What it stresses</h3>
+        <ul>
+          <li><code>@app.view</code> for GET routes.</li>
+          <li>Native FastAPI <code>@app.api.post</code> for form-driven mutation — deliberate signal that violetear doesn't yet have a first-class form-POST helper and that's fine for SSR.</li>
+          <li><code>doc.style(href=..., sheet=...)</code> registering an auto-served stylesheet route.</li>
+          <li><code>&lt;form&gt;</code> / <code>&lt;input&gt;</code> / <code>&lt;button&gt;</code> via the markup builder.</li>
+        </ul>
+
+        <h4>Flow</h4>
+        <div class="flow">
+          <div class="flow-row">
+            <span class="flow-node user">browser GET /</span>
+            <span class="flow-arrow">→</span>
+            <span class="flow-node server">@app.view("/")</span>
+            <span class="flow-arrow">→</span>
+            <span class="flow-node state">read entries[]</span>
+            <span class="flow-arrow">→</span>
+            <span class="flow-node">Document.render()</span>
+            <span class="flow-arrow">→</span>
+            <span class="flow-node io">HTML response</span>
+          </div>
+          <div class="flow-row">
+            <span class="flow-node user">browser POST /entries</span>
+            <span class="flow-arrow">→</span>
+            <span class="flow-node server">app.api.post("/entries")</span>
+            <span class="flow-arrow">→</span>
+            <span class="flow-node state">entries.append({name, msg, ts})</span>
+            <span class="flow-arrow">→</span>
+            <span class="flow-node io">303 redirect → /</span>
+          </div>
+        </div>
+
+        <h4>Verification</h4>
+        <p>TestClient: GET <code>/</code> returns 200 with the empty-state markup; POST <code>/entries</code> with form data returns 303; subsequent GET shows the new entry.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ EXAMPLE 03 ============ -->
+  <section id="ex3">
+    <h2>03 · Unit converter (reactive + RPC, single user)</h2>
+    <div class="ex">
+      <div>
+        <div class="ex-tag">Mockup</div>
+        <div class="mockup">
+          <div class="mockup-bar">Unit Converter</div>
+          <div class="mockup-body">
+            <div class="m3-row"><label>m</label><span class="m3-input">1.0</span></div>
+            <div class="m3-row"><label>ft</label><span class="m3-input">3.281</span></div>
+            <div class="m3-row"><label>in</label><span class="m3-input">39.370</span></div>
+            <div class="m3-mode">
+              <span class="on">quick</span>
+              <span class="off">precise</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <h3>What it stresses</h3>
+        <ul>
+          <li><code>@app.local</code> with multiple primitive fields (m, ft, in, mode).</li>
+          <li><code>data-bind-value</code> on the inputs — SSR-rendered, hydrated.</li>
+          <li>Multiple <code>@app.client.callback</code> on different events (one per input).</li>
+          <li><code>@app.client.on("ready")</code> lifecycle.</li>
+          <li><code>@app.server.rpc</code> with float args + dict return.</li>
+          <li><code>violetear.storage.store</code> round-trip.</li>
+          <li><code>violetear.dom.DOM.find</code>.</li>
+        </ul>
+
+        <h4>Flow</h4>
+        <div class="flow">
+          <div class="flow-row">
+            <span class="flow-node user">user types in m field</span>
+            <span class="flow-arrow">→</span>
+            <span class="flow-node client">on_meters_change(event)</span>
+            <span class="flow-arrow">→</span>
+            <span class="flow-node state">UiState.meters = v</span>
+          </div>
+          <div class="flow-row">
+            <span class="flow-arrow">↳</span>
+            <span class="flow-node">ReactiveRegistry.notify("UiState.meters")</span>
+            <span class="flow-arrow">→</span>
+            <span class="flow-node io">other inputs update via data-bind-value</span>
+          </div>
+          <div class="flow-branch">
+            <div class="flow-branch-label">if mode == "precise":</div>
+            <div class="flow-row">
+              <span class="flow-node client">await precise_convert(meters=v)</span>
+              <span class="flow-arrow">→</span>
+              <span class="flow-node server">POST /_violetear/rpc/precise_convert</span>
+              <span class="flow-arrow">→</span>
+              <span class="flow-node io">{ feet, inches }</span>
+            </div>
+            <div class="flow-row">
+              <span class="flow-arrow">↳</span>
+              <span class="flow-node state">UiState.{feet, inches} = ...</span>
+            </div>
+          </div>
+        </div>
+
+        <h4>Verification</h4>
+        <p>Test asserts SSR markup contains <code>data-bind-value="UiState.meters"</code> etc., the bundle compiles, and <code>POST /_violetear/rpc/precise_convert</code> returns the expected dict.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ EXAMPLE 04 ============ -->
+  <section id="ex4">
+    <h2>04 · Pomodoro timer (PWA + offline + storage)</h2>
+    <div class="ex">
+      <div>
+        <div class="ex-tag">Mockup</div>
+        <div class="mockup">
+          <div class="mockup-bar">🍅 Pomodoro</div>
+          <div class="mockup-body">
+            <div class="m4-modes">
+              <span class="on">work</span>
+              <span class="off">break</span>
+              <span class="off">long</span>
+            </div>
+            <div class="m4-timer">24:13</div>
+            <div class="m4-buttons">▶  ⏸  ↻</div>
+            <div class="m4-sessions">sessions today: 3</div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <h3>What it stresses</h3>
+        <ul>
+          <li><code>@app.view</code> with a custom <code>Manifest</code> object.</li>
+          <li>Service Worker asset caching (bundle.py + stylesheet).</li>
+          <li><code>violetear.storage.store</code> written every tick — validates round-trip-on-mutation.</li>
+          <li>A long-running <code>asyncio</code> loop on the client (validates Pyodide concurrency).</li>
+          <li><code>@app.local</code> mutation from a non-callback client function.</li>
+        </ul>
+
+        <h4>Flow — first load &amp; SW install</h4>
+        <div class="flow">
+          <div class="flow-row">
+            <span class="flow-node user">GET /</span>
+            <span class="flow-arrow">→</span>
+            <span class="flow-node server">@app.view(pwa=Manifest)</span>
+            <span class="flow-arrow">→</span>
+            <span class="flow-node io">HTML + &lt;link manifest&gt; + SW.register</span>
+          </div>
+          <div class="flow-row">
+            <span class="flow-arrow">↳</span>
+            <span class="flow-node client">SW.install</span>
+            <span class="flow-arrow">→</span>
+            <span class="flow-node io">cache bundle.py, style.css, favicon</span>
+          </div>
+        </div>
+
+        <h4>Flow — tick loop</h4>
+        <div class="flow">
+          <div class="flow-row">
+            <span class="flow-node client">asyncio loop: while running</span>
+            <span class="flow-arrow">→</span>
+            <span class="flow-node client">await asyncio.sleep(1)</span>
+            <span class="flow-arrow">→</span>
+            <span class="flow-node state">PomodoroState.seconds_left -= 1</span>
+          </div>
+          <div class="flow-row">
+            <span class="flow-arrow">↳</span>
+            <span class="flow-node">ReactiveRegistry.notify</span>
+            <span class="flow-arrow">→</span>
+            <span class="flow-node io">DOM updates (data-bind-text)</span>
+          </div>
+          <div class="flow-row">
+            <span class="flow-arrow">↳</span>
+            <span class="flow-node state">store.pomodoro = snapshot()</span>
+            <span class="flow-arrow">→</span>
+            <span class="flow-node io">localStorage</span>
+          </div>
+        </div>
+
+        <h4>Verification</h4>
+        <p>Test asserts the manifest endpoint serves the expected JSON (name, theme_color, scope = <code>/</code>), the SW endpoint serves a script that lists the bundle URL in its assets, the bundle compiles.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ EXAMPLE 05 ============ -->
+  <section id="ex5">
+    <h2>05 · Chat room with presence (multi-user via WebSocket)</h2>
+    <div class="ex">
+      <div>
+        <div class="ex-tag">Mockup</div>
+        <div class="mockup">
+          <div class="mockup-bar">Chat Room</div>
+          <div class="mockup-body m5">
+            <div class="m5-chat">
+              <div class="m5-sys">— Alex joined —</div>
+              <div class="m5-msg"><strong>Alex:</strong> hi</div>
+              <div class="m5-msg s2"><strong>Sam:</strong> hey</div>
+              <div class="m5-sys">— Iris joined —</div>
+              <div class="m5-msg"><strong>Iris:</strong> 👋</div>
+              <div class="m5-input-box">say something…</div>
+            </div>
+            <div class="m5-users">
+              <div class="m5-user">Alex</div>
+              <div class="m5-user">Sam</div>
+              <div class="m5-user">Iris</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <h3>What it stresses</h3>
+        <ul>
+          <li>Full WS lifecycle — connect, disconnect, messages both directions.</li>
+          <li><code>.broadcast(...)</code> (message fan-out) AND <code>.invoke(client_id, ...)</code> (targeted reverse-RPC for history).</li>
+          <li><code>@app.client.on("connect")</code> — the feature we wired in <code>e32a24b</code>.</li>
+          <li><code>@app.server.realtime</code> AND <code>@app.client.realtime</code> in the same file.</li>
+          <li>Manual server-side shared state — what <code>@app.shared</code> will replace once it ships.</li>
+        </ul>
+
+        <h4>Flow — message broadcast</h4>
+        <div class="flow">
+          <div class="flow-row">
+            <span class="flow-node user">Client A clicks send</span>
+            <span class="flow-arrow">→</span>
+            <span class="flow-node client">post_message realtime ping</span>
+            <span class="flow-arrow">→</span>
+            <span class="flow-node server">@app.server.realtime post_message</span>
+          </div>
+          <div class="flow-row">
+            <span class="flow-arrow">↳</span>
+            <span class="flow-node state">messages.append(msg)</span>
+            <span class="flow-arrow">→</span>
+            <span class="flow-node server">receive_message.broadcast(msg)</span>
+          </div>
+          <div class="flow-branch">
+            <div class="flow-branch-label">fan-out to all connected clients</div>
+            <div class="flow-row">
+              <span class="flow-node client">A · receive_message(msg)</span>
+              <span class="flow-arrow">·</span>
+              <span class="flow-node client">B · receive_message(msg)</span>
+              <span class="flow-arrow">·</span>
+              <span class="flow-node client">C · receive_message(msg)</span>
+            </div>
+            <div class="flow-row">
+              <span class="flow-arrow">↳</span>
+              <span class="flow-node io">each client appends to chat DOM</span>
+            </div>
+          </div>
+        </div>
+
+        <h4>Flow — connect &amp; history sync</h4>
+        <div class="flow">
+          <div class="flow-row">
+            <span class="flow-node user">Client B opens page</span>
+            <span class="flow-arrow">→</span>
+            <span class="flow-node client">WS onopen</span>
+            <span class="flow-arrow">→</span>
+            <span class="flow-node client">@app.client.on("connect")</span>
+          </div>
+          <div class="flow-row">
+            <span class="flow-arrow">↳</span>
+            <span class="flow-node client">request_history realtime ping</span>
+            <span class="flow-arrow">→</span>
+            <span class="flow-node server">@app.server.realtime request_history</span>
+          </div>
+          <div class="flow-row">
+            <span class="flow-arrow">↳</span>
+            <span class="flow-node server">receive_history.invoke(client_id, ...)</span>
+            <span class="flow-arrow">→</span>
+            <span class="flow-node client">B only · history rendered</span>
+          </div>
+          <div class="flow-row">
+            <span class="flow-arrow">↳</span>
+            <span class="flow-node server">@app.server.on("connect") · users[client_id] = name</span>
+            <span class="flow-arrow">→</span>
+            <span class="flow-node server">set_user_list.broadcast(users)</span>
+            <span class="flow-arrow">→</span>
+            <span class="flow-node io">all sidebars refresh</span>
+          </div>
+        </div>
+
+        <h4>Verification</h4>
+        <p>Test connects two <code>TestClient.websocket_connect</code> sessions concurrently; the second client receives the first's join broadcast; sending a message from client A causes client B to receive a <code>receive_message</code> envelope with the right shape.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CONVENTIONS ============ -->
+  <section id="conventions">
+    <h2>File conventions</h2>
+    <ul>
+      <li><strong>Naming.</strong> <code>examples/0N_&lt;slug&gt;.py</code> — numeric prefix preserves tier order in directory listings.</li>
+      <li><strong>Top-of-file docstring</strong> (5–10 lines): what it demonstrates, how to run, URL to open, multi-tab instructions for tier 5.</li>
+      <li><strong>No shared helpers.</strong> Every example is self-contained. If two need the same utility, both inline it.</li>
+      <li><strong>Inline comments kept light.</strong> Code structure does most of the explaining; one-line comments only at non-obvious moments. Deep pedagogy is a later effort.</li>
+      <li><strong>Imports at module top.</strong> Exception: <code>from violetear.dom import DOM</code> inside <code>@app.client.*</code> functions is the established pattern and correct (Pyodide-side imports).</li>
+      <li><strong><code>if __name__ == "__main__":</code></strong> at the bottom. Tier 1 writes files; tiers 2–5 call <code>app.run()</code> (uvicorn).</li>
+    </ul>
+  </section>
+
+  <!-- ============ TESTING ============ -->
+  <section id="testing">
+    <h2>Test strategy</h2>
+    <p>Add <code>tests/test_examples_canonical.py</code> with <strong>one thin smoke test per example</strong>. Goal: catch regressions when the framework changes — not to validate the examples' behavior in depth (that's what the example itself demonstrates by running).</p>
+    <p>Each test:</p>
+    <ul>
+      <li>Imports the example module (top-level execution must succeed — surfaces module-load bugs immediately).</li>
+      <li><strong>Tier 1:</strong> invokes the build function, asserts the output strings contain expected markers.</li>
+      <li><strong>Tiers 2–5:</strong> builds <code>TestClient(example_module.app.api)</code>, exercises one happy-path request, asserts on key markers (right HTML, right manifest, right WS envelope shape).</li>
+    </ul>
+    <p>Total cost: roughly 5 small tests, ~150 lines combined.</p>
+  </section>
+
+  <!-- ============ DISPOSITION ============ -->
+  <section id="removal">
+    <h2>Disposition of existing examples</h2>
+    <p>Delete all 9 in a final commit after the last new example lands:</p>
+    <pre><code>basic_pwa.py    broadcast.py    full_pwa.py
+hello_world.py  quickstart.py   reactivity.py
+rpc_call.py     server_realtime.py  simple_client.py</code></pre>
+    <p>Rationale: a transitional <code>_legacy/</code> directory adds clutter without value — the git history is the archive. The new set replaces the old completely. Bonus: deleting <code>reactivity.py</code> removes any lingering reference to the <code>class_name=</code> pattern that was the source of the bug surfaced in slice 1 and fixed in <code>540a354</code>.</p>
+  </section>
+
+  <!-- ============ BUILD ORDER ============ -->
+  <section id="order">
+    <h2>Build order</h2>
+    <p>Build one example at a time, in numerical order. After each:</p>
+    <ol>
+      <li>The example file lands.</li>
+      <li>The smoke test lands.</li>
+      <li><code>make</code> (= <code>make test-unit</code>) is green locally.</li>
+      <li>Commit: <code>feat(examples): canonical 0N_&lt;slug&gt; — &lt;one-line description&gt;</code>.</li>
+      <li>Push so CI runs on each commit.</li>
+    </ol>
+    <p>After the last example lands, in a final commit:</p>
+    <ul>
+      <li>Remove the 9 legacy files.</li>
+      <li>Update <code>README.md</code>'s quickstart to nudge readers toward the new set.</li>
+      <li>Update <code>AGENTS.md</code> "Common workflows" to point at the canonical examples.</li>
+    </ul>
+  </section>
+
+  <!-- ============ LOCKED + OPEN ============ -->
+  <section id="locked">
+    <h2>Locked decisions</h2>
+    <ol>
+      <li><strong>Count.</strong> 5 examples — no separate <code>@app.shared</code> example until the feature ships.</li>
+      <li><strong>Shape.</strong> Independent showcases, not cumulative.</li>
+      <li><strong>Domains.</strong> Design tokens / guestbook / unit converter / pomodoro / chat (locked above).</li>
+      <li><strong>Disposition.</strong> Wholesale removal of the 9 legacy files; no <code>_legacy/</code> directory.</li>
+      <li><strong>Spec home.</strong> <code>issues/6-...md</code> per repo convention (not the global <code>docs/superpowers/specs/</code> default).</li>
+      <li><strong>Tier 5 initial-state push.</strong> Client realtime ping + server-side <code>.invoke(client_id, ...)</code> — exercises both directions in one flow.</li>
+      <li><strong>Tier 4 reload behavior.</strong> On reload, pause the timer (don't compute elapsed wall-time). Simpler + familiar UX.</li>
+      <li><strong>Test strategy.</strong> Thin smoke test per example, not in-depth behavioral tests.</li>
+    </ol>
+
+    <details>
+      <summary>Open considerations &amp; deferred items</summary>
+      <ul>
+        <li><strong>Tier-1 output location.</strong> Currently writes alongside the script (<code>examples/01_static.html</code>). Alternative: <code>examples/_out/</code>. Lean: alongside, for "open it and see" simplicity.</li>
+        <li><strong>Deep pedagogical docs.</strong> Deferred per Alex 2026-05-20 — once the canonical set lands, we'll write a tour.</li>
+        <li><strong><code>@app.shared</code> example.</strong> When the feature ships, revise example 5 to use it (replacing the manual broadcast pattern) OR add a 6th example. Decision deferred until the feature lands.</li>
+        <li><strong>Component subclass showcase.</strong> Not in the canonical set. The pattern exists in <code>markup.py:Component</code> but no example exercises it. Add later if magpie/superbot stresses it.</li>
+        <li><strong>Static-site-generator mode.</strong> Tier 1 is one file; a "render many pages to disk" scenario could be a 1b variant later if needed.</li>
+      </ul>
+    </details>
+  </section>
+
+  <footer>single self-contained file · no external dependencies · companion to issues/6-canonical-examples-design.md</footer>
+
+</div>
+</body>
+</html>
