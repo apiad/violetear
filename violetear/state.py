@@ -151,14 +151,11 @@ class ReactiveProxy:
 
     def _notify_client(self, path: str, new_value: Any):
         """
-        Lazily imports the client registry to avoid circular imports.
+        Removed in v2.0: ReactiveRegistry is now part of the JS runtime.
+        This method is guarded by IS_BROWSER and never executes in v2 (no Pyodide).
+        Kept as stub to avoid accidental breakage.
         """
-        from violetear.client import ReactiveRegistry
-
-        # We unwrap LeafProxies before sending to the registry if needed,
-        # though the registry usually handles the raw value.
-        val = new_value._value if isinstance(new_value, LeafProxy) else new_value
-        ReactiveRegistry.notify(path, val)
+        pass
 
 
 def local[T](cls: type[T]) -> T:
