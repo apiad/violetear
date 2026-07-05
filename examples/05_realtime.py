@@ -22,7 +22,7 @@ this example demonstrates the wire protocol, not durable storage).
 
 from violetear import App, Document, StyleSheet
 from violetear.color import Colors
-from violetear.dom import DOM, Event
+from violetear.js import DOM, Event, get_client_id
 from violetear.units import px, rem
 
 
@@ -159,16 +159,12 @@ async def on_socket_connect():
     # WS is now live — ask the server to push our initial state. The server
     # responds via receive_history.invoke(client_id=...) so only this client
     # gets it (proves the targeted-invoke wire path).
-    from violetear.client import get_client_id
-
     await request_history(client_id=get_client_id())
 
 
 @app.client.on("ready")
 async def on_ready():
     # Surface the default name in the rename field so the user can edit it.
-    from violetear.client import get_client_id
-
     my_id = get_client_id()
     name_input = DOM.find("name-input")
     name_input.value = f"anon-{my_id[:6]}"
@@ -176,8 +172,6 @@ async def on_ready():
 
 @app.client.callback
 async def on_send_click(event: Event):
-    from violetear.client import get_client_id
-
     text_el = DOM.find("message-input")
     text = str(text_el.value or "")
     if not text.strip():
@@ -188,8 +182,6 @@ async def on_send_click(event: Event):
 
 @app.client.callback
 async def on_rename_click(event: Event):
-    from violetear.client import get_client_id
-
     name_el = DOM.find("name-input")
     new_name = str(name_el.value or "")
     if not new_name.strip():

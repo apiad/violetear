@@ -20,8 +20,7 @@ from dataclasses import dataclass
 
 from violetear import App, Document, StyleSheet
 from violetear.color import Colors
-from violetear.dom import Event
-from violetear.storage import store
+from violetear.js import Event, localStorage
 from violetear.units import px, rem
 
 
@@ -68,7 +67,7 @@ async def precise_convert(meters: float) -> dict:
 
 @app.client
 async def save_state():
-    store.last_state = {
+    localStorage.last_state = {
         "meters": float(UiState.meters),
         "feet": float(UiState.feet),
         "inches": float(UiState.inches),
@@ -148,7 +147,7 @@ async def on_mode_change(event: Event):
 
 @app.client.on("ready")
 async def restore():
-    saved = store.last_state
+    saved = localStorage.last_state
     if saved is None:
         return
     # Each lookup on a missing key returns None — skip in that case.

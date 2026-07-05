@@ -22,9 +22,8 @@ from dataclasses import dataclass
 
 from violetear import App, Document, StyleSheet
 from violetear.color import Colors
-from violetear.dom import Event
+from violetear.js import Event, localStorage, sleep
 from violetear.pwa import Manifest
-from violetear.storage import store
 from violetear.units import px, rem
 
 
@@ -62,7 +61,7 @@ class PomodoroState:
 
 @app.client
 async def save_state():
-    store.pomodoro = {
+    localStorage.pomodoro = {
         "mode": str(PomodoroState.mode),
         "seconds_left": int(PomodoroState.seconds_left),
         "sessions": int(PomodoroState.sessions),
@@ -90,13 +89,11 @@ async def tick():
     # callbacks take an `event` arg. `start` awaits tick from its handler;
     # other buttons (pause, reset) fire on their own coroutines and remain
     # responsive even while this loop is mid-await.
-    import asyncio  # lazy: bundle imports don't include asyncio
-
     # Mode durations inlined (gap 7.7).
     durations = {"work": 1500, "short": 300, "long": 900}
 
     while bool(PomodoroState.running):
-        await asyncio.sleep(1)
+        await sleep(1)
         s = int(PomodoroState.seconds_left) - 1
         if s <= 0:
             # Phase complete: bump session counter on a finished "work" leg,
@@ -165,7 +162,7 @@ async def switch_mode(event: Event):
 
 @app.client.on("ready")
 async def restore():
-    saved = store.pomodoro
+    saved = localStorage.pomodoro
     if saved is None:
         return
     if saved.mode is not None:
