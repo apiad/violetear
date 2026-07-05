@@ -87,7 +87,7 @@ def test_pwa_custom_manifest_object_is_honored():
 
 
 def test_pwa_service_worker_caches_versioned_bundle_asset():
-    """The generated SW script references the versioned bundle URL."""
+    """The generated SW script references the versioned bundle.js URL."""
     app = App(title="App", version="cafef00d")
 
     @app.view("/", pwa=True)
@@ -100,5 +100,6 @@ def test_pwa_service_worker_caches_versioned_bundle_asset():
 
     # The cache name embeds the app version (sanity check on substitution).
     assert "violetear-cafef00d" in sw
-    # The bundle asset is added with the version querystring.
-    assert "/_violetear/bundle.py?v=cafef00d" in sw
+    # The bundle and runtime assets are added with the version querystring.
+    assert "/_violetear/bundle.js?v=cafef00d" in sw
+    assert "/_violetear/runtime.js?v=cafef00d" in sw

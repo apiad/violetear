@@ -75,6 +75,6 @@ def test_element_has_bindings_ignores_data_bind_attrs():
     el._attrs["data-bind-text"] = "Ui.theme"
 
     # Pinned: reactive-only elements report no bindings. This is the current
-    # contract; if has_bindings is ever made the gate for Pyodide injection,
+    # contract; if has_bindings is ever made the gate for JS injection,
     # this assertion should flip.
     assert el.has_bindings() is False

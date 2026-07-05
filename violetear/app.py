@@ -1,90 +1,20 @@
+import ast
 import asyncio
 from contextlib import asynccontextmanager
 import functools
-import os
 import inspect
 import hashlib
 import json
-import threading
 from pathlib import Path
-from textwrap import dedent
-from typing import Any, Callable, Dict, List, Set, Union, cast
-from urllib.request import urlretrieve
+import textwrap
+from typing import Any, Callable, Dict, List, Union
 import uuid
 
 from .stylesheet import StyleSheet
 from .markup import Document
 from .pwa import Manifest, ServiceWorker
-from .state import ReactiveProxy, local
-
-
-# --- Pyodide local hosting ---
-# We serve Pyodide assets from the same origin as the app instead of a CDN, so:
-# (a) the dev iteration loop isn't gated on a ~10MB CDN round-trip every page
-#     load (browser cache helps but isn't always honored mid-iteration);
-# (b) Service Workers can pre-cache Pyodide for fully offline PWA support;
-# (c) air-gapped deployments work after a single download per machine.
-
-PYODIDE_VERSION = "0.29.0"
-PYODIDE_FILES = (
-    "pyodide.js",
-    "pyodide.asm.js",
-    "pyodide.asm.wasm",
-    "python_stdlib.zip",
-    "pyodide-lock.json",
-)
-PYODIDE_CDN_BASE = f"https://cdn.jsdelivr.net/pyodide/v{PYODIDE_VERSION}/full/"
-
-
-def _pyodide_cache_dir() -> Path:
-    """Resolve the local Pyodide cache directory.
-
-    Honors ``VIOLETEAR_PYODIDE_CACHE`` env override; otherwise defaults to
-    ``~/.cache/violetear/pyodide-<version>/``. Version is part of the path so
-    bumping ``PYODIDE_VERSION`` produces a clean new cache (no stale files).
-    """
-    override = os.environ.get("VIOLETEAR_PYODIDE_CACHE")
-    if override:
-        return Path(override)
-    return Path.home() / ".cache" / "violetear" / f"pyodide-{PYODIDE_VERSION}"
-
-
-_pyodide_download_lock = threading.Lock()
-
-
-def _ensure_pyodide_cached() -> Path:
-    """Download missing Pyodide assets to the local cache. Returns the cache path.
-
-    Idempotent: existing files are not re-downloaded. Thread-safe via a module
-    lock so concurrent first-requests coalesce. Uses ``.partial`` rename for
-    atomic completion — a crashed download leaves no half-baked file behind.
-    """
-    cache = _pyodide_cache_dir()
-    cache.mkdir(parents=True, exist_ok=True)
-
-    missing = [f for f in PYODIDE_FILES if not (cache / f).exists()]
-    if not missing:
-        return cache
-
-    with _pyodide_download_lock:
-        # Re-check inside the lock — another thread may have raced ahead.
-        missing = [f for f in PYODIDE_FILES if not (cache / f).exists()]
-        if not missing:
-            return cache
-
-        print(
-            f"[violetear] Downloading Pyodide v{PYODIDE_VERSION} to {cache} "
-            f"(~14MB, one-time per machine)…"
-        )
-        for fname in missing:
-            print(f"[violetear]   {fname}")
-            tmp = cache / f"{fname}.partial"
-            urlretrieve(PYODIDE_CDN_BASE + fname, tmp)
-            tmp.rename(cache / fname)
-        print("[violetear] Pyodide cache ready.")
-
-    return cache
-
+from .state import local
+from .transpile import transpile_class, transpile_function, ClientCompileError
 
 # --- Optional Server Dependencies ---
 try:
@@ -224,33 +154,37 @@ class ClientRealtimeStub(ClientFunctionStub):
         return f"<client.realtime:{self.__name__})>"
 
 
+def _wrap_realtime_params(fn_name: str, params: list[str], body: str) -> str:
+    """Wrap realtime function to accept a kwargs object from the WS runtime."""
+    # Original: async function receive_message(msg) { ... }
+    # Wrapped:  async function receive_message({msg}) { ... }
+    if not params:
+        return f"async function {fn_name}() {{\n{body}\n}}"
+    destructured = ", ".join(params)
+    return f"async function {fn_name}({{{destructured}}}) {{\n{body}\n}}"
+
+
 class ClientRegistry:
     """
     Registry for Client-Side Logic.
     """
 
     def __init__(self, app: "App"):
-        self.app = app
-        self.code_functions: Dict[str, Callable] = {}
-        self.state_classes: Dict[str, type] = {}
-        self.callback_names: Set[str] = set()
-        self.realtime_functions: Dict[str, Callable] = {}
-        self.event_handlers: Dict[str, List[str]] = {}
-
-    def register_state(self, cls: type):
-        """Registers a class to be transpiled to the client."""
-        self.state_classes[cls.__name__] = cls
+        self._app = app
+        self._compiled_classes: dict[str, str] = {}
+        # func_name -> (decorator_kind, js_source)
+        # decorator_kind: "callback" | "realtime" | "on:<event>" | "client"
+        self._compiled_functions: dict[str, tuple[str, str]] = {}
+        self._lifecycle: dict[str, list[str]] = {}  # event -> [fn_name, ...]
 
     def _register(self, func: Callable):
-        """Helper to register the raw function source."""
-        # Unwrap if it's already a stub (in case of decorator stacking)
+        """Helper to validate and compile the function to JS."""
         if isinstance(func, ClientFunctionStub):
             func = func.func
 
         if not inspect.iscoroutinefunction(func):
             raise ValueError(f"Client function '{func.__name__}' must be async")
 
-        self.code_functions[func.__name__] = func
         return func
 
     def __call__(self, func: Callable):
@@ -259,6 +193,8 @@ class ClientRegistry:
         Marks a function to be transpiled to the browser.
         """
         func = self._register(func)
+        js = transpile_function(func)
+        self._compiled_functions[func.__name__] = ("client", js)
         return ClientFunctionStub(func)
 
     def callback(self, func: Callable):
@@ -267,7 +203,8 @@ class ClientRegistry:
         Marks a function as safe to attach to DOM events.
         """
         func = self._register(func)
-        self.callback_names.add(func.__name__)
+        js = transpile_function(func)
+        self._compiled_functions[func.__name__] = ("callback", js)
         return ClientFunctionStub(func, is_callback=True)
 
     def realtime(self, func: Callable):
@@ -277,8 +214,21 @@ class ClientRegistry:
         Returns a wrapper with .invoke() and .broadcast() methods.
         """
         func = self._register(func)
-        self.realtime_functions[func.__name__] = func
-        return ClientRealtimeStub(func, self.app)
+        # Compile to JS then rewrite the param list for destructured kwargs
+        raw_js = transpile_function(func)
+        # Extract params and body from the compiled output to rewrap
+        src = textwrap.dedent(inspect.getsource(func))
+        tree = ast.parse(src)
+        func_def = tree.body[0]
+        params = [a.arg for a in func_def.args.args]
+        # Split raw_js: first line is "async function name(params) {"
+        # body is everything between first { and last }
+        lines = raw_js.split("\n")
+        # body lines are lines[1:-1]
+        body = "\n".join(lines[1:-1])
+        js = _wrap_realtime_params(func.__name__, params, body)
+        self._compiled_functions[func.__name__] = ("realtime", js)
+        return ClientRealtimeStub(func, self._app)
 
     def on(self, event: str):
         """
@@ -288,12 +238,9 @@ class ClientRegistry:
 
         def decorator(func: Callable):
             func = self._register(func)
-
-            if event not in self.event_handlers:
-                self.event_handlers[event] = []
-
-            self.event_handlers[event].append(func.__name__)
-
+            js = transpile_function(func)
+            self._compiled_functions[func.__name__] = ("on:" + event, js)
+            self._lifecycle.setdefault(event, []).append(func.__name__)
             return ClientFunctionStub(func)
 
         return decorator
@@ -363,8 +310,10 @@ class App:
         favicon: str | None = None,
         fade_in: float = 0.1,
         version: str | None = None,
+        storage_prefix: str = "",
     ):
         self.title = title
+        self.storage_prefix = storage_prefix
 
         if version is None:
             self.version = uuid.uuid4().hex[:8]
@@ -390,32 +339,29 @@ class App:
         async def get_favicon():
             return FileResponse(self.favicon)
 
-        # Pyodide assets served from origin. Cache is populated lazily on the
-        # first request — no work happens at App() construction time.
-        @self.api.get("/_violetear/pyodide/{filename}")
-        async def get_pyodide_asset(filename: str):
-            if filename not in PYODIDE_FILES:
-                return Response(status_code=404)
-            try:
-                cache = _ensure_pyodide_cached()
-            except Exception as e:
-                return Response(
-                    status_code=503,
-                    content=f"Pyodide download failed: {e}",
-                    media_type="text/plain",
-                )
-            return FileResponse(cache / filename)
+        # Serve static runtime.js
+        _runtime_js_path = Path(__file__).parent / "runtime.js"
+
+        @self.api.get("/_violetear/runtime.js")
+        def get_runtime():
+            return Response(
+                content=_runtime_js_path.read_text(encoding="utf-8"),
+                media_type="application/javascript",
+                headers={"Cache-Control": "public, max-age=3600"},
+            )
+
+        @self.api.get("/_violetear/bundle.js")
+        def get_bundle():
+            return Response(
+                content=self._generate_bundle_js(),
+                media_type="application/javascript",
+            )
 
         # Registry of served styles to prevent duplicate route registration
         self.served_styles: Dict[str, StyleSheet] = {}
 
         # PWA Registry: route_scope_hash -> (Manifest, ServiceWorker)
         self.pwa_registry: Dict[str, tuple[Manifest, ServiceWorker]] = {}
-
-        # Register the Bundle Route (Dynamic Python file)
-        @self.api.get("/_violetear/bundle.py")
-        def get_bundle():
-            return Response(content=self._generate_bundle(), media_type="text/x-python")
 
         # --- PWA Asset Routes ---
         @self.api.get("/_violetear/pwa/{scope_hash}/manifest.json")
@@ -489,14 +435,11 @@ class App:
         self.client = ClientRegistry(self)
         self.server = ServerRegistry(self)
 
-    # UPDATED: self.local wrapper
-    # This intercepts the decorator to register the class before passing it
-    # to the logic in state.py
     def local[T](self, cls: type[T]) -> T:
-        # 1. Register source code for the bundle
-        self.client.register_state(cls)
-
-        # 2. Return the server-side proxy
+        # Compile to JS at decoration time — fail fast on unsupported constructs
+        js = transpile_class(cls)
+        self.client._compiled_classes[cls.__name__] = js
+        # Keep server-side reactive proxy (used for SSR initial values)
         return local(cls)
 
     def _register_rpc_route(self, func: Callable):
@@ -572,248 +515,77 @@ class App:
             if resource.sheet and resource.href and not resource.inline:
                 self.style(resource.href, resource.sheet)
 
-    def _generate_server_stubs(self) -> str:
-        """
-        Generates client-side Python stubs for server functions.
-        These stubs delegate to the helper functions in client.py.
-        """
-        stubs = []
+    def _generate_bundle_js(self) -> str:
+        """Generate bundle.js: compiled state classes + functions + RPC stubs + hydrate call."""
+        parts: list[str] = []
 
-        # 1. RPC Stubs (HTTP POST)
-        # These call the server and await a response.
+        # 1. Compiled state classes
+        for js in self.client._compiled_classes.values():
+            parts.append(js)
+
+        # 2. Compiled client functions
+        for fn_name, (kind, js) in self.client._compiled_functions.items():
+            parts.append(js)
+
+        # 3. JS RPC stubs for @app.server.rpc
         for name, func in self.server.rpc_functions.items():
             sig = inspect.signature(func)
-            arg_names = [p.name for p in sig.parameters.values()]
-
-            stub = dedent(
-                f"""
-                async def {name}(*args, **kwargs):
-                    arg_names = {arg_names!r}
-                    return await _call_rpc("{name}", arg_names, args, kwargs)
-                """
+            params = [p.name for p in sig.parameters.values() if p.name != "client_id"]
+            param_str = ", ".join(params)
+            destructured = ", ".join(params)
+            parts.append(
+                f"async function {name}({{{destructured}}}) {{\n"
+                f'  const r = await fetch("/_violetear/rpc/{name}", {{\n'
+                f'    method: "POST",\n'
+                f'    headers: {{"Content-Type": "application/json"}},\n'
+                f"    body: JSON.stringify({{{param_str}}})\n"
+                f"  }});\n"
+                f"  if (!r.ok) throw new Error(`RPC error: ${{r.status}}`);\n"
+                f"  return r.json();\n"
+                f"}}"
             )
-            stubs.append(stub)
 
-        # 2. Realtime Stubs (WebSocket)
-        # These send a fire-and-forget message.
+        # 4. JS realtime stubs for @app.server.realtime
         for name, func in self.server.realtime_functions.items():
-            # Realtime functions don't need arg mapping on the client side
-            # because they just forward *args directly to the socket payload.
-            stub = dedent(
-                f"""
-                async def {name}(*args, **kwargs):
-                    return await _call_realtime("{name}", args, kwargs)
-                """
+            sig = inspect.signature(func)
+            params = [p.name for p in sig.parameters.values() if p.name != "client_id"]
+            param_str = ", ".join(params)
+            destructured = ", ".join(params)
+            parts.append(
+                f"async function {name}({{{destructured}}}) {{\n"
+                f"  window.violetear_socket.send(JSON.stringify({{\n"
+                f'    type: "realtime", func: "{name}",\n'
+                f"    args: [], kwargs: {{{param_str}}}\n"
+                f"  }}));\n"
+                f"}}"
             )
-            stubs.append(stub)
 
-        return "\n\n".join(stubs)
+        # 5. Scope object + hydrate call
+        # Group by decorator kind for lifecycle dispatch
+        lifecycle_entries: list[str] = []
+        for event, fn_names in self.client._lifecycle.items():
+            names_js = ", ".join(fn_names)
+            lifecycle_entries.append(f"    {event}: [{names_js}]")
 
-    def _generate_bundle(self) -> str:
-        """
-        Generates the Python bundle to run in the browser.
-        """
-        # 1. Mock the 'app' object
-        header = "class Event: pass"
+        # Non-lifecycle scope entries (callable by name from WS/DOM)
+        scope_entries: list[str] = []
+        for fn_name in self.client._compiled_functions:
+            scope_entries.append(f"  {fn_name}")
 
-        # 2. Inject violetear.state module
-        state_path = Path(__file__).parent / "state.py"
-        with open(state_path, "r") as f:
-            state_source = f.read()
+        lifecycle_block = ",\n".join(lifecycle_entries)
+        scope_block = ",\n".join(scope_entries)
 
-        state_injection = dedent(
-            f"""
-            import sys, types
+        storage_prefix = self.storage_prefix or self.title.lower().replace(" ", "-")
 
-            # 1. Create or Get 'violetear' parent package
-            if "violetear" not in sys.modules:
-                m_violetear = types.ModuleType("violetear")
-                sys.modules["violetear"] = m_violetear
-            else:
-                m_violetear = sys.modules["violetear"]
-
-            # 2. Create 'violetear.state'
-            m_state = types.ModuleType("violetear.state")
-            sys.modules["violetear.state"] = m_state
-
-            # 3. Link child to parent (Critical for imports to work)
-            m_violetear.state = m_state
-
-            # 4. Execute source
-            exec({repr(state_source)}, m_state.__dict__)
-
-            # 5. Global Import (Makes 'violetear' available in this script)
-            import violetear.state
-            """
+        parts.append(
+            f"const _scope = {{\n"
+            f"  _lifecycle: {{\n{lifecycle_block}\n  }},\n"
+            f"{scope_block}\n"
+            f"}};\n"
+            f'Violetear_hydrate(_scope, {{ storage_prefix: "{storage_prefix}" }});'
         )
 
-        # 3. Inject violetear.dom module
-        dom_path = Path(__file__).parent / "dom.py"
-        with open(dom_path, "r") as f:
-            dom_source = f.read()
-
-        dom_injection = dedent(
-            f"""
-            m_dom = types.ModuleType("violetear.dom")
-            sys.modules["violetear.dom"] = m_dom
-
-            # Link to parent
-            sys.modules["violetear"].dom = m_dom
-
-            exec({repr(dom_source)}, m_dom.__dict__)
-
-            import violetear.dom
-            # Re-export common DOM names into the bundle's module scope so user
-            # code's `from violetear.dom import DOM` (or just bare `DOM`) resolves
-            # without each function needing its own lazy import.
-            from violetear.dom import DOM, DOMElement, Event
-            """
-        )
-
-        # 4. Inject Storage
-        storage_path = Path(__file__).parent / "storage.py"
-        with open(storage_path, "r") as f:
-            storage_source = f.read()
-
-        storage_injection = dedent(
-            f"""
-            m_storage = types.ModuleType("violetear.storage")
-            sys.modules["violetear.storage"] = m_storage
-
-            # Link to parent
-            sys.modules["violetear"].storage = m_storage
-
-            exec({repr(storage_source)}, m_storage.__dict__)
-
-            import violetear.storage
-            # Re-export the singleton storage handles into the bundle's module
-            # scope so user code that wrote `from violetear.storage import store`
-            # at module level (the natural Pythonic shape) doesn't NameError.
-            from violetear.storage import store, session
-            """
-        )
-
-        # 5. Read the Client Runtime and inject as violetear.client
-        runtime_path = Path(__file__).parent / "client.py"
-        with open(runtime_path, "r") as f:
-            runtime_code = f.read()
-
-        client_injection = dedent(
-            f"""
-            m_client = types.ModuleType("violetear.client")
-            sys.modules["violetear.client"] = m_client
-
-            # Link to parent so `from violetear.client import X` resolves —
-            # state.py's _notify_client and dom.py's _bind_property both do this
-            # lazy import at runtime when a reactive write fires.
-            sys.modules["violetear"].client = m_client
-
-            exec({repr(runtime_code)}, m_client.__dict__)
-
-            import violetear.client
-            # Re-export the names the bundle calls at module scope:
-            # - hydrate / _register_client_event: used by init_code
-            # - _call_rpc / _call_realtime: used by the server-stub functions
-            #   generated by _generate_server_stubs (one stub per @app.server.rpc
-            #   or @app.server.realtime function)
-            # - ReactiveRegistry: kept for symmetry / direct use
-            # - _dispatch_client_event: kept for symmetry
-            from violetear.client import (
-                hydrate,
-                ReactiveRegistry,
-                _register_client_event,
-                _dispatch_client_event,
-                _call_rpc,
-                _call_realtime,
-            )
-            """
-        )
-
-        # 6. Generate State Classes (with dataclass re-application)
-        # dedent() lets us pull definitions from nested scopes (factories, tests)
-        # — without it, indentation from the source file leaks into the bundle.
-        state_code = []
-        for name, cls in self.client.state_classes.items():
-            source = dedent(inspect.getsource(cls))
-            lines = source.split("\n")
-
-            # Check for dataclass
-            is_dataclass = "@dataclass" in source
-
-            # Strip decorators to avoid 'app' definition errors
-            clean_lines = [l for l in lines if not l.strip().startswith("@")]
-
-            # Reconstruct class
-            state_code.append("\n".join(clean_lines))
-
-            # Re-apply dataclass
-            if is_dataclass:
-                state_code.append(f"{name} = dataclass({name})")
-
-            # Apply Reactive Proxy
-            # Now safe because we imported violetear.state above
-            state_code.append(f"{name} = violetear.state.local({name})")
-
-        # 7. Extract User Functions
-        user_code = []
-        for name, func in self.client.code_functions.items():
-            source = dedent(inspect.getsource(func))
-            code = source.split("\n")
-            code = [c for c in code if not c.strip().startswith("@")]
-            user_code.append("\n".join(code))
-
-        # --- Safety Checks & Server Stubs ---
-        safety_checks = []
-        safety_checks.append(
-            dedent(
-                """
-                def _server_only_broadcast(*args, **kwargs):
-                    raise RuntimeError("❌ .broadcast() cannot be called from the Client.")
-                def _server_only_invoke(*args, **kwargs):
-                    raise RuntimeError("❌ .invoke() cannot be called from the Client.")
-                """
-            )
-        )
-        for name in self.client.realtime_functions.keys():
-            safety_checks.append(f"{name}.broadcast = _server_only_broadcast")
-            safety_checks.append(f"{name}.invoke = _server_only_invoke")
-
-        safety_code = "\n".join(safety_checks)
-        server_stubs = self._generate_server_stubs()
-
-        # 8. Initialization
-        # Register socket-lifecycle handlers BEFORE the socket opens, so
-        # onopen/onclose dispatch can find them with no race.
-        init_code = "# --- Init ---"
-        for event in ("connect", "disconnect"):
-            for func_name in self.client.event_handlers.get(event, []):
-                init_code += f"\n_register_client_event({event!r}, {func_name})"
-        init_code += "\nhydrate(globals())"
-        # "ready" fires once, after hydration completes.
-        for func_name in self.client.event_handlers.get("ready", []):
-            init_code += f"\nawait {func_name}()"
-
-        # Global Imports for the Bundle
-        # Ensure standard library + violetear components are ready
-        imports = (
-            "from dataclasses import dataclass, field\nimport datetime\nimport json"
-        )
-
-        return "\n\n".join(
-            [
-                imports,
-                header,
-                state_injection,
-                dom_injection,
-                storage_injection,
-                client_injection,
-                "\n".join(state_code),
-                "\n".join(user_code),
-                safety_code,
-                server_stubs,
-                init_code,
-            ]
-        )
+        return "\n\n".join(parts)
 
     def _version_url(self, url: str) -> str:
         """Appends the app version to the URL to bust caches."""
@@ -821,62 +593,35 @@ class App:
         return f"{url}{delimiter}v={self.version}"
 
     def _inject_client_side(self, doc: Document):
-        """Injects Pyodide and the Bundle bootstrapper."""
-
+        """Inject the JS runtime and compiled bundle into the document."""
         if self.fade_in > 0:
-            # 1. The "Cloak" Script
-            # We inject this FIRST so it runs immediately before the body renders.
-            # It creates a style that hides the body and disables clicking.
-            cloak_script = dedent(
-                """
-                var cloak = document.createElement("style");
-                cloak.id = "violetear-cloak";
-                // opacity: 0 -> hides content visually
-                // pointer-events: none -> prevents clicking on invisible buttons
-                cloak.innerHTML = "body { opacity: 0; pointer-events: none; }";
-                document.head.appendChild(cloak);
-                """
+            cloak_script = (
+                'var cloak = document.createElement("style");'
+                'cloak.id = "violetear-cloak";'
+                'cloak.innerHTML = "body { opacity: 0; pointer-events: none; }";'
+                "document.head.appendChild(cloak);"
             )
             doc.script(content=cloak_script)
 
-        # 2. Load Pyodide from the local origin route. loadPyodide() defaults
-        # its indexURL to the directory where pyodide.js was loaded from, so
-        # all subsequent fetches (wasm, stdlib, lock file) hit our route too.
-        doc.script(src="/_violetear/pyodide/pyodide.js")
+        doc.script(src="/_violetear/runtime.js")
+        bundle_url = self._version_url("/_violetear/bundle.js")
+        doc.script(src=bundle_url, defer=True)
 
-        # 3. Bootstrap Script
-        # We update this to remove the cloak once hydration is complete.
-        # Ensure we fetch the versioned bundle to avoid stale logic
-        bundle_url = self._version_url("/_violetear/bundle.py")
-
-        bootstrap = dedent(
-            f"""
-            async function main() {{
-                // optional: You could inject a 'Loading...' spinner here if you wanted
-
-                let pyodide = await loadPyodide();
-                let response = await fetch("{bundle_url}");
-                let code = await response.text();
-                await pyodide.runPythonAsync(code);
-
-                // --- Hydration Complete ---
-
-                // Find the cloak style
-                let cloak = document.getElementById("violetear-cloak");
-                if (cloak) {{
-                    // Update styles to fade in
-                    cloak.innerHTML = "body {{ opacity: 1; pointer-events: auto; transition: opacity {self.fade_in}s ease-in-out; }}";
-
-                    // Clean up the style tag after the transition finishes
-                    setTimeout(() => cloak.remove(), {int(self.fade_in * 1000)});
-                }}
-            }}
-
-            main();
-            """
-        )
-
-        doc.script(content=bootstrap)
+        if self.fade_in > 0:
+            # Fade in after bundle loads — bundle.js calls Violetear_hydrate synchronously
+            # so cloak removal can happen at end of bundle evaluation
+            fade_ms = int(self.fade_in * 1000)
+            fade_script = (
+                f'document.addEventListener("DOMContentLoaded", () => {{'
+                f'  const cloak = document.getElementById("violetear-cloak");'
+                f"  if (cloak) {{"
+                f'    cloak.innerHTML = "body {{ opacity: 1; pointer-events: auto; '
+                f'transition: opacity {self.fade_in}s ease-in-out; }}";'
+                f"    setTimeout(() => cloak.remove(), {fade_ms});"
+                f"  }}"
+                f"}});"
+            )
+            doc.script(content=fade_script)
 
     def _register_pwa(self, path: str, config: Union[bool, Manifest]):
         """
@@ -909,16 +654,10 @@ class App:
         # We implicitly version these to ensure the SW caches fresh copies
         sw.add_assets(
             manifest.start_url,  # Nav request (HTML) - network first, but good to have in cache
-            self._version_url("/_violetear/bundle.py"),
+            self._version_url("/_violetear/bundle.js"),
+            self._version_url("/_violetear/runtime.js"),
             self._version_url("/favicon.ico"),
         )
-
-        # Pre-cache Pyodide assets so the PWA loads fully offline after first
-        # visit. These URLs are stable across versions (not version-bumped) so
-        # we don't apply self._version_url to them — the Pyodide files
-        # themselves are pinned by PYODIDE_VERSION on the server side.
-        for fname in PYODIDE_FILES:
-            sw.add_assets(f"/_violetear/pyodide/{fname}")
 
         self.pwa_registry[scope_hash] = (manifest, sw)
 
@@ -946,16 +685,14 @@ class App:
         doc.script(content=js_injector)
 
         # 2. Inject Service Worker Registration
-        sw_script = dedent(
-            f"""
-            if ('serviceWorker' in navigator) {{
-                window.addEventListener('load', () => {{
-                    navigator.serviceWorker.register('{sw_url}', {{ scope: '{path}' }})
-                        .then(reg => console.log('[Violetear] SW registered for {path}', reg))
-                        .catch(err => console.log('[Violetear] SW registration failed', err));
-                }});
-            }}
-            """
+        sw_script = (
+            f"if ('serviceWorker' in navigator) {{\n"
+            f"    window.addEventListener('load', () => {{\n"
+            f"        navigator.serviceWorker.register('{sw_url}', {{ scope: '{path}' }})\n"
+            f"            .then(reg => console.log('[Violetear] SW registered for {path}', reg))\n"
+            f"            .catch(err => console.log('[Violetear] SW registration failed', err));\n"
+            f"    }});\n"
+            f"}}"
         )
         doc.script(content=sw_script)
 
@@ -1007,8 +744,8 @@ class App:
                     # Check if this doc uses any new stylesheets we need to serve
                     self._register_document_styles(doc)
 
-                    # Check if this document contains Python bindings
-                    if self.client.code_functions:
+                    # Check if this document contains client bindings
+                    if self.client._compiled_functions or self.client._compiled_classes:
                         self._inject_client_side(doc)
 
                     # Inject PWA tags if enabled for this route

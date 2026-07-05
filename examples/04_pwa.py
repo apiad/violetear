@@ -153,7 +153,7 @@ async def switch_mode(event: Event):
     # event target rather than from a module-level lookup table.
     durations = {"work": 1500, "short": 300, "long": 900}
     new_mode = str(event.target.dataset.mode)
-    if new_mode not in durations:
+    if not durations[new_mode]:
         return
     PomodoroState.running = False
     PomodoroState.toggle_label = "Start"

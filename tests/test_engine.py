@@ -112,12 +112,9 @@ def test_rpc_endpoint_validates_body_and_returns_result():
     assert r.status_code == 422
 
 
-def test_bundle_endpoint_returns_compilable_python():
-    """GET /_violetear/bundle.py returns Pyodide-bound source that is at minimum
-    syntactically valid Python — catches regressions in the bundle generator.
-
-    Uses module-level state + callback because the bundle generator expects
-    its inputs to be defined at module scope (see test_bundle_rejects_nested_defs)."""
+def test_bundle_endpoint_returns_js():
+    """GET /_violetear/bundle.js returns compiled JS — state classes + functions
+    + RPC stubs + hydrate call."""
     app = App(title="Bundle", version="t4")
     app.local(_BundleState)
     app.client.callback(_bundle_click)
@@ -127,19 +124,17 @@ def test_bundle_endpoint_returns_compilable_python():
         return Document(title="Bundle")
 
     client = TestClient(app.api)
-    r = client.get("/_violetear/bundle.py")
+    r = client.get("/_violetear/bundle.js")
 
     assert r.status_code == 200
-    assert "text/x-python" in r.headers["content-type"]
-
-    # The bundle must compile under the host Python — surfaces any
-    # syntax-breaking regression in _generate_bundle / dedent layout.
-    compile(r.text, "<violetear-bundle>", "exec")
+    assert "application/javascript" in r.headers["content-type"]
+    assert "async function" in r.text
+    assert "Violetear_hydrate" in r.text
 
 
 def test_bundle_supports_nested_defs():
-    """Bundle generator dedents source so nested @app.local / @app.client defs
-    (e.g. inside factories or tests) produce valid Python."""
+    """Compiler handles nested @app.local / @app.client defs
+    (e.g. inside factories or tests) via inspect.getsource + dedent."""
     app = App(title="Nested", version="t6")
 
     @app.local
@@ -156,9 +151,10 @@ def test_bundle_supports_nested_defs():
         return Document(title="x")
 
     client = TestClient(app.api)
-    r = client.get("/_violetear/bundle.py")
+    r = client.get("/_violetear/bundle.js")
     assert r.status_code == 200
-    compile(r.text, "<violetear-bundle>", "exec")
+    assert "class _NestedState" in r.text
+    assert "async function nested_click" in r.text
 
 
 def test_reactive_class_binding_via_classes_kwarg():
@@ -185,9 +181,8 @@ def test_reactive_class_binding_via_classes_kwarg():
 
 
 def test_client_on_connect_handler_registered_in_bundle():
-    """@app.client.on("connect") handlers are registered in the bundle before hydration,
-    so the socket's onopen dispatch finds them. We pin the bundle output rather than
-    drive Pyodide; that's a later slice."""
+    """@app.client.on("connect") handlers appear in the JS bundle's _lifecycle
+    object so the WS runtime dispatches them on socket-open."""
     app = App(title="Connect", version="conn1")
 
     @app.client.on("connect")
@@ -199,16 +194,11 @@ def test_client_on_connect_handler_registered_in_bundle():
         return Document(title="x")
 
     client = TestClient(app.api)
-    bundle = client.get("/_violetear/bundle.py").text
+    bundle = client.get("/_violetear/bundle.js").text
 
-    assert "_register_client_event('connect', hello)" in bundle
-    # The init-code call site (last occurrence — earlier matches may be inside
-    # comments/docstrings) registers the handler before hydrate() opens the
-    # socket. We assert on the rindex pair to ignore the prose-level mentions.
-    assert bundle.rindex("_register_client_event('connect', hello)") < bundle.rindex(
-        "hydrate(globals())"
-    )
-    compile(bundle, "<bundle>", "exec")
+    assert "async function hello" in bundle
+    assert "connect: [hello]" in bundle
+    assert "Violetear_hydrate" in bundle
 
 
 def test_client_on_disconnect_handler_registered_in_bundle():
@@ -223,50 +213,33 @@ def test_client_on_disconnect_handler_registered_in_bundle():
         return Document(title="x")
 
     client = TestClient(app.api)
-    bundle = client.get("/_violetear/bundle.py").text
+    bundle = client.get("/_violetear/bundle.js").text
 
-    assert "_register_client_event('disconnect', bye)" in bundle
-    compile(bundle, "<bundle>", "exec")
+    assert "async function bye" in bundle
+    assert "disconnect: [bye]" in bundle
 
 
-def test_pyodide_route_serves_from_local_cache(tmp_path, monkeypatch):
-    """Pyodide is served from `/_violetear/pyodide/<file>` via a local disk cache.
-
-    We seed the cache with stub files via the VIOLETEAR_PYODIDE_CACHE env override
-    so the test runs without downloading ~14MB from the CDN.
-    """
-    monkeypatch.setenv("VIOLETEAR_PYODIDE_CACHE", str(tmp_path))
-    # Seed all expected files so the route succeeds.
-    from violetear.app import PYODIDE_FILES
-
-    for fname in PYODIDE_FILES:
-        (tmp_path / fname).write_text(f"// stub for {fname}\n")
-
-    app = App(title="Pyodide", version="pyodide1")
+def test_runtime_js_route_serves_with_cache_header():
+    """GET /_violetear/runtime.js serves the JS runtime with a cache header."""
+    app = App(title="Runtime", version="rt1")
 
     @app.view("/")
     def home():
         return Document(title="x")
 
     client = TestClient(app.api)
+    r = client.get("/_violetear/runtime.js")
 
-    # Each declared file is served and matches what we wrote on disk.
-    for fname in PYODIDE_FILES:
-        r = client.get(f"/_violetear/pyodide/{fname}")
-        assert r.status_code == 200, fname
-        assert f"stub for {fname}" in r.text
-
-    # Unknown filenames are 404 — the route is a whitelist, not a directory walk.
-    r = client.get("/_violetear/pyodide/etc/passwd")
-    assert r.status_code == 404
-    r = client.get("/_violetear/pyodide/random.js")
-    assert r.status_code == 404
+    assert r.status_code == 200
+    assert "application/javascript" in r.headers["content-type"]
+    assert "Cache-Control" in r.headers
+    assert "Violetear_hydrate" in r.text
 
 
-def test_injected_client_script_points_at_local_pyodide_route():
-    """When the app has client code, the injected <script src=...> uses
-    `/_violetear/pyodide/pyodide.js` (origin), not the CDN URL."""
-    app = App(title="Local Pyodide", version="pyodide2")
+def test_injected_client_script_points_at_runtime_and_bundle():
+    """When the app has client code, the injected scripts reference
+    runtime.js and bundle.js (not Pyodide CDN)."""
+    app = App(title="JS Client", version="jsclient1")
 
     @app.client.callback
     async def noop(event):
@@ -278,14 +251,15 @@ def test_injected_client_script_points_at_local_pyodide_route():
 
     client = TestClient(app.api)
     html = client.get("/").text
-    assert "/_violetear/pyodide/pyodide.js" in html
+    assert "/_violetear/runtime.js" in html
+    assert "/_violetear/bundle.js" in html
     assert "cdn.jsdelivr.net" not in html
+    assert "pyodide" not in html
 
 
-def test_pwa_service_worker_precaches_pyodide_assets(tmp_path, monkeypatch):
-    """PWA-enabled apps add Pyodide files to the SW asset list so the app
-    loads fully offline after first visit."""
-    monkeypatch.setenv("VIOLETEAR_PYODIDE_CACHE", str(tmp_path))
+def test_pwa_service_worker_precaches_js_assets():
+    """PWA-enabled apps cache runtime.js + bundle.js so the app loads offline."""
+    import hashlib
 
     app = App(title="PWA Offline", version="pwaoff")
 
@@ -293,15 +267,12 @@ def test_pwa_service_worker_precaches_pyodide_assets(tmp_path, monkeypatch):
     def home():
         return Document(title="x")
 
-    import hashlib
-    from violetear.app import PYODIDE_FILES
-
     h = hashlib.md5(b"/").hexdigest()[:8]
     client = TestClient(app.api)
     sw = client.get(f"/_violetear/pwa/{h}/sw.js").text
 
-    for fname in PYODIDE_FILES:
-        assert f"/_violetear/pyodide/{fname}" in sw, fname
+    assert "/_violetear/runtime.js" in sw
+    assert "/_violetear/bundle.js" in sw
 
 
 def test_reactive_class_binding_via_class_name_alias():

@@ -88,22 +88,6 @@ def _load_example(filename: str):
     return module
 
 
-@pytest.fixture(scope="session", autouse=True)
-def _pyodide_cache_prewarm():
-    """Pre-warm the Pyodide local cache once per test session.
-
-    Without this, the first e2e test that loads a real page triggers a ~14MB
-    download from jsDelivr — fine in dev but flaky in CI and slow on a cold
-    runner. Calling _ensure_pyodide_cached() here populates the cache early
-    (or no-ops if it already exists from a prior run / a CI cache restore).
-
-    Marked autouse so any e2e test inherits a warm cache without opting in.
-    """
-    from violetear.app import _ensure_pyodide_cached
-
-    _ensure_pyodide_cached()
-
-
 @pytest.fixture
 def example_server() -> Callable[[str], str]:
     """Boot one of the canonical examples on a free port via uvicorn-in-thread,

@@ -8,15 +8,10 @@ the framework changes — not to validate the examples' behavior in depth.
 See `issues/6-canonical-examples-design.md` for the design.
 """
 
-import ast
 import hashlib
 import importlib.util
 import sys
 from pathlib import Path
-
-# Top-level `await` is legal in the violetear bundle because Pyodide runs it via
-# `pyodide.runPythonAsync(...)`. Standard `compile()` needs this flag to accept it.
-COMPILE_ASYNC = ast.PyCF_ALLOW_TOP_LEVEL_AWAIT
 
 EXAMPLES_DIR = Path(__file__).resolve().parent.parent / "examples"
 
@@ -24,8 +19,8 @@ EXAMPLES_DIR = Path(__file__).resolve().parent.parent / "examples"
 def _load(filename: str):
     """Import an example module by filename and register it in sys.modules.
 
-    Registration is REQUIRED because violetear's bundle generator calls
-    `inspect.getsource(cls)` on `@app.local` state classes; without a sys.modules
+    Registration is REQUIRED because violetear's compiler calls
+    `inspect.getsource(fn)` on client functions; without a sys.modules
     entry, that raises `TypeError: <class is a built-in class>` (see gap 7.5).
     """
     name = filename.removesuffix(".py")
@@ -148,11 +143,12 @@ def test_03_interactive_ssr_bindings_and_rpc_and_bundle():
     assert abs(body["feet"] - 2.0 * 3.28083989501) < 1e-9
     assert abs(body["inches"] - 2.0 * 39.3700787402) < 1e-9
 
-    # Bundle compiles — proves the @app.local state class and all client
-    # functions got transpiled without inspect.getsource blowing up.
-    r = client.get("/_violetear/bundle.py")
+    # Bundle serves — proves the @app.local state class and all client
+    # functions got transpiled without errors at decoration time.
+    r = client.get("/_violetear/bundle.js")
     assert r.status_code == 200
-    compile(r.text, "<bundle-03>", "exec", flags=COMPILE_ASYNC)
+    assert "async function" in r.text
+    assert "Violetear_hydrate" in r.text
 
 
 # -- 04_pwa --------------------------------------------------------------------
@@ -208,18 +204,18 @@ def test_04_pwa_manifest_serviceworker_and_bundle():
     assert r.status_code == 200
     sw = r.text
     assert "CACHE_NAME" in sw
-    assert "/_violetear/bundle.py" in sw
-    # Pyodide files are pre-cached too so the app loads offline after first visit.
-    assert "/_violetear/pyodide/pyodide.js" in sw
+    assert "/_violetear/bundle.js" in sw
+    assert "/_violetear/runtime.js" in sw
     # Cache name includes the pinned app version (1.0.0) so it stays stable
     # across server restarts (the reason we pinned version=).
     assert "1.0.0" in sw
 
-    # Bundle compiles — same canary as 03 but now exercising the PWA bundle
-    # too (the long-running `tick()` loop has top-level await semantics).
-    r = client.get("/_violetear/bundle.py")
+    # Bundle serves — same canary as 03 but now exercising the PWA bundle
+    # too (the long-running `tick()` loop gets transpiled at decoration time).
+    r = client.get("/_violetear/bundle.js")
     assert r.status_code == 200
-    compile(r.text, "<bundle-04>", "exec", flags=COMPILE_ASYNC)
+    assert "async function" in r.text
+    assert "Violetear_hydrate" in r.text
 
 
 # -- 05_realtime ---------------------------------------------------------------
@@ -257,10 +253,11 @@ def test_05_realtime_chat_broadcast_and_targeted_invoke():
     assert 'data-on-click="on_send_click"' in html
     assert 'data-on-click="on_rename_click"' in html
 
-    # Bundle compiles (top-level await from on("connect")/on("ready") handlers).
-    r = client.get("/_violetear/bundle.py")
+    # Bundle serves — proves all client functions transpiled at decoration time.
+    r = client.get("/_violetear/bundle.js")
     assert r.status_code == 200
-    compile(r.text, "<bundle-05>", "exec", flags=COMPILE_ASYNC)
+    assert "async function" in r.text
+    assert "Violetear_hydrate" in r.text
 
     # Two-client wire-protocol round trip.
     with client.websocket_connect("/_violetear/ws?client_id=alice") as ws_a:
