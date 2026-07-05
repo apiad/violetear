@@ -62,18 +62,37 @@ class Event:
     target: EventTarget
 ```
 
-**Storage** — attribute-style access; values JSON-serialized transparently
+**Storage** — three tiers, all namespaced by `App(storage_prefix="myapp")` so multiple violetear apps on the same domain don't collide. Values are JSON-serialized transparently.
+
 ```python
 class Storage:
+    """Sync KV store backed by window.localStorage or window.sessionStorage."""
     def get(self, key: str, default=None) -> Any: ...
     def set(self, key: str, value: Any) -> None: ...
     def remove(self, key: str) -> None: ...
+    def has(self, key: str) -> bool: ...
+    def clear(self) -> None: ...
     def __getattr__(self, key: str) -> Any: ...      # localStorage.foo → get("foo")
     def __setattr__(self, key: str, value: Any): ... # localStorage.foo = v → set("foo", v)
 
-localStorage: Storage
-sessionStorage: Storage
+localStorage: Storage    # survives tab close
+sessionStorage: Storage  # cleared on tab close
+
+class IDBStore:
+    """Async KV store backed by IndexedDB. Large quota, survives tab close."""
+    async def get(self, key: str, default=None) -> Any: ...
+    async def set(self, key: str, value: Any) -> None: ...
+    async def remove(self, key: str) -> None: ...
+    async def has(self, key: str) -> bool: ...
+    async def keys(self) -> list[str]: ...
+    async def items(self) -> list[tuple[str, Any]]: ...
+    async def clear(self) -> None: ...
+    # No attribute-style access — IDB ops are async; __getattr__ can't be awaited
+
+idb: IDBStore  # app-namespaced singleton, good for offline-first apps (PWA)
 ```
+
+`App(storage_prefix="myapp")` prefixes all keys for all three stores. If omitted, defaults to the app `title` slugified.
 
 **Async / timing**
 ```python
@@ -200,9 +219,9 @@ For `@app.local @dataclass` classes. Reads live `__annotations__` + `__dataclass
 - `dict` → `{}`
 - Literal default (e.g. `1500`, `"work"`, `True`) → emitted verbatim
 
-**Output pattern:**
+**Output pattern — singleton keeps the original class name so Python code translates 1:1:**
 ```javascript
-class ClassName {
+class _ClassName {  // internal constructor, underscore-prefixed
     constructor() {
         this._field1 = <default1>;
         this._field2 = <default2>;
@@ -211,7 +230,8 @@ class ClassName {
     set field1(v) { this._field1 = v; ReactiveRegistry.notify("ClassName.field1", v); }
     // ...
 }
-const classname = new ClassName();  // lowercase singleton
+const ClassName = new _ClassName();
+// User writes UiState.meters in both Python and JS — no name translation needed.
 ```
 
 **Rejected:** methods on state classes (use `@app.client` functions instead).
@@ -276,7 +296,14 @@ Reads source via `inspect.getsource` + `textwrap.dedent`. Strips all decorator l
 | `bool(x)` | `Boolean(x)` |
 | `len(x)` | `x.length` |
 | `print(x)` | `console.log(x)` |
-| `isinstance(x, T)` | Not supported — raises `ClientCompileError` |
+| `abs(x)` | `Math.abs(x)` |
+| `round(x)` | `Math.round(x)` |
+| `round(x, n)` | `parseFloat(x.toFixed(n))` |
+| `min(a, b)` | `Math.min(a, b)` (scalar only; list form rejected) |
+| `max(a, b)` | `Math.max(a, b)` (scalar only) |
+| `pow(x, y)` | `Math.pow(x, y)` |
+| `sum(lst)` | rejected — use a for loop |
+| `isinstance(x, T)` | rejected — raises `ClientCompileError` |
 | `exec(s)` (from violetear.js) | raw `s` emitted as JS statement |
 
 **String method translations:**
@@ -368,7 +395,93 @@ async function post_message({client_id, text}) {
 
 ---
 
-## 5. Files deleted / repurposed
+## 5. Interaction patterns — wire protocol
+
+### Scope object
+
+The bundle.js ends with a scope object passed to `Violetear_hydrate`. The bundle generator builds it from the registered decorators:
+
+```javascript
+const scope = {
+    // Lifecycle handlers grouped by event name
+    _lifecycle: {
+        connect:    [on_socket_connect],
+        disconnect: [],
+        ready:      [on_ready, restore],
+    },
+    // @app.client.realtime — pushed from server by name
+    receive_message,
+    set_user_list,
+    receive_history,
+    // @app.client.callback / @app.client / bare — DOM events and helpers
+    on_send_click,
+    on_rename_click,
+    save_state,
+    tick,
+};
+Violetear_hydrate(scope);
+```
+
+### `@app.server.rpc` — HTTP round-trip
+
+Server function unchanged. Client call `await precise_convert(meters=m)` → JS fetch stub. Compiler resolves Python kwargs to positional using the registered server signature at compile time.
+
+```javascript
+async function precise_convert(meters) {
+    const r = await fetch("/_violetear/rpc/precise_convert", {
+        method: "POST", headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({meters})
+    });
+    if (!r.ok) throw new Error(`RPC ${r.status}`);
+    return r.json();
+}
+```
+
+### `@app.server.realtime` — fire-and-forget via WebSocket
+
+```javascript
+async function post_message(client_id, text) {
+    window.violetear_socket.send(JSON.stringify({
+        type: "realtime", func: "post_message",
+        args: [], kwargs: {client_id, text}
+    }));
+}
+```
+
+### `@app.client.realtime` — server pushes to client
+
+Server sends `{type:"rpc", func:"receive_message", kwargs:{msg:{...}}}`.  
+Runtime calls `scope["receive_message"](kwargs)`.  
+Compiled function uses destructured params to match kwargs:
+
+```python
+# User writes:
+@app.client.realtime
+async def receive_message(msg: dict): ...
+
+# Compiler emits:
+async function receive_message({msg}) { ... }
+# Called by runtime as: receive_message(data.kwargs)
+```
+
+### `broadcast` / `invoke` — server side only, no client changes
+
+`receive_message.broadcast(msg=msg)` sends the WebSocket frame to all/one client. Runtime dispatches to the compiled function. No client-side design change.
+
+### `@app.client.on("connect")` / `@app.client.on("ready")`
+
+Registered in `scope._lifecycle`. Runtime dispatches:
+- `connect`: when WebSocket `onopen` fires
+- `ready`: after `_hydrate_events` + `_hydrate_bindings` complete
+- `disconnect`: when WebSocket `onclose` fires (before reconnect attempt)
+
+### `@app.client.callback` — DOM event handlers
+
+Attached via `data-on-<event>="fn_name"` attributes (set during SSR). Runtime: `el.addEventListener(event, scope[fn_name])`. No `create_proxy` needed — native JS functions attach directly.
+
+---
+
+## 6. Files deleted / repurposed
 
 | File | Fate |
 |---|---|
