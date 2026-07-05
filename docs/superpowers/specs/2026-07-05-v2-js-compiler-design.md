@@ -486,8 +486,8 @@ Attached via `data-on-<event>="fn_name"` attributes (set during SSR). Runtime: `
 | File | Fate |
 |---|---|
 | `violetear/client.py` | **Deleted** — replaced by `runtime.js` |
-| `violetear/dom.py` | **Replaced** — keep as thin server-side stub (raises `ClientOnlyError`); or remove entirely since users now import from `violetear.js` |
-| `violetear/storage.py` | **Replaced** — same; keep as deprecated stub or remove |
+| `violetear/dom.py` | **Deleted** — users import from `violetear.js` |
+| `violetear/storage.py` | **Deleted** — users import from `violetear.js` |
 | `violetear/js.py` | **New** — the shim module |
 | `violetear/runtime.js` | **New** — the JS runtime |
 | `violetear/transpile.py` | **New** — the AST compiler |
