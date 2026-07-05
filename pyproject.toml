@@ -31,6 +31,10 @@ dev = [
     "pytest>=9.0.2",
     "pytest-cov>=7.0.0",
     "pytest-playwright>=0.5",
+    "httpx>=0.25.0",
+    "uvicorn>=0.29.0",
+    "fastapi[standard]>=0.124.0",
+    "pydantic>=2.0.0",
 ]
 
 [tool.setuptools.package-data]
