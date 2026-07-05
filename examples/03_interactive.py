@@ -1,10 +1,10 @@
 """Tier 3 canonical example — an interactive length converter.
 
-SSR + client-side Python (Pyodide bundle). Demonstrates `@app.local`
+SSR + client-side Python compiled to JS. Demonstrates `@app.local`
 reactive state, `data-bind-value` SSR hydration, `@app.client.callback`
 on `oninput`, `@app.client.on("ready")` for boot-time restore,
 `@app.server.rpc` with float args + dict return, and
-`violetear.storage.store` for cross-reload persistence.
+`violetear.js.localStorage` for cross-reload persistence.
 
 Run:
 

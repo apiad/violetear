@@ -1,6 +1,6 @@
 """Tier 5 canonical example — a multi-user chat room with live presence.
 
-WebSocket + Pyodide bundle. Demonstrates the full realtime API:
+WebSocket + Python→JS compiler. Demonstrates the full realtime API:
 `@app.server.on("connect")` / `("disconnect")` lifecycle handlers,
 `@app.server.realtime` server-side fire-and-forget endpoints,
 `@app.client.realtime` server-pushable client functions (both the

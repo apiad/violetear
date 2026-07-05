@@ -1,9 +1,9 @@
 """
-`violetear` is a minimalist CSS generator.
+`violetear` is a full-stack Python web framework.
 
-You use Python to define CSS styles and automatically obtain a CSS stylesheet.
-Using a fluent API, you can quickly build complex styles programmatically
-and compose them into a fully-fledged design system.
+Write server-side rendering, client-side logic, and CSS all in Python.
+Client-side functions are compiled to JavaScript at server startup via an
+AST compiler — no Pyodide, no WASM, no 14MB download.
 """
 
 from .stylesheet import StyleSheet

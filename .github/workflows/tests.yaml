@@ -56,12 +56,6 @@ jobs:
           path: ~/.cache/ms-playwright
           key: playwright-${{ runner.os }}-${{ hashFiles('uv.lock') }}
 
-      - name: Cache violetear Pyodide assets
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/violetear
-          key: violetear-pyodide-0.29.0
-
       - name: Install Playwright Chromium
         run: uv run playwright install --with-deps chromium
 

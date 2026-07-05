@@ -28,9 +28,9 @@ test-unit: format-check
 test-all: format-check
 	uv run pytest --cov=violetear
 
-# End-to-end browser tests via Playwright. Slow (~5s/test for Pyodide load),
-# so kept out of the default `make` gate. Run when you change anything that
-# affects the bundle, hydration, reactive bindings, or Pyodide hosting.
+# End-to-end browser tests via Playwright. Kept out of the default `make`
+# gate. Run when you change anything that affects bundle.js, runtime.js,
+# hydration, reactive bindings, or the WebSocket bridge.
 e2e:
 	uv run playwright install chromium
 	uv run pytest -m e2e -v

@@ -1,10 +1,10 @@
-# Violetear v1.0 - The Full-Stack Python Framework
+# Violetear — Roadmap
 
-**Status:** Draft
-**Target:** v1.0 (Evolution from Library to Framework)
+**Status:** v2.0 released
+**Current:** v2.0 — Python→JS compiler, no Pyodide, 85 tests pass
 
 ## Summary
-Transform `violetear` into a hybrid, full-stack Python web framework. It will support both **Server-Side Rendering (SSR)** for high-performance static content and **Client-Side Rendering (CSR)** via Pyodide for rich interactivity. The architecture remains modular: the core library stays zero-dependency, while the framework layer (`violetear.app`) leverages `FastAPI` and standard WebAssembly tools.
+`violetear` is a full-stack Python web framework. Server-Side Rendering via FastAPI, client-side logic compiled from Python to JavaScript at server startup (no Pyodide, no WASM). The core library stays zero-dependency; `violetear[server]` adds FastAPI + uvicorn.
 
 ## Phase 1: Modernization & Tooling
 *Objective: Prepare the codebase for modern standards and faster iteration.*

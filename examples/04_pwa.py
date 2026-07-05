@@ -1,8 +1,8 @@
 """Tier 4 canonical example — an installable, offline-capable pomodoro timer.
 
-SSR + Pyodide bundle + PWA. Demonstrates `@app.view(pwa=Manifest(...))`,
-Service Worker asset caching (bundle + stylesheet + Pyodide files cached
-on first load — the app works offline after that), `violetear.storage`
+SSR + Python→JS compiler + PWA. Demonstrates `@app.view(pwa=Manifest(...))`,
+Service Worker asset caching (bundle.js + stylesheet cached on first load —
+the app works offline after that), `violetear.js.localStorage` for
 cross-reload persistence, an `asyncio` tick loop on the client side, and
 `@app.local` mutation from a non-callback client function.
 
