@@ -76,3 +76,11 @@ Transform `violetear` into a hybrid, full-stack Python web framework. It will su
     - Injects `<meta>` tags for theme color and icons.
 - [x] **Service Worker**: Implement a default Service Worker generator.
     - Automatically cache the Pyodide runtime and the app's registered CSS/JS assets (from the Asset Registry).
+
+## Phase 5: v2.0 — Python→JS Compiler (Complete)
+
+- [x] **Remove Pyodide**: replaced with `runtime.js` (~400 lines vanilla JS)
+- [x] **`transpile.py`**: Python→JS AST compiler for state classes and client functions
+- [x] **`violetear/js.py`**: browser API shims for IDE/mypy support
+- [x] **`violetear/runtime.js`**: ReactiveRegistry, hydration, WebSocket, DOM, Storage, IDB
+- [x] **Updated examples**: 03/04/05 use `from violetear.js import ...`

@@ -297,9 +297,26 @@ def _emit_stmt(node: ast.stmt, ctx: _CompileContext) -> str:  # noqa: C901
                 line=node.lineno,
                 col=node.col_offset,
             )
+        # Pre-declare any names assigned inside the try body so they are
+        # visible in the outer scope after the try/catch block (JS `let` is
+        # block-scoped, so without this a variable assigned inside `try` would
+        # raise ReferenceError when read in subsequent outer statements).
+        hoisted: list[str] = []
+        for stmt in node.body:
+            if isinstance(stmt, (ast.Assign, ast.AnnAssign, ast.AugAssign)):
+                targets = (
+                    stmt.targets if isinstance(stmt, ast.Assign) else [stmt.target]
+                )
+                for t in targets:
+                    if isinstance(t, ast.Name) and t.id not in ctx._declared:
+                        ctx._declared.add(t.id)
+                        hoisted.append(t.id)
+        hoist_line = ""
+        if hoisted:
+            hoist_line = "let " + ", ".join(hoisted) + ";\n"
         body = _emit_block(node.body, ctx)
         catch_body = _emit_block(node.handlers[0].body, ctx)
-        return f"try {{\n{body}\n}} catch(_e) {{\n{catch_body}\n}}"
+        return f"{hoist_line}try {{\n{body}\n}} catch(_e) {{\n{catch_body}\n}}"
 
     if isinstance(node, ast.Expr):
         val = node.value

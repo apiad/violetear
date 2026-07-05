@@ -418,7 +418,13 @@ class App:
                             # Execute the function (Fire-and-forget from client perspective)
                             # We await it here so the server processes it safely within this connection's loop
                             try:
-                                await func(*args, **kwargs)
+                                # Inject client_id if the function expects it as first param
+                                sig = inspect.signature(func)
+                                param_names = list(sig.parameters.keys())
+                                if param_names and param_names[0] == "client_id":
+                                    await func(client_id, *args, **kwargs)
+                                else:
+                                    await func(*args, **kwargs)
                             except Exception as e:
                                 print(
                                     f"[Violetear] ❌ Error executing realtime function '{func_name}': {e}"

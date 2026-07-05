@@ -123,7 +123,7 @@ async def receive_message(msg: dict):
 @app.client.realtime
 async def set_user_list(users: dict):
     container = DOM.find("user-list")
-    container.html("")
+    container.html = ""
     for _client_id, name in users.items():
         row = DOM.create("div").add("user-row")
         row.text = name
@@ -134,7 +134,7 @@ async def set_user_list(users: dict):
 async def receive_history(messages: list, users: dict):
     # Initial state push from request_history (targeted invoke).
     log = DOM.find("chat-log")
-    log.html("")
+    log.html = ""
     for msg in messages:
         row = DOM.create("div").add("chat-row")
         if msg["from_name"] == "system":
@@ -147,7 +147,7 @@ async def receive_history(messages: list, users: dict):
         row.append(text_el)
         log.append(row)
     user_container = DOM.find("user-list")
-    user_container.html("")
+    user_container.html = ""
     for _cid, name in users.items():
         row = DOM.create("div").add("user-row")
         row.text = name
