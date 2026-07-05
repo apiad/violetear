@@ -11,13 +11,16 @@ file is voice/process; **this file (AGENTS.md, plural) is structural**.
 ## What violetear is
 
 A full-stack isomorphic Python web framework. FastAPI + uvicorn on the
-server; Pyodide bundle on the client. Ships a server-side HTML builder
-(`markup.Element`, `HTML.div(...)`), a reactive-state layer (`@app.local` +
-`ReactiveProxy`) that emits `data-bind-*` annotations during SSR and
-hydrates them on the client, a `DOMElement` wrapper for imperative
-browser-side DOM work, a WebSocket RPC bus (`@app.server.rpc` /
-`@app.client.realtime`), a CSS DSL (`Style`, `StyleSheet`), and PWA
-scaffolding. No JS framework, no templates, no htmx.
+server; a Python→JS AST compiler + vanilla-JS runtime on the client (no
+Pyodide, no WASM). Ships a server-side HTML builder (`markup.Element`,
+`HTML.div(...)`), a reactive-state layer (`@app.local` + `ReactiveProxy`)
+that emits `data-bind-*` annotations during SSR and hydrates them on the
+client, a Python→JS compiler (`transpile.py`) that compiles `@app.client.*`
+functions at decoration time, a vanilla-JS runtime (`runtime.js`: ~400 lines,
+ReactiveRegistry, DOM, storage, WebSocket, hydration), browser API stubs
+(`js.py`, imported by client code for IDE/mypy support), a WebSocket RPC bus
+(`@app.server.rpc` / `@app.client.realtime`), a CSS DSL (`Style`,
+`StyleSheet`), and PWA scaffolding. No JS framework, no templates, no htmx.
 
 Vault node: `vault/Efforts/Repos/violetear.md` (in Alex's workspace).
 
@@ -28,9 +31,9 @@ violetear/          package source
   app.py            App, ClientRegistry, ServerRegistry, SocketManager, bundle gen
   markup.py         Element, Document, HTML builder, Component
   state.py          @local decorator, ReactiveProxy, LeafProxy
-  client.py         Pyodide-side: ReactiveRegistry, hydrate(), socket listener
-  dom.py            Pyodide-side: DOMElement, DOM static factory, Event protocol
-  storage.py        Pyodide-side: store/session wrappers around localStorage
+  transpile.py      Python→JS AST compiler: ClientCompileError, transpile_class, transpile_function
+  js.py             Browser API stubs for IDE/mypy: DOM, localStorage, sessionStorage, sleep, fetch, …
+  runtime.js        Vanilla-JS runtime: ReactiveRegistry, hydration, DOM, storage, WebSocket (~400 lines)
   style.py          fluent style builder
   stylesheet.py     stylesheet builder, selectors
   color.py          Color class + Colors named-color registry
@@ -83,10 +86,9 @@ CI runs the same gate on every push/PR (`.github/workflows/tests.yml`).
 1. Read the relevant `issues/<n>-...md` design doc if one exists; otherwise
    draft one before coding non-trivial surface.
 2. Update `roadmap.md` checkboxes when shipping a phase item.
-3. Pin behavior with a test in the matching file
-   (`tests/test_<surface>.py`). Coverage gates aren't enforced but
-   leaving Pyodide-only paths at 0% is the established norm — that's
-   what the deferred "Pyodide simulator" slice is for.
+3. Pin behavior with a test in the matching file (`tests/test_<surface>.py`).
+   Coverage gates aren't enforced but new compiler/runtime paths should
+   have unit tests in `tests/test_transpile.py` or `tests/test_js_shims.py`.
 
 ### Fix a bug found in production usage
 
@@ -114,12 +116,9 @@ so the two version files don't drift.
 Be extra careful when touching these — regressions are easy because the
 test suite won't catch them:
 
-- **`client.py`** (hydration, ReactiveRegistry, socket listener) — pure
-  Pyodide code, no server-side tests. Bundle-generation tests pin *what
-  gets emitted* but not the runtime behavior.
-- **`dom.py` `DOMElement`** — same, pure Pyodide.
-- **`storage.py`** — has a server-side memory fallback for testing but
-  it's untested today.
+- **`runtime.js`** — vanilla-JS runtime, no JS test harness. Bundle-generation
+  tests pin *what gets emitted* but not the in-browser behavior. E2E tests
+  (Playwright, manual) are the only gate.
 - **Style/StyleSheet fluent methods** (`.padding`, `.font`, `.border`,
   `.flex`, …) — black-box tested against fixtures in `tests/test_examples.py`
   via expected `.css` outputs in `tests/expected_outputs/`, no unit tests.
@@ -133,6 +132,9 @@ test suite won't catch them:
   `@app.server.on("connect")` + `.invoke(client_id, ...)` to greet new
   clients, or `.broadcast(...)` from inside a request handler when there
   are already-connected clients.
+- Don't import `violetear.dom`, `violetear.storage`, or `violetear.client`
+  — these modules were deleted in v2.0. Use `from violetear.js import DOM,
+  localStorage, sessionStorage` inside `@app.client.*` functions instead.
 - Don't put PII or secrets in `examples/`. They're shipped in PyPI sdists.
 - Don't add a new third-party runtime dependency without first checking
   whether the workspace already has a sibling lib (in `repos/`) that

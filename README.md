@@ -19,7 +19,7 @@ It features a unique 3-layer architecture:
 2.  **🧱 UI Layer**: Build reusable HTML components with a fluent builder pattern. Type-safe, refactor-friendly, and composable.
 3.  **⚡ Logic Layer**: Write server-side and client-side code in the same file. `violetear` handles the compilation, bundling, RPC bridges, and state persistence seamlessly.
 
-Use it for anything: from a simple script to generate a CSS file, to a static site generator, all the way up to a full-stack Isomorphic Web App powered by **FastAPI** and **Pyodide**.
+Use it for anything: from a simple script to generate a CSS file, to a static site generator, all the way up to a full-stack Isomorphic Web App powered by **FastAPI** and a **Python→JS compiler** (no Pyodide, no WASM, no 14MB download).
 
 ## 📦 Installation
 
@@ -98,6 +98,8 @@ async def report_count(current_count: int, action: str):
 
 Define the interactivity. We use `@app.client.on("ready")` to restore state when the page loads and everything is setup.
 
+> **v2.0:** Client-side Python is now compiled to JavaScript at server startup. Import browser APIs from `violetear.js` — these are type-correct stubs for IDE/mypy support that become JS globals in the browser.
+
 ```python
 @app.client.on("ready")
 async def init_counter():
@@ -105,32 +107,28 @@ async def init_counter():
     Runs automatically when the page loads (Client-Side).
     Restores the counter from Local Storage so F5 doesn't reset it.
     """
-    from violetear.dom import DOM
-    from violetear.storage import store
+    from violetear.js import DOM, localStorage
 
     # We can access storage like an object!
-    saved_count = store.count
+    saved_count = localStorage.count
     if saved_count is not None:
         DOM.find("display").text = str(saved_count)
-        print(f"Restored count: {saved_count}")
 ```
 
-And we use `@app.client.callback` to handle user interactions and run Python code in the browser. Check out the Pythonic API for interacting with the DOM and the LocalStorage. We can also call server-side functions seamlessly, via automagic RPC (Remote Procedure Call).
+And we use `@app.client.callback` to handle user interactions. The code is compiled to JavaScript at server startup — no Pyodide, no 14MB WASM download. We can also call server-side functions seamlessly, via automagic RPC (Remote Procedure Call).
 
 ```python
-from violetear.dom import Event
+from violetear.js import Event
 
 @app.client.callback
 async def handle_change(event: Event):
     """
-    Runs in the browser on click.
+    Compiled to JavaScript and runs in the browser on click.
     """
-    from violetear.dom import DOM
-    from violetear.storage import store
+    from violetear.js import DOM, localStorage
 
     # A. Get current state from DOM
     display = DOM.find("display")
-    # We can read/write text content directly
     current_value = int(display.text)
 
     # B. Determine action
@@ -141,8 +139,7 @@ async def handle_change(event: Event):
     display.text = str(new_value)
 
     # D. Save to Local Storage (Persistence)
-    # This automatically serializes the value to JSON
-    store.count = new_value
+    localStorage.count = new_value
 
     # E. Sync with Server (Background)
     await report_count(current_count=new_value, action=action)
@@ -206,8 +203,8 @@ Run it with `python main.py` and open `http://localhost:8000`. You have a full-s
 ### ⚡ Full-Stack Application Engine
 
   * **Hybrid Architecture**: Supports both **Server-Side Rendering (SSR)** for SEO and speed, and **Client-Side Rendering (CSR)** for interactivity.
-  * **Pythonic DOM**: A wrapper (`violetear.dom`) that provides a clean, type-safe Python API for DOM manipulation in the browser.
-  * **Smart Storage**: A Pythonic wrapper (`violetear.storage`) around `localStorage` that handles JSON serialization automatically and allows attribute access (`store.user.name`).
+  * **Python→JS Compiler**: Client-side Python functions (`@app.client.*`) are compiled to JavaScript at server startup via an AST compiler. No Pyodide, no WASM, no 14MB download.
+  * **Browser API stubs**: `violetear.js` provides type-correct Python stubs (`DOM`, `localStorage`, `sessionStorage`, `sleep`, `fetch`) for IDE and mypy support. Every export is a JS global in the runtime.
   * **Asset Management**: Stylesheets created in Python are served directly from memory.
   * **Seamless RPC**: Call server functions from the browser as if they were local.
 
@@ -249,7 +246,7 @@ The "application" cache is defined per route (@app.view), so you can have multip
 Violetear uses a hybrid strategy to ensure safety and speed:
 
   * **Navigation (HTML):** *Network-First*. It tries to fetch the latest version from the server. If offline, it falls back to the cache.
-  * **Assets (JS/CSS):** *Cache-First*. Assets are versioned (e.g., `bundle.py?v=1.0.2`). This ensures instant loading while guaranteeing updates when the version changes.
+  * **Assets (JS/CSS):** *Cache-First*. Assets are versioned (e.g., `bundle.js?v=2.0.0`). This ensures instant loading while guaranteeing updates when the version changes.
 
 ### Current Limitations
 
@@ -267,10 +264,10 @@ The magic happens via the `.broadcast()` method available on any `@app.client` f
 Create a function decorated with `@app.client.realtime`. This code will be compiled and run in the browser, but the server "knows" about it and can invoke it.
 
 ```python
-# This function runs in the User's Browser
+# This function is compiled to JS and runs in the User's Browser
 @app.client.realtime
 async def update_alert(message: str, color: str):
-    from violetear.dom import DOM
+    from violetear.js import DOM
 
     # Update the DOM immediately
     el = DOM.find("status-message")
