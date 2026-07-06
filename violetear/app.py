@@ -7,6 +7,7 @@ import hashlib
 import json
 from pathlib import Path
 import textwrap
+import traceback
 from typing import Any, Callable, Dict, List, Union
 import uuid
 
@@ -418,17 +419,33 @@ class App:
                             # Execute the function (Fire-and-forget from client perspective)
                             # We await it here so the server processes it safely within this connection's loop
                             try:
-                                # Inject client_id if the function expects it as first param
-                                sig = inspect.signature(func)
-                                param_names = list(sig.parameters.keys())
+                                # Inject client_id if the handler expects it as its
+                                # first param. Inspect the UNDERLYING handler, not the
+                                # @realtime wrapper's (*args, **kwargs) signature —
+                                # functools.wraps makes inspect.signature follow
+                                # __wrapped__ transparently, so unwrap explicitly to
+                                # keep this decision deterministic.
+                                target = inspect.unwrap(func)
+                                param_names = list(
+                                    inspect.signature(target).parameters.keys()
+                                )
                                 if param_names and param_names[0] == "client_id":
+                                    # The connection owns the trusted client_id; drop
+                                    # any client-supplied one so it's bound exactly
+                                    # once (else: TypeError, multiple values).
+                                    kwargs.pop("client_id", None)
                                     await func(client_id, *args, **kwargs)
                                 else:
                                     await func(*args, **kwargs)
-                            except Exception as e:
+                            except Exception:
+                                # Surface handler errors loudly: a swallowed exception
+                                # here means the handler's broadcast/invoke never fires
+                                # and a client blocked on the reply hangs forever.
                                 print(
-                                    f"[Violetear] ❌ Error executing realtime function '{func_name}': {e}"
+                                    f"[Violetear] ❌ Error executing realtime function '{func_name}':\n"
+                                    f"{traceback.format_exc()}"
                                 )
+                                raise
                         else:
                             print(
                                 f"[Violetear] ⚠️ Warning: Client {client_id} tried to call unknown realtime function '{func_name}'"
@@ -436,6 +453,12 @@ class App:
 
             except (WebSocketDisconnect, RuntimeError):
                 await self.socket_manager.disconnect(client_id)
+            except Exception:
+                # A realtime handler raised (already logged above). Tear down
+                # this connection and let the error propagate so it stays
+                # visible instead of silently leaving the client hanging.
+                await self.socket_manager.disconnect(client_id)
+                raise
 
         # Client and Server registries
         self.client = ClientRegistry(self)
