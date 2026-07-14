@@ -95,7 +95,9 @@ No JS build tooling.
   rejects mistyped `.broadcast`/`.invoke` kwargs; client runtime rejects a
   malformed inbound frame naming the field (`violetear/validate.py`,
   `_VALIDATORS` registry, `_check*` primitives in `runtime.js`).
-- [ ] **Slice 2**: client→server realtime + RPC arg/response validation.
+- [x] **Slice 2**: client→server realtime + RPC arg/response validation — client
+  send stubs validate args (RPC + realtime) and the RPC response; server rejects
+  mistyped inbound realtime frames (`_RETURN_VALIDATORS`, `ServerRegistry._validate_incoming`).
 - [ ] **Slice 3**: reactive-setter field validation (`transpile_class`).
 - [ ] **Issue #9**: semantic soundness of the transpiler (`if []:` truthiness,
   `==`→`===` on collections) — separate track.
