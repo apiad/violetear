@@ -102,3 +102,12 @@ def test_js_return_check_none_is_any():
 
 def test_js_return_check_untyped_is_any():
     assert js_return_check(_ret_untyped) == "_checkAny"
+
+
+def test_js_type_check_primitives_and_containers():
+    from violetear.validate import js_type_check
+
+    assert js_type_check(int) == "_checkInt"
+    assert js_type_check(str) == "_checkStr"
+    assert js_type_check(list) == "(v, p) => _checkList(v, p, _checkAny)"
+    assert js_type_check(None) == "_checkAny"

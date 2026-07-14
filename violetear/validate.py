@@ -98,6 +98,13 @@ def js_check_spec(func: Callable) -> str:
     return "{ " + ", ".join(entries) + " }"
 
 
+def js_type_check(annotation: Any) -> str:
+    """Public: JS check expression for an already-resolved type annotation."""
+    if annotation is None:
+        return "_checkAny"
+    return _js_checker(annotation)
+
+
 def js_return_check(func: Callable) -> str:
     """Return a single JS check expression for a function's return annotation."""
     sig = inspect.signature(inspect.unwrap(func), eval_str=True)
