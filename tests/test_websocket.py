@@ -2,9 +2,12 @@
 Tests for the WebSocket lifecycle, realtime dispatch, and reverse-RPC envelope.
 """
 
+import asyncio
 import time
 
+import pytest
 from fastapi.testclient import TestClient
+from pydantic import ValidationError
 
 from violetear import App, Document
 
@@ -160,3 +163,51 @@ def test_reverse_rpc_invoke_targets_specific_client():
         msg_a = ws_a.receive_json()
         assert msg_a["func"] == "whisper"
         assert msg_a["kwargs"] == {"secret": "shh"}
+
+
+def test_broadcast_rejects_mistyped_kwargs_before_send():
+    """A server-side broadcast with kwargs that violate the @app.client.realtime
+    signature raises before any frame reaches the wire."""
+    app = App(title="WS-Validate-Out", version="wsv1")
+
+    @app.client.realtime
+    async def notify(message: str, level: str):
+        pass
+
+    @app.view("/")
+    def home():
+        return Document(title="x")
+
+    with pytest.raises(ValidationError):
+        # level must be str; 123 is rejected by the generated Pydantic model
+        asyncio.run(notify.broadcast(message="hello", level=123))
+
+
+def test_broadcast_accepts_valid_kwargs_and_sends_envelope():
+    """Valid kwargs pass validation and produce the unchanged envelope shape."""
+    app = App(title="WS-Validate-Out-OK", version="wsv2")
+
+    @app.client.realtime
+    async def notify(message: str, level: str):
+        pass
+
+    @app.server.rpc
+    async def kick() -> dict:
+        await notify.broadcast(message="hi", level="info")
+        return {"ok": True}
+
+    @app.view("/")
+    def home():
+        return Document(title="x")
+
+    client = TestClient(app.api)
+    with client.websocket_connect("/_violetear/ws?client_id=v") as ws:
+        r = client.post("/_violetear/rpc/kick", json={})
+        assert r.status_code == 200
+        msg = ws.receive_json()
+    assert msg == {
+        "type": "rpc",
+        "func": "notify",
+        "args": [],
+        "kwargs": {"message": "hi", "level": "info"},
+    }

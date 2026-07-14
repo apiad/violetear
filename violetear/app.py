@@ -16,6 +16,7 @@ from .markup import Document
 from .pwa import Manifest, ServiceWorker
 from .state import local
 from .transpile import transpile_class, transpile_function, ClientCompileError
+from .validate import signature_to_model, js_check_spec
 
 # --- Optional Server Dependencies ---
 try:
@@ -177,6 +178,10 @@ class ClientRegistry:
         # decorator_kind: "callback" | "realtime" | "on:<event>" | "client"
         self._compiled_functions: dict[str, tuple[str, str]] = {}
         self._lifecycle: dict[str, list[str]] = {}  # event -> [fn_name, ...]
+        # name -> pydantic model (server-side outgoing validation)
+        self._realtime_validators: dict[str, type] = {}
+        # name -> JS check-spec string (client-side inbound validation)
+        self._realtime_check_specs: dict[str, str] = {}
 
     def _register(self, func: Callable):
         """Helper to validate and compile the function to JS."""
@@ -229,6 +234,11 @@ class ClientRegistry:
         body = "\n".join(lines[1:-1])
         js = _wrap_realtime_params(func.__name__, params, body)
         self._compiled_functions[func.__name__] = ("realtime", js)
+        # Derive both validators from the one signature (spec issue #8).
+        self._realtime_validators[func.__name__] = signature_to_model(
+            func, f"{func.__name__}Kwargs"
+        )
+        self._realtime_check_specs[func.__name__] = js_check_spec(func)
         return ClientRealtimeStub(func, self._app)
 
     def on(self, event: str):
@@ -262,10 +272,21 @@ class SocketManager:
         self.active_connections.pop(client_id)
         await self.app.emit("disconnect", client_id)
 
+    def _validate_outgoing(self, func_name: str, kwargs: dict):
+        """Validate server->client realtime kwargs against the handler signature.
+
+        Raises pydantic.ValidationError before the frame is serialized/sent.
+        No model registered (e.g. untyped handler) -> no-op.
+        """
+        model = self.app.client._realtime_validators.get(func_name)
+        if model is not None:
+            model(**kwargs)
+
     async def broadcast(self, func_name: str, args: tuple, kwargs: dict):
         """
         Sends a command to all connected clients to run a specific function.
         """
+        self._validate_outgoing(func_name, kwargs)
         payload = json.dumps(
             {"type": "rpc", "func": func_name, "args": args, "kwargs": kwargs}
         )
@@ -283,6 +304,7 @@ class SocketManager:
         """
         Sends a command to a specific client to run a specific function.
         """
+        self._validate_outgoing(func_name, kwargs)
         payload = json.dumps(
             {"type": "rpc", "func": func_name, "args": args, "kwargs": kwargs}
         )
