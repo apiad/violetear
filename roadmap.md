@@ -84,3 +84,18 @@ Transform `violetear` into a hybrid, full-stack Python web framework. It will su
 - [x] **`violetear/js.py`**: browser API shims for IDE/mypy support
 - [x] **`violetear/runtime.js`**: ReactiveRegistry, hydration, WebSocket, DOM, Storage, IDB
 - [x] **Updated examples**: 03/04/05 use `from violetear.js import ...`
+
+## Phase 6: Safe, self-verifying codegen (issue #8)
+
+The one Python signature is the schema; validators are emitted on both ends of
+every boundary (Pydantic server-side, our own zero-dep `_check` JS client-side).
+No JS build tooling.
+
+- [x] **Slice 1**: server→client realtime validated on both sides — server
+  rejects mistyped `.broadcast`/`.invoke` kwargs; client runtime rejects a
+  malformed inbound frame naming the field (`violetear/validate.py`,
+  `_VALIDATORS` registry, `_check*` primitives in `runtime.js`).
+- [ ] **Slice 2**: client→server realtime + RPC arg/response validation.
+- [ ] **Slice 3**: reactive-setter field validation (`transpile_class`).
+- [ ] **Issue #9**: semantic soundness of the transpiler (`if []:` truthiness,
+  `==`→`===` on collections) — separate track.
