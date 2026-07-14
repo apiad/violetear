@@ -316,3 +316,15 @@ def test_transpile_function_rejects_comprehension():
 
     with pytest.raises(ClientCompileError, match="unsupported"):
         transpile_function(fn)
+
+
+def test_transpile_class_setter_validates_field_type():
+    @dataclass
+    class UiState:
+        count: int = 0
+        label: str = "x"
+
+    js = transpile_class(UiState)
+    assert '(_checkInt)(v, "UiState.count");' in js
+    assert '(_checkStr)(v, "UiState.label");' in js
+    assert 'ReactiveRegistry.notify("UiState.count", v);' in js

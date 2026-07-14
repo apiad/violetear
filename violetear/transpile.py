@@ -7,7 +7,9 @@ import dataclasses
 import inspect
 import json
 import textwrap
-from typing import Any
+from typing import Any, get_type_hints
+
+from .validate import js_type_check
 
 
 class ClientCompileError(Exception):
@@ -134,10 +136,18 @@ def transpile_class(cls: type) -> str:
         lines.append(f"    this._{f.name} = {_js_field_default(f)};")
     lines.append("  }")
 
+    try:
+        hints = get_type_hints(cls)
+    except Exception:
+        hints = {}
+
     for f in fields:
+        ann = hints.get(f.name)
+        checker = js_type_check(ann) if ann is not None else "_checkAny"
         lines.append(f"  get {f.name}() {{ return this._{f.name}; }}")
         lines.append(
             f"  set {f.name}(v) {{ "
+            f'({checker})(v, "{class_name}.{f.name}"); '
             f"this._{f.name} = v; "
             f'ReactiveRegistry.notify("{class_name}.{f.name}", v); }}'
         )
