@@ -101,5 +101,15 @@ No JS build tooling.
 - [x] **Slice 3**: reactive-setter field validation — each `@app.local` dataclass
   setter checks the assigned value against the field type before mutating +
   notifying (`transpile_class` + `validate.js_type_check`).
-- [ ] **Issue #9**: semantic soundness of the transpiler (`if []:` truthiness,
-  `==`→`===` on collections) — separate track.
+## Phase 7: Semantic soundness (issue #9)
+
+Generated JS must *compute what the Python means*. A zero-dep `_py` runtime helper
+the transpiler emits calls into (`if (_py.truthy(x))`, `_py.eq`, `_py.format`, …).
+
+- [x] **Slice 1**: truthiness + deep equality + f-string format specs — `if`/
+  `while`/ternary/`not`/`bool()` → `_py.truthy`; `and`/`or` → `_py.and`/`or`
+  (thunked short-circuit); `==`/`!=` → `_py.eq`/`ne`; `f"{x:02d}"` → `_py.format`.
+  Fixes the live example-04 time-display padding bug.
+- [ ] **Slice 2**: numeric/sequence — `%` (floored), `*` (repeat), `+` (list
+  concat), `len(dict)`, `str()`/`bool()` on collections.
+- [ ] **Slice 3**: membership — `in` / `not in` (currently a compile error).
