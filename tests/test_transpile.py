@@ -99,8 +99,8 @@ def test_transpile_function_if_elif_else():
             x = 3
 
     js = transpile_function(fn)
-    assert 'if ((mode === "a"))' in js
-    assert 'else if ((mode === "b"))' in js
+    assert 'if (_py.truthy(_py.eq(mode, "a")))' in js
+    assert 'else if (_py.truthy(_py.eq(mode, "b")))' in js
     assert "else {" in js
 
 
@@ -110,7 +110,7 @@ def test_transpile_function_while_loop():
             x = 1
 
     js = transpile_function(fn)
-    assert "while (running)" in js
+    assert "while (_py.truthy(running))" in js
 
 
 def test_transpile_function_for_range():
@@ -202,7 +202,7 @@ def test_transpile_function_ternary():
         y = "a" if x else "b"
 
     js = transpile_function(fn)
-    assert '(x ? "a" : "b")' in js
+    assert '(_py.truthy(x) ? "a" : "b")' in js
 
 
 def test_transpile_function_is_none():
@@ -262,7 +262,7 @@ def test_transpile_function_builtin_casts():
     assert "Math.trunc(Number(x))" in js
     assert "Number(x)" in js
     assert "String(x)" in js
-    assert "Boolean(x)" in js
+    assert "_py.truthy(x)" in js
 
 
 def test_transpile_function_math_builtins():
@@ -328,3 +328,64 @@ def test_transpile_class_setter_validates_field_type():
     assert '(_checkInt)(v, "UiState.count");' in js
     assert '(_checkStr)(v, "UiState.label");' in js
     assert 'ReactiveRegistry.notify("UiState.count", v);' in js
+
+
+def test_transpile_not_uses_truthy():
+    async def fn(items):
+        if not items:
+            return
+
+    js = transpile_function(fn)
+    assert "!_py.truthy(items)" in js
+
+
+def test_transpile_and_or_short_circuit():
+    async def fn(a, b):
+        x = a and b
+        y = a or b
+
+    js = transpile_function(fn)
+    assert "_py.and(a, () => b)" in js
+    assert "_py.or(a, () => b)" in js
+
+
+def test_transpile_eq_ne_use_py():
+    async def fn(x, y):
+        a = x == y
+        b = x != y
+
+    js = transpile_function(fn)
+    assert "_py.eq(x, y)" in js
+    assert "_py.ne(x, y)" in js
+
+
+def test_transpile_bool_uses_truthy():
+    async def fn(items):
+        x = bool(items)
+
+    js = transpile_function(fn)
+    assert "_py.truthy(items)" in js
+
+
+def test_transpile_fstring_format_spec():
+    async def fn(n):
+        x = f"{n:02d}"
+
+    js = transpile_function(fn)
+    assert '`${_py.format(n, "02d")}`' in js
+
+
+def test_transpile_fstring_plain_unchanged():
+    async def fn(name):
+        x = f"hello {name}"
+
+    js = transpile_function(fn)
+    assert "`hello ${name}`" in js
+
+
+def test_transpile_fstring_computed_spec_raises():
+    async def fn(n, w):
+        x = f"{n:{w}d}"
+
+    with pytest.raises(ClientCompileError, match="format spec"):
+        transpile_function(fn)

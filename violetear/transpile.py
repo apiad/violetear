@@ -273,7 +273,7 @@ def _emit_stmt(node: ast.stmt, ctx: _CompileContext) -> str:  # noqa: C901
         )
 
     if isinstance(node, ast.If):
-        cond = _emit_expr(node.test, ctx)
+        cond = f"_py.truthy({_emit_expr(node.test, ctx)})"
         body = _emit_block(node.body, ctx)
         out = f"if ({cond}) {{\n{body}\n}}"
         if node.orelse:
@@ -286,7 +286,7 @@ def _emit_stmt(node: ast.stmt, ctx: _CompileContext) -> str:  # noqa: C901
         return out
 
     if isinstance(node, ast.While):
-        cond = _emit_expr(node.test, ctx)
+        cond = f"_py.truthy({_emit_expr(node.test, ctx)})"
         body = _emit_block(node.body, ctx)
         return f"while ({cond}) {{\n{body}\n}}"
 
@@ -526,7 +526,7 @@ def _emit_expr(node: ast.expr, ctx: _CompileContext) -> str:  # noqa: C901
         if isinstance(node.op, ast.USub):
             return f"(-{v})"
         if isinstance(node.op, ast.Not):
-            return f"(!{v})"
+            return f"!_py.truthy({v})"
         if isinstance(node.op, ast.UAdd):
             return v
         raise ClientCompileError(
@@ -538,9 +538,15 @@ def _emit_expr(node: ast.expr, ctx: _CompileContext) -> str:  # noqa: C901
         )
 
     if isinstance(node, ast.BoolOp):
-        op = "&&" if isinstance(node.op, ast.And) else "||"
-        parts = [_emit_expr(v, ctx) for v in node.values]
-        return "(" + f" {op} ".join(parts) + ")"
+        # Python and/or return an operand (not a bool) with Python truthiness.
+        # Fold right with thunks to preserve short-circuit + single evaluation:
+        #   a and b and c -> _py.and(a, () => _py.and(b, () => c))
+        helper = "_py.and" if isinstance(node.op, ast.And) else "_py.or"
+        vals = [_emit_expr(v, ctx) for v in node.values]
+        expr = vals[-1]
+        for v in reversed(vals[:-1]):
+            expr = f"{helper}({v}, () => {expr})"
+        return expr
 
     if isinstance(node, ast.Compare):
         if len(node.ops) != 1:
@@ -567,6 +573,12 @@ def _emit_expr(node: ast.expr, ctx: _CompileContext) -> str:  # noqa: C901
             and comparator.value is None
         ):
             return f"({l} !== null)"
+        # Python == / != are value equality (deep for collections); JS === is
+        # reference equality. Route through _py.eq / _py.ne.
+        if isinstance(op, ast.Eq):
+            return f"_py.eq({l}, {_emit_expr(comparator, ctx)})"
+        if isinstance(op, ast.NotEq):
+            return f"_py.ne({l}, {_emit_expr(comparator, ctx)})"
         cmp_op = _CMP_OPS.get(type(op))
         if cmp_op is None:
             raise ClientCompileError(
@@ -581,7 +593,7 @@ def _emit_expr(node: ast.expr, ctx: _CompileContext) -> str:  # noqa: C901
         return f"({l} {cmp_op} {r})"
 
     if isinstance(node, ast.IfExp):
-        cond = _emit_expr(node.test, ctx)
+        cond = f"_py.truthy({_emit_expr(node.test, ctx)})"
         body = _emit_expr(node.body, ctx)
         orelse = _emit_expr(node.orelse, ctx)
         return f"({cond} ? {body} : {orelse})"
@@ -593,7 +605,11 @@ def _emit_expr(node: ast.expr, ctx: _CompileContext) -> str:  # noqa: C901
                 parts.append(val.value.replace("`", "\\`").replace("${", "\\${"))
             elif isinstance(val, ast.FormattedValue):
                 expr = _emit_expr(val.value, ctx)
-                parts.append(f"${{{expr}}}")
+                if val.format_spec is not None:
+                    spec = _constant_format_spec(val.format_spec, ctx, node)
+                    parts.append(f"${{_py.format({expr}, {json.dumps(spec)})}}")
+                else:
+                    parts.append(f"${{{expr}}}")
             else:
                 raise ClientCompileError(
                     category="unsupported-construct",
@@ -624,6 +640,25 @@ def _emit_expr(node: ast.expr, ctx: _CompileContext) -> str:  # noqa: C901
     raise ClientCompileError(
         category="unsupported-construct",
         message=f"unsupported expression: {ast.unparse(node)!r}",
+        filename=ctx.filename,
+        line=getattr(node, "lineno", 0),
+        col=getattr(node, "col_offset", 0),
+    )
+
+
+def _constant_format_spec(
+    fmt: ast.JoinedStr, ctx: _CompileContext, node: ast.expr
+) -> str:
+    """Extract a constant f-string format spec (e.g. '02d'); raise on a computed one."""
+    if (
+        len(fmt.values) == 1
+        and isinstance(fmt.values[0], ast.Constant)
+        and isinstance(fmt.values[0].value, str)
+    ):
+        return fmt.values[0].value
+    raise ClientCompileError(
+        category="unsupported-construct",
+        message="computed f-string format spec is not supported; use a constant like f'{x:02d}'",
         filename=ctx.filename,
         line=getattr(node, "lineno", 0),
         col=getattr(node, "col_offset", 0),
@@ -701,7 +736,7 @@ def _try_builtin(
         case "str":
             return f"String({pos_args[0]})" if pos_args else '""'
         case "bool":
-            return f"Boolean({pos_args[0]})" if pos_args else "false"
+            return f"_py.truthy({pos_args[0]})" if pos_args else "false"
         case "len":
             return f"{pos_args[0]}.length"
         case "print":
