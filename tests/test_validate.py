@@ -36,6 +36,27 @@ def test_js_check_spec_optional():
     )
 
 
+def _bare_containers(msg: dict, items: list): ...
+
+
+def test_js_check_spec_bare_containers():
+    # `msg: dict` / `items: list` (no type params) — check container kind only.
+    assert js_check_spec(_bare_containers) == (
+        "{ msg: (v, p) => _checkDict(v, p, _checkAny), "
+        "items: (v, p) => _checkList(v, p, _checkAny) }"
+    )
+
+
+def test_js_check_spec_resolves_pep563_string_annotations():
+    # Simulate `from __future__ import annotations`: annotations are strings.
+    def _stringy(msg, count): ...
+
+    _stringy.__annotations__ = {"msg": "dict", "count": "int"}
+    assert js_check_spec(_stringy) == (
+        "{ msg: (v, p) => _checkDict(v, p, _checkAny), count: _checkInt }"
+    )
+
+
 def test_js_check_spec_untyped_is_passthrough():
     assert js_check_spec(_untyped) == "{ whatever: _checkAny }"
 

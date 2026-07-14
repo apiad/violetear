@@ -28,7 +28,10 @@ _PRIMITIVE_CHECKS: dict[type, str] = {
 
 def signature_to_model(func: Callable, model_name: str) -> type[BaseModel]:
     """Build a Pydantic model from a function's typed parameters."""
-    sig = inspect.signature(inspect.unwrap(func))
+    # eval_str resolves PEP 563 string annotations (`from __future__ import
+    # annotations` turns `dict` into the string "dict"); without it every
+    # annotation degrades to a bare string and validation is lost.
+    sig = inspect.signature(inspect.unwrap(func), eval_str=True)
     fields: dict[str, tuple] = {}
     for name, param in sig.parameters.items():
         if name in _SKIP_PARAMS:
@@ -47,6 +50,13 @@ def _js_checker(annotation: Any) -> str:
     """Return a JS check expression for one annotation (pass-through if unsupported)."""
     if annotation in _PRIMITIVE_CHECKS:
         return _PRIMITIVE_CHECKS[annotation]
+
+    # Bare, unparametrized containers (`dict`, `list`) — check the container
+    # kind, elements unchecked.
+    if annotation is list:
+        return "(v, p) => _checkList(v, p, _checkAny)"
+    if annotation is dict:
+        return "(v, p) => _checkDict(v, p, _checkAny)"
 
     origin = get_origin(annotation)
     args = get_args(annotation)
@@ -76,7 +86,7 @@ def _js_checker(annotation: Any) -> str:
 
 def js_check_spec(func: Callable) -> str:
     """Return a JS object literal `{ name: <checker>, ... }` for a signature."""
-    sig = inspect.signature(inspect.unwrap(func))
+    sig = inspect.signature(inspect.unwrap(func), eval_str=True)
     entries: list[str] = []
     for name, param in sig.parameters.items():
         if name in _SKIP_PARAMS:
