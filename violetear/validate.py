@@ -96,3 +96,12 @@ def js_check_spec(func: Callable) -> str:
             annotation = Any
         entries.append(f"{name}: {_js_checker(annotation)}")
     return "{ " + ", ".join(entries) + " }"
+
+
+def js_return_check(func: Callable) -> str:
+    """Return a single JS check expression for a function's return annotation."""
+    sig = inspect.signature(inspect.unwrap(func), eval_str=True)
+    ann = sig.return_annotation
+    if ann is inspect.Signature.empty or ann is type(None):
+        return "_checkAny"
+    return _js_checker(ann)

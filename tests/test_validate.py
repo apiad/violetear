@@ -1,6 +1,6 @@
 import dataclasses
 import pytest
-from violetear.validate import signature_to_model, js_check_spec
+from violetear.validate import signature_to_model, js_check_spec, js_return_check
 
 
 def _fn(message: str, color: str): ...
@@ -80,3 +80,25 @@ def test_signature_to_model_empty_params_ok():
 
     Model = signature_to_model(_noargs, "NoArgsKwargs")
     assert Model().model_dump() == {}
+
+
+def _ret_dict(x: int) -> dict: ...
+def _ret_none(x: int) -> None: ...
+def _ret_untyped(x: int): ...
+def _ret_str(x: int) -> str: ...
+
+
+def test_js_return_check_dict():
+    assert js_return_check(_ret_dict) == "(v, p) => _checkDict(v, p, _checkAny)"
+
+
+def test_js_return_check_str():
+    assert js_return_check(_ret_str) == "_checkStr"
+
+
+def test_js_return_check_none_is_any():
+    assert js_return_check(_ret_none) == "_checkAny"
+
+
+def test_js_return_check_untyped_is_any():
+    assert js_return_check(_ret_untyped) == "_checkAny"
