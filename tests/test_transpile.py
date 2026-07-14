@@ -423,3 +423,22 @@ def test_transpile_str_uses_py():
 
     js = transpile_function(fn)
     assert "_py.str(items)" in js
+
+
+def test_transpile_in_uses_contains():
+    async def fn(x, items):
+        a = x in items
+        b = x not in items
+
+    js = transpile_function(fn)
+    assert "_py.contains(items, x)" in js
+    assert "!_py.contains(items, x)" in js
+
+
+def test_transpile_in_condition():
+    async def fn(key, d):
+        if key in d:
+            return
+
+    js = transpile_function(fn)
+    assert "_py.truthy(_py.contains(d, key))" in js

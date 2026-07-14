@@ -586,6 +586,11 @@ def _emit_expr(node: ast.expr, ctx: _CompileContext) -> str:  # noqa: C901
             return f"_py.eq({l}, {_emit_expr(comparator, ctx)})"
         if isinstance(op, ast.NotEq):
             return f"_py.ne({l}, {_emit_expr(comparator, ctx)})"
+        # Python membership: x in c / x not in c (list/str/dict dispatch at runtime).
+        if isinstance(op, ast.In):
+            return f"_py.contains({_emit_expr(comparator, ctx)}, {l})"
+        if isinstance(op, ast.NotIn):
+            return f"!_py.contains({_emit_expr(comparator, ctx)}, {l})"
         cmp_op = _CMP_OPS.get(type(op))
         if cmp_op is None:
             raise ClientCompileError(
