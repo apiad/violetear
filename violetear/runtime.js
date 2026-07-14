@@ -130,6 +130,36 @@ const _py = {
     }
     return s;
   },
+  mod(a, b) { return ((a % b) + b) % b; },
+  mul(a, b) {
+    if (typeof a === "string" && typeof b === "number") return a.repeat(Math.max(0, b));
+    if (typeof b === "string" && typeof a === "number") return b.repeat(Math.max(0, a));
+    if (Array.isArray(a) && typeof b === "number") return Array.from({ length: Math.max(0, b) }, () => a).flat();
+    if (Array.isArray(b) && typeof a === "number") return Array.from({ length: Math.max(0, a) }, () => b).flat();
+    return a * b;
+  },
+  add(a, b) {
+    if (Array.isArray(a) && Array.isArray(b)) return a.concat(b);
+    return a + b;
+  },
+  len(x) {
+    if (x === null || x === undefined) return 0;
+    if (typeof x === "string" || Array.isArray(x)) return x.length;
+    if (typeof x === "object") return Object.keys(x).length;
+    return 0;
+  },
+  repr(x) {
+    if (typeof x === "string") return "'" + x + "'";
+    return this.str(x);
+  },
+  str(x) {
+    if (x === true) return "True";
+    if (x === false) return "False";
+    if (x === null || x === undefined) return "None";
+    if (Array.isArray(x)) return "[" + x.map((e) => this.repr(e)).join(", ") + "]";
+    if (typeof x === "object") return "{" + Object.entries(x).map(([k, v]) => this.repr(k) + ": " + this.repr(v)).join(", ") + "}";
+    return String(x);
+  },
 };
 
 // ---------------------------------------------------------------------------

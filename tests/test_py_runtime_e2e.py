@@ -41,3 +41,14 @@ def test_py_format(example_server, page):
     assert page.evaluate("() => _py.format(5, '02d')") == "05"
     assert page.evaluate("() => _py.format(3.14159, '.2f')") == "3.14"
     assert page.evaluate("() => _py.format(255, 'x')") == "ff"
+
+
+@pytest.mark.e2e
+def test_py_numeric_and_sequence(example_server, page):
+    _boot(example_server, page)
+    assert page.evaluate("() => _py.mod(-7, 3)") == 2
+    assert page.evaluate("() => _py.mul('a', 3)") == "aaa"
+    assert page.evaluate("() => _py.mul([1, 2], 2)") == [1, 2, 1, 2]
+    assert page.evaluate("() => _py.add([1], [2])") == [1, 2]
+    assert page.evaluate("() => _py.len({a: 1, b: 2})") == 2
+    assert page.evaluate("() => _py.str([1, 2])") == "[1, 2]"
