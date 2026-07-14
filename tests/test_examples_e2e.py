@@ -244,3 +244,29 @@ def test_05_realtime_chat_message_round_trips_to_dom(example_server, page):
     assert errors == [], "Browser errors during chat round-trip:\n  " + "\n  ".join(
         errors
     )
+
+
+@pytest.mark.e2e
+def test_05_realtime_rejects_malformed_inbound_frame(example_server, page):
+    """A server-pushed frame whose kwargs violate the @app.client.realtime
+    signature is rejected in the client runtime, naming the field, before the
+    handler runs. examples/05_realtime.py declares `receive_message(msg: dict)`;
+    the generated _VALIDATORS entry (_checkDict) rejects a non-dict msg."""
+    base = example_server("05_realtime.py")
+
+    page.goto(base + "/")
+    page.wait_for_function(
+        "() => document.getElementById('violetear-cloak') === null",
+        timeout=HYDRATION_TIMEOUT_MS,
+    )
+
+    rejected = page.evaluate(
+        """() => {
+          try {
+            _validateKwargs('receive_message', { msg: 123 }, _VALIDATORS['receive_message']);
+            return null;
+          } catch (e) { return e.message; }
+        }"""
+    )
+    assert rejected is not None
+    assert "receive_message.msg" in rejected

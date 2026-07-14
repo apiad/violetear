@@ -288,7 +288,7 @@ function _hydrate_bindings() {
 
 let _violetear_socket = null;
 
-function _setup_websocket(scope) {
+function _setup_websocket(scope, validators) {
   const protocol = location.protocol === "https:" ? "wss" : "ws";
   const url = `${protocol}://${location.host}/_violetear/ws?client_id=${_CLIENT_ID}`;
   const socket = new WebSocket(url);
@@ -305,15 +305,21 @@ function _setup_websocket(scope) {
     try { data = JSON.parse(event.data); } catch { return; }
     if (data.type === "rpc") {
       const fn = scope[data.func];
-      if (fn) fn(data.kwargs ?? {}).catch(e => console.error(`[violetear] rpc error in ${data.func}:`, e));
-      else console.warn(`[violetear] rpc handler not found: ${data.func}`);
+      if (!fn) { console.warn(`[violetear] rpc handler not found: ${data.func}`); return; }
+      try {
+        _validateKwargs(data.func, data.kwargs ?? {}, validators?.[data.func]);
+      } catch (e) {
+        console.error(`[violetear] invalid inbound payload for ${data.func}:`, e.message);
+        return;
+      }
+      fn(data.kwargs ?? {}).catch(e => console.error(`[violetear] rpc error in ${data.func}:`, e));
     }
   };
 
   socket.onclose = () => {
     const handlers = scope._lifecycle?.disconnect ?? [];
     handlers.forEach(fn => fn().catch(() => {}));
-    setTimeout(() => _setup_websocket(scope), 3000);
+    setTimeout(() => _setup_websocket(scope, validators), 3000);
   };
 }
 
@@ -337,8 +343,9 @@ async function Violetear_hydrate(scope, opts = {}) {
   _hydrate_events(scope);
   _hydrate_bindings();
 
+  const validators = opts.validators ?? {};
   const needs_websocket = Object.keys(scope).some(k => !k.startsWith("_"));
-  if (needs_websocket) _setup_websocket(scope);
+  if (needs_websocket) _setup_websocket(scope, validators);
 
   await _dispatch_ready(scope);
 }

@@ -611,6 +611,18 @@ class App:
                 f"}}"
             )
 
+        # 4.5 Validator registry for @app.client.realtime handlers.
+        # Threaded into Violetear_hydrate so the WS dispatch can check inbound
+        # kwargs before invoking the handler. Always emitted (possibly empty)
+        # so runtime.js never references an undefined binding.
+        validator_entries: list[str] = []
+        for fn_name, (kind, _js) in self.client._compiled_functions.items():
+            if kind == "realtime":
+                spec = self.client._realtime_check_specs.get(fn_name, "{  }")
+                validator_entries.append(f"  {fn_name}: {spec}")
+        validators_block = ",\n".join(validator_entries)
+        parts.append(f"const _VALIDATORS = {{\n{validators_block}\n}};")
+
         # 5. Scope object + hydrate call
         # Group by decorator kind for lifecycle dispatch
         lifecycle_entries: list[str] = []
@@ -633,7 +645,7 @@ class App:
             f"  _lifecycle: {{\n{lifecycle_block}\n  }},\n"
             f"{scope_block}\n"
             f"}};\n"
-            f'Violetear_hydrate(_scope, {{ storage_prefix: "{storage_prefix}" }});'
+            f'Violetear_hydrate(_scope, {{ storage_prefix: "{storage_prefix}", validators: _VALIDATORS }});'
         )
 
         return "\n\n".join(parts)

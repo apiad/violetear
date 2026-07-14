@@ -301,3 +301,38 @@ def test_reactive_class_binding_via_class_name_alias():
     assert 'data-bind-class="UiState.theme"' in html
     # The alias should be consumed, not leaked as a literal HTML attribute.
     assert "class_name=" not in html
+
+
+def test_bundle_emits_validators_registry_for_realtime():
+    app = App(title="Bundle-Validators", version="bv1")
+
+    @app.client.realtime
+    async def update_alert(message: str, color: str):
+        pass
+
+    @app.view("/")
+    def home():
+        return Document(title="x")
+
+    bundle = app._generate_bundle_js()
+    assert "const _VALIDATORS = {" in bundle
+    assert "update_alert: { message: _checkStr, color: _checkStr }" in bundle
+    # threaded into hydrate opts
+    assert "validators: _VALIDATORS" in bundle
+
+
+def test_bundle_validators_empty_when_no_realtime():
+    app = App(title="Bundle-NoRealtime", version="bv2")
+
+    @app.client.callback
+    async def click(event):
+        pass
+
+    @app.view("/")
+    def home():
+        return Document(title="x")
+
+    bundle = app._generate_bundle_js()
+    # registry still emitted (empty) and threaded, so runtime never sees undefined
+    assert "const _VALIDATORS = {" in bundle
+    assert "validators: _VALIDATORS" in bundle
