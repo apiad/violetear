@@ -16,7 +16,7 @@ from .markup import Document
 from .pwa import Manifest, ServiceWorker
 from .state import local
 from .transpile import transpile_class, transpile_function, ClientCompileError
-from .validate import signature_to_model, js_check_spec
+from .validate import signature_to_model, js_check_spec, js_return_check
 
 # --- Optional Server Dependencies ---
 try:
@@ -615,7 +615,8 @@ class App:
         for fn_name, (kind, js) in self.client._compiled_functions.items():
             parts.append(js)
 
-        # 3. JS RPC stubs for @app.server.rpc
+        # 3. JS RPC stubs for @app.server.rpc — validate args before fetch and
+        #    the response after (both derived from the Python signature).
         for name, func in self.server.rpc_functions.items():
             sig = inspect.signature(func)
             params = [p.name for p in sig.parameters.values() if p.name != "client_id"]
@@ -623,17 +624,21 @@ class App:
             destructured = ", ".join(params)
             parts.append(
                 f"async function {name}({{{destructured}}}) {{\n"
+                f'  _validateKwargs("{name}", {{ {param_str} }}, _VALIDATORS["{name}"]);\n'
                 f'  const r = await fetch("/_violetear/rpc/{name}", {{\n'
                 f'    method: "POST",\n'
                 f'    headers: {{"Content-Type": "application/json"}},\n'
                 f"    body: JSON.stringify({{{param_str}}})\n"
                 f"  }});\n"
                 f"  if (!r.ok) throw new Error(`RPC error: ${{r.status}}`);\n"
-                f"  return r.json();\n"
+                f"  const _data = await r.json();\n"
+                f'  const _rc = _RETURN_VALIDATORS["{name}"];\n'
+                f'  if (_rc) _rc(_data, "{name}(): return");\n'
+                f"  return _data;\n"
                 f"}}"
             )
 
-        # 4. JS realtime stubs for @app.server.realtime
+        # 4. JS realtime stubs for @app.server.realtime — validate args before send.
         for name, func in self.server.realtime_functions.items():
             sig = inspect.signature(func)
             params = [p.name for p in sig.parameters.values() if p.name != "client_id"]
@@ -641,6 +646,7 @@ class App:
             destructured = ", ".join(params)
             parts.append(
                 f"async function {name}({{{destructured}}}) {{\n"
+                f'  _validateKwargs("{name}", {{ {param_str} }}, _VALIDATORS["{name}"]);\n'
                 f"  window.violetear_socket.send(JSON.stringify({{\n"
                 f'    type: "realtime", func: "{name}",\n'
                 f"    args: [], kwargs: {{{param_str}}}\n"
@@ -648,17 +654,27 @@ class App:
                 f"}}"
             )
 
-        # 4.5 Validator registry for @app.client.realtime handlers.
-        # Threaded into Violetear_hydrate so the WS dispatch can check inbound
-        # kwargs before invoking the handler. Always emitted (possibly empty)
-        # so runtime.js never references an undefined binding.
+        # 4.5 Validator registries. _VALIDATORS: kwargs specs for every boundary
+        # (client.realtime inbound + server.rpc/realtime outgoing). _RETURN_VALIDATORS:
+        # response checkers for rpc. Always emitted (possibly empty) so the bundle
+        # never references an undefined binding.
         validator_entries: list[str] = []
         for fn_name, (kind, _js) in self.client._compiled_functions.items():
             if kind == "realtime":
                 spec = self.client._realtime_check_specs.get(fn_name, "{  }")
                 validator_entries.append(f"  {fn_name}: {spec}")
+        for name, func in self.server.rpc_functions.items():
+            validator_entries.append(f"  {name}: {js_check_spec(func)}")
+        for name, func in self.server.realtime_functions.items():
+            validator_entries.append(f"  {name}: {js_check_spec(func)}")
         validators_block = ",\n".join(validator_entries)
         parts.append(f"const _VALIDATORS = {{\n{validators_block}\n}};")
+
+        return_entries: list[str] = []
+        for name, func in self.server.rpc_functions.items():
+            return_entries.append(f"  {name}: {js_return_check(func)}")
+        return_block = ",\n".join(return_entries)
+        parts.append(f"const _RETURN_VALIDATORS = {{\n{return_block}\n}};")
 
         # 5. Scope object + hydrate call
         # Group by decorator kind for lifecycle dispatch

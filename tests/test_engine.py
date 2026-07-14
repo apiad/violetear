@@ -336,3 +336,41 @@ def test_bundle_validators_empty_when_no_realtime():
     # registry still emitted (empty) and threaded, so runtime never sees undefined
     assert "const _VALIDATORS = {" in bundle
     assert "validators: _VALIDATORS" in bundle
+
+
+def test_rpc_stub_validates_args_and_response():
+    app = App(title="RPC-Validate", version="rv1")
+
+    @app.server.rpc
+    async def report_count(current_count: int, action: str) -> dict:
+        return {"ok": True}
+
+    @app.view("/")
+    def home():
+        return Document(title="x")
+
+    bundle = app._generate_bundle_js()
+    assert (
+        '_validateKwargs("report_count", { current_count, action }, _VALIDATORS["report_count"])'
+        in bundle
+    )
+    assert "const _RETURN_VALIDATORS = {" in bundle
+    assert "report_count: (v, p) => _checkDict(v, p, _checkAny)" in bundle
+    assert '_RETURN_VALIDATORS["report_count"]' in bundle
+    assert "report_count: { current_count: _checkInt, action: _checkStr }" in bundle
+
+
+def test_realtime_send_stub_validates_args():
+    app = App(title="RT-Send-Validate", version="rv2")
+
+    @app.server.realtime
+    async def telemetry(x: int, y: int):
+        pass
+
+    @app.view("/")
+    def home():
+        return Document(title="x")
+
+    bundle = app._generate_bundle_js()
+    assert '_validateKwargs("telemetry", { x, y }, _VALIDATORS["telemetry"])' in bundle
+    assert "telemetry: { x: _checkInt, y: _checkInt }" in bundle
