@@ -98,6 +98,8 @@ No JS build tooling.
 - [x] **Slice 2**: client→server realtime + RPC arg/response validation — client
   send stubs validate args (RPC + realtime) and the RPC response; server rejects
   mistyped inbound realtime frames (`_RETURN_VALIDATORS`, `ServerRegistry._validate_incoming`).
-- [ ] **Slice 3**: reactive-setter field validation (`transpile_class`).
+- [x] **Slice 3**: reactive-setter field validation — each `@app.local` dataclass
+  setter checks the assigned value against the field type before mutating +
+  notifying (`transpile_class` + `validate.js_type_check`).
 - [ ] **Issue #9**: semantic soundness of the transpiler (`if []:` truthiness,
   `==`→`===` on collections) — separate track.
