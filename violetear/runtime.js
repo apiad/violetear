@@ -70,6 +70,69 @@ function _validateKwargs(fnName, kwargs, spec) {
 }
 
 // ---------------------------------------------------------------------------
+// _py — Python semantics helpers the transpiler emits calls into.
+// ---------------------------------------------------------------------------
+const _py = {
+  truthy(x) {
+    if (typeof x === "boolean") return x;
+    if (x === null || x === undefined) return false;
+    if (typeof x === "number") return x !== 0;
+    if (typeof x === "string") return x.length > 0;
+    if (Array.isArray(x)) return x.length > 0;
+    if (typeof x === "object") return Object.keys(x).length > 0;
+    return true;
+  },
+  and(a, bf) { return this.truthy(a) ? bf() : a; },
+  or(a, bf) { return this.truthy(a) ? a : bf(); },
+  eq(a, b) {
+    if (a === b) return true;
+    if (a === null || b === null || a === undefined || b === undefined) return false;
+    if (typeof a !== "object" || typeof b !== "object") return a === b;
+    const aArr = Array.isArray(a), bArr = Array.isArray(b);
+    if (aArr !== bArr) return false;
+    if (aArr) {
+      if (a.length !== b.length) return false;
+      for (let i = 0; i < a.length; i++) if (!this.eq(a[i], b[i])) return false;
+      return true;
+    }
+    const ka = Object.keys(a), kb = Object.keys(b);
+    if (ka.length !== kb.length) return false;
+    for (const k of ka) {
+      if (!Object.prototype.hasOwnProperty.call(b, k)) return false;
+      if (!this.eq(a[k], b[k])) return false;
+    }
+    return true;
+  },
+  ne(a, b) { return !this.eq(a, b); },
+  format(value, spec) {
+    const m = /^(0?)(\d*)(?:\.(\d+))?([a-zA-Z%]?)$/.exec(spec);
+    if (!m) return String(value);
+    const zero = m[1] === "0";
+    const width = m[2] ? parseInt(m[2], 10) : 0;
+    const prec = m[3] !== undefined ? parseInt(m[3], 10) : null;
+    const type = m[4].toLowerCase();
+    let s;
+    if (type === "d") s = String(Math.trunc(Number(value)));
+    else if (type === "f") s = Number(value).toFixed(prec === null ? 6 : prec);
+    else if (type === "x") s = Math.trunc(Number(value)).toString(16);
+    else if (type === "%") s = (Number(value) * 100).toFixed(prec === null ? 6 : prec) + "%";
+    else if (prec !== null && typeof value === "string") s = value.slice(0, prec);
+    else s = String(value);
+    if (width > s.length) {
+      const pad = width - s.length;
+      if (type === "" || type === "s") {
+        s = s + " ".repeat(pad);
+      } else if (zero && (s[0] === "-" || s[0] === "+")) {
+        s = s[0] + "0".repeat(pad) + s.slice(1);
+      } else {
+        s = (zero ? "0" : " ").repeat(pad) + s;
+      }
+    }
+    return s;
+  },
+};
+
+// ---------------------------------------------------------------------------
 // ReactiveRegistry — pub/sub for @app.local state
 // ---------------------------------------------------------------------------
 const ReactiveRegistry = (() => {
