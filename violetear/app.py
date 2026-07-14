@@ -46,6 +46,8 @@ class ServerRegistry:
         self.rpc_functions: Dict[str, Callable] = {}
         self.realtime_functions: Dict[str, Callable] = {}
         self.event_handlers: Dict[str, List[Callable]] = {}
+        # name -> pydantic model for inbound client->server realtime validation
+        self._realtime_validators: dict[str, type] = {}
 
     def rpc(self, func: Callable):
         """
@@ -83,7 +85,29 @@ class ServerRegistry:
 
         # Preserve identity
         self.realtime_functions[func.__name__] = wrapper
+        self._realtime_validators[func.__name__] = signature_to_model(
+            func, f"{func.__name__}InKwargs"
+        )
         return wrapper
+
+    def _validate_incoming(self, func_name: str, args: list, kwargs: dict):
+        """Validate an inbound client→server realtime payload against the
+        handler signature. Binds positional args to param names (skipping
+        client_id) so both the kwargs and positional forms validate. Raises
+        pydantic.ValidationError on mismatch; no-op if no model registered."""
+        model = self._realtime_validators.get(func_name)
+        if model is None:
+            return
+        func = self.realtime_functions[func_name]
+        params = [
+            p
+            for p in inspect.signature(inspect.unwrap(func)).parameters
+            if p != "client_id"
+        ]
+        merged = dict(kwargs)
+        for name, val in zip(params, args):
+            merged[name] = val
+        model(**merged)
 
     def on(self, event: str):
         """
@@ -437,6 +461,19 @@ class App:
 
                         if func_name in self.server.realtime_functions:
                             func = self.server.realtime_functions[func_name]
+
+                            # Validate the inbound payload against the handler
+                            # signature before running it (security-relevant trust
+                            # boundary). Reject-and-skip: log, drop the frame, keep
+                            # the connection open.
+                            try:
+                                self.server._validate_incoming(func_name, args, kwargs)
+                            except Exception as _ve:
+                                print(
+                                    f"[Violetear] ⚠️ Rejected invalid inbound realtime "
+                                    f"'{func_name}': {_ve}"
+                                )
+                                continue
 
                             # Execute the function (Fire-and-forget from client perspective)
                             # We await it here so the server processes it safely within this connection's loop

@@ -211,3 +211,78 @@ def test_broadcast_accepts_valid_kwargs_and_sends_envelope():
         "args": [],
         "kwargs": {"message": "hi", "level": "info"},
     }
+
+
+def test_inbound_realtime_rejects_mistyped_kwargs_and_skips_handler():
+    """A client→server realtime frame with a wrong-typed field is rejected
+    server-side: the handler is not called and the connection stays open."""
+    app = App(title="WS-Inbound-Validate", version="wsv3")
+
+    seen = []
+
+    @app.client.realtime
+    async def ack():
+        pass
+
+    @app.server.realtime
+    async def record(action: str, count: int):
+        seen.append((action, count))
+        await ack.broadcast()
+
+    @app.view("/")
+    def home():
+        return Document(title="x")
+
+    client = TestClient(app.api)
+    with client.websocket_connect("/_violetear/ws?client_id=z") as ws:
+        ws.send_json(
+            {
+                "type": "realtime",
+                "func": "record",
+                "args": [],
+                "kwargs": {"action": "x", "count": "oops"},
+            }
+        )
+        ws.send_json(
+            {
+                "type": "realtime",
+                "func": "record",
+                "args": [],
+                "kwargs": {"action": "ok", "count": 3},
+            }
+        )
+        ack_msg = ws.receive_json()
+
+    assert ack_msg["func"] == "ack"
+    assert seen == [("ok", 3)]
+
+
+def test_inbound_realtime_positional_args_still_validate_and_run():
+    """The existing positional-args path (args=[...], kwargs={}) still binds and
+    validates — regression guard for test_realtime_message_dispatches."""
+    app = App(title="WS-Inbound-Pos", version="wsv4")
+
+    seen = []
+
+    @app.client.realtime
+    async def ack():
+        pass
+
+    @app.server.realtime
+    async def record(action: str, count: int):
+        seen.append((action, count))
+        await ack.broadcast()
+
+    @app.view("/")
+    def home():
+        return Document(title="x")
+
+    client = TestClient(app.api)
+    with client.websocket_connect("/_violetear/ws?client_id=p") as ws:
+        ws.send_json(
+            {"type": "realtime", "func": "record", "args": ["click", 7], "kwargs": {}}
+        )
+        ack_msg = ws.receive_json()
+
+    assert ack_msg["func"] == "ack"
+    assert seen == [("click", 7)]
