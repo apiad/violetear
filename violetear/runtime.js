@@ -4,6 +4,72 @@
 "use strict";
 
 // ---------------------------------------------------------------------------
+// Validator primitives — generated _VALIDATORS specs call into these.
+// Zero-dependency. Each _check* is (value, path) => value | throw.
+// ---------------------------------------------------------------------------
+class VioletearValidationError extends Error {
+  constructor(path, expected, got) {
+    super(`${path}: expected ${expected}, got ${JSON.stringify(got)} (${typeof got})`);
+    this.name = "VioletearValidationError";
+    this.path = path;
+  }
+}
+const _checkAny = (v) => v;
+const _checkStr = (v, p) => {
+  if (typeof v !== "string") throw new VioletearValidationError(p, "string", v);
+  return v;
+};
+const _checkBool = (v, p) => {
+  if (typeof v !== "boolean") throw new VioletearValidationError(p, "boolean", v);
+  return v;
+};
+const _checkNumber = (v, p) => {
+  if (typeof v !== "number" || Number.isNaN(v)) throw new VioletearValidationError(p, "number", v);
+  return v;
+};
+const _checkInt = (v, p) => {
+  if (typeof v !== "number" || !Number.isInteger(v)) throw new VioletearValidationError(p, "integer", v);
+  return v;
+};
+const _checkList = (v, p, elem) => {
+  if (!Array.isArray(v)) throw new VioletearValidationError(p, "list", v);
+  v.forEach((x, i) => elem(x, `${p}[${i}]`));
+  return v;
+};
+const _checkDict = (v, p, val) => {
+  if (v === null || typeof v !== "object" || Array.isArray(v)) throw new VioletearValidationError(p, "object", v);
+  for (const k of Object.keys(v)) val(v[k], `${p}.${k}`);
+  return v;
+};
+const _checkOptional = (v, p, inner) => {
+  if (v === null || v === undefined) return v;
+  return inner(v, p);
+};
+const _checkShape = (v, p, fields) => {
+  if (v === null || typeof v !== "object" || Array.isArray(v)) throw new VioletearValidationError(p, "object", v);
+  for (const k of Object.keys(fields)) fields[k](v[k], `${p}.${k}`);
+  return v;
+};
+function _validateKwargs(fnName, kwargs, spec) {
+  if (!spec) return kwargs;
+  const errors = [];
+  for (const field of Object.keys(spec)) {
+    try {
+      spec[field](kwargs ? kwargs[field] : undefined, `${fnName}.${field}`);
+    } catch (e) {
+      errors.push(e.message);
+    }
+  }
+  if (errors.length) {
+    const e = new VioletearValidationError(fnName, "valid kwargs", kwargs);
+    e.message = `${fnName}: ${errors.join("; ")}`;
+    e.errors = errors;
+    throw e;
+  }
+  return kwargs;
+}
+
+// ---------------------------------------------------------------------------
 // ReactiveRegistry — pub/sub for @app.local state
 // ---------------------------------------------------------------------------
 const ReactiveRegistry = (() => {
