@@ -160,6 +160,12 @@ const _py = {
     if (typeof x === "object") return "{" + Object.entries(x).map(([k, v]) => this.repr(k) + ": " + this.repr(v)).join(", ") + "}";
     return String(x);
   },
+  contains(c, x) {
+    if (typeof c === "string") return c.includes(x);
+    if (Array.isArray(c)) return c.some((e) => this.eq(e, x));
+    if (c !== null && typeof c === "object") return Object.prototype.hasOwnProperty.call(c, x);
+    return false;
+  },
 };
 
 // ---------------------------------------------------------------------------

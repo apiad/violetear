@@ -52,3 +52,14 @@ def test_py_numeric_and_sequence(example_server, page):
     assert page.evaluate("() => _py.add([1], [2])") == [1, 2]
     assert page.evaluate("() => _py.len({a: 1, b: 2})") == 2
     assert page.evaluate("() => _py.str([1, 2])") == "[1, 2]"
+
+
+@pytest.mark.e2e
+def test_py_contains(example_server, page):
+    _boot(example_server, page)
+    assert page.evaluate("() => _py.contains([1, 2, 3], 2)") is True
+    assert page.evaluate("() => _py.contains([1, 2, 3], 9)") is False
+    assert page.evaluate("() => _py.contains('hello', 'ell')") is True
+    assert page.evaluate("() => _py.contains({a: 1, b: 2}, 'a')") is True
+    assert page.evaluate("() => _py.contains({a: 1}, 'z')") is False
+    assert page.evaluate("() => _py.contains([[1, 2]], [1, 2])") is True
