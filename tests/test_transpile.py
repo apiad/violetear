@@ -86,7 +86,7 @@ def test_transpile_function_simple_assignment():
     js = transpile_function(fn)
     assert "async function fn()" in js
     assert "let x = 1;" in js
-    assert "let y = (x + 2);" in js
+    assert "let y = _py.add(x, 2);" in js
 
 
 def test_transpile_function_if_elif_else():
@@ -224,7 +224,7 @@ def test_transpile_function_floor_div_and_mod():
 
     js = transpile_function(fn)
     assert "Math.floor(s / 60)" in js
-    assert "(s % 60)" in js
+    assert "_py.mod(s, 60)" in js
 
 
 def test_transpile_function_slice():
@@ -261,7 +261,7 @@ def test_transpile_function_builtin_casts():
     js = transpile_function(fn)
     assert "Math.trunc(Number(x))" in js
     assert "Number(x)" in js
-    assert "String(x)" in js
+    assert "_py.str(x)" in js
     assert "_py.truthy(x)" in js
 
 
@@ -389,3 +389,37 @@ def test_transpile_fstring_computed_spec_raises():
 
     with pytest.raises(ClientCompileError, match="format spec"):
         transpile_function(fn)
+
+
+def test_transpile_mul_uses_py():
+    async def fn(s, items):
+        a = s * 3
+        b = items * 2
+
+    js = transpile_function(fn)
+    assert "_py.mul(s, 3)" in js
+    assert "_py.mul(items, 2)" in js
+
+
+def test_transpile_add_uses_py():
+    async def fn(a, b):
+        x = a + b
+
+    js = transpile_function(fn)
+    assert "_py.add(a, b)" in js
+
+
+def test_transpile_len_uses_py():
+    async def fn(d):
+        x = len(d)
+
+    js = transpile_function(fn)
+    assert "_py.len(d)" in js
+
+
+def test_transpile_str_uses_py():
+    async def fn(items):
+        x = str(items)
+
+    js = transpile_function(fn)
+    assert "_py.str(items)" in js

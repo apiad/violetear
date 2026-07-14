@@ -510,6 +510,13 @@ def _emit_expr(node: ast.expr, ctx: _CompileContext) -> str:  # noqa: C901
             return f"Math.floor({l} / {r})"
         if isinstance(node.op, ast.Pow):
             return f"Math.pow({l}, {r})"
+        # Python +/*/% differ from JS on sequences and negative modulo.
+        if isinstance(node.op, ast.Add):
+            return f"_py.add({l}, {r})"
+        if isinstance(node.op, ast.Mult):
+            return f"_py.mul({l}, {r})"
+        if isinstance(node.op, ast.Mod):
+            return f"_py.mod({l}, {r})"
         op = _BIN_OPS.get(type(node.op))
         if op is None:
             raise ClientCompileError(
@@ -734,11 +741,11 @@ def _try_builtin(
         case "float":
             return f"Number({pos_args[0]})" if pos_args else "0.0"
         case "str":
-            return f"String({pos_args[0]})" if pos_args else '""'
+            return f"_py.str({pos_args[0]})" if pos_args else '""'
         case "bool":
             return f"_py.truthy({pos_args[0]})" if pos_args else "false"
         case "len":
-            return f"{pos_args[0]}.length"
+            return f"_py.len({pos_args[0]})"
         case "print":
             return f"console.log({', '.join(pos_args)})"
         case "abs":
