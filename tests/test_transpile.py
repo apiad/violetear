@@ -310,12 +310,12 @@ def test_transpile_function_rejects_sync():
         transpile_function(fn)
 
 
-def test_transpile_function_rejects_comprehension():
+def test_transpile_function_supports_list_comprehension():
     async def fn():
         x = [i for i in range(10)]
 
-    with pytest.raises(ClientCompileError, match="unsupported"):
-        transpile_function(fn)
+    js = transpile_function(fn)
+    assert ".map(" in js
 
 
 def test_transpile_class_setter_validates_field_type():
@@ -383,12 +383,13 @@ def test_transpile_fstring_plain_unchanged():
     assert "`hello ${name}`" in js
 
 
-def test_transpile_fstring_computed_spec_raises():
+def test_transpile_fstring_computed_spec_works():
     async def fn(n, w):
         x = f"{n:{w}d}"
 
-    with pytest.raises(ClientCompileError, match="format spec"):
-        transpile_function(fn)
+    js = transpile_function(fn)
+    assert "_py.format(" in js
+    assert "w" in js
 
 
 def test_transpile_mul_uses_py():

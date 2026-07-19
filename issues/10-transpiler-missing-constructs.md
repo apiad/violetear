@@ -1,7 +1,7 @@
 ---
 number: 10
 title: "Transpiler missing constructs: comprehensions, tuple unpacking, computed format specs"
-state: open
+state: closed
 labels: transpiler
 ---
 
