@@ -69,3 +69,21 @@ Key design decisions:
 | Persistence | Optional (`localStorage`) | In-memory (Redis in future) |
 | Conflict model | N/A (isolated) | Last-write-wins |
 | Use for | UI toggles, filters, per-user form state | Chat, counters, collaborative cursors, leaderboards |
+
+## Partials: fragments as the unit of server-rendered UI
+
+`@app.partial` is the minimal server-side primitive for dynamic UI composition. The design constraint is strict: a partial route returns a raw HTML fragment — no `<html>`, no `<head>`, no injected scripts. The client is responsible for fetching and injecting it.
+
+This keeps the server free of client concerns and keeps partial responses cacheable. The DOM manipulation API (`DOM.find`, `DOM.query`, `el.load()`) provides the client-side half.
+
+### Re-hydration after injection
+
+Injecting raw HTML into the DOM normally breaks reactive bindings — any `data-bind-*` attributes in the fragment are unknown to `ReactiveRegistry`. The solution is `_hydrate_subtree(root, scope)`: a focused hydration pass that runs on the injected subtree rather than the full page. After binding, `ReactiveRegistry.flush_subtree(root)` applies cached reactive values immediately so the fragment reflects current state without waiting for the next state mutation.
+
+The `_violetear_scope` module variable stores the scope from the initial `Violetear_hydrate` call, making it available to `_DOMEl.load()` without threading it through the call chain.
+
+### DOM API design choices
+
+- **OOP, not jQuery**: `DOM.find(id).load(url)` reads like a sentence. Chaining works because every method returns `this`.
+- **Method vs property for `html`**: `el.html(content)` is a method (not a property setter) to distinguish it semantically from `el.load()`. Both set `innerHTML` but only `load` re-hydrates. The visual distinction matters.
+- **No client-side element construction**: `el.append(child_element)` is explicitly out of scope for v1. It requires constructing `Element` trees client-side, which duplicates the server-side `ElementBuilder` API and adds complexity. Partials are the clean alternative: construct the fragment server-side, fetch and inject client-side.

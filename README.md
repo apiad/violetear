@@ -356,6 +356,56 @@ Open two browser tabs. Click the button in one. The counter updates in both — 
 
 **How it works:** `Room` is a `SharedProxy` singleton on the server. Any field write intercepts `__setattr__`, which broadcasts a `shared_sync` WebSocket frame to every connection. On connect, the server pushes the full current state before the application's `on("connect")` handler fires. Client setters send `shared_set` to the server; the server is the source of truth and re-broadcasts to all clients (including the sender). The `server_only` metadata prevents clients from writing privileged fields.
 
+## 📄 Partials & DOM Manipulation
+
+`@app.partial` registers a GET route that returns a raw HTML fragment. The client fetches it and injects it into the page via `DOM.query(sel).load(url)`, which also re-hydrates any reactive bindings in the fragment.
+
+```python
+@app.partial("/messages")
+def render_messages():
+    ul = HTML.ul(id="msg-list")
+    with ul as b:
+        for msg in Room.messages:
+            b.li(text=f"{msg['from']}: {msg['text']}")
+    return ul
+
+@app.client.callback
+async def refresh(event: Event):
+    DOM.find("msg-input").value = ""
+    await post_message(text=DOM.find("msg-input").value)
+    await DOM.query("#msg-area").load("/messages")
+```
+
+The full DOM manipulation API (available in `@app.client.*` functions via `from violetear.js import DOM`):
+
+```python
+DOM.find("id")              # getElementById → DOMElement
+DOM.query("#sel")           # querySelector → DOMElement
+DOM.query_all(".cls")       # querySelectorAll → list[DOMElement]
+
+el.text = "hello"           # textContent
+el.html("<b>bold</b>")      # innerHTML (no re-hydration)
+await el.load("/fragment")  # fetch + inject + re-hydrate
+
+el.add_class("active")      # classList.add
+el.remove_class("active")   # classList.remove
+el.toggle_class("open")     # classList.toggle
+el.has_class("active")      # classList.contains
+
+el.attr("href", "/x")       # setAttribute
+el.attr("href")             # getAttribute
+el.remove_attr("disabled")  # removeAttribute
+
+el.hide()                   # style.display = "none"
+el.show()                   # style.display = ""
+el.value                    # form field value (read/write)
+el.clear()                  # innerHTML = ""
+el.remove()                 # .remove()
+el.focus() / el.blur()
+el.scroll_into_view()
+el.on("click", fn) / el.off("click", fn)
+```
+
 ## 🛣️ Roadmap
 
 The long-term vision for Violetear is to become a Python-native, full-stack, production-ready web framework. Here are some of the currently planned features:
@@ -365,7 +415,7 @@ The long-term vision for Violetear is to become a Python-native, full-stack, pro
   * [ ] **🔥 JIT CSS**: An optimization engine that scans your Python code and serves *only* the CSS rules actually used by your components.
   * [ ] **🧭 SPA Engine**: An abstraction (`violetear.spa`) for building Single Page Applications.
   * [ ] **🔀 Client-Side Routing**: Define client-side routes that render specific components into a shell without reloading the page.
-  * [ ] **📃 Partial Views**: Define server views that render only partial documents, which can be injected into the client-side DOM dynamically.
+  * [x] **📃 Partial Views**: `@app.partial` returns raw HTML fragments; `DOM.query(sel).load(url)` fetches and injects them with automatic re-hydration.
   * [x] **🗃️ `@app.local`**: Reactive state that lives in the browser (per user). Changes update the DOM automatically.
   * [x] **🌐 `@app.shared`**: Real-time state that lives on the server (multiplayer). Changes are synced to all connected clients via **WebSockets**.
 

@@ -1,0 +1,69 @@
+site_name: violetear
+site_url: https://apiad.github.io/violetear/
+site_description: The Full-Stack Web Framework for Pythonistas
+site_author: Alejandro Piad Morffis
+repo_url: https://github.com/apiad/violetear
+repo_name: apiad/violetear
+edit_uri: edit/main/docs/
+
+theme:
+  name: material
+  palette:
+    - scheme: default
+      primary: deep purple
+      accent: purple
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: deep purple
+      accent: purple
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.top
+    - toc.integrate
+    - content.code.copy
+    - content.code.annotate
+  logo: assets/logo.png
+  favicon: assets/logo.png
+
+nav:
+  - Home: index.md
+  - Getting Started:
+    - Installation: install.md
+    - Quickstart: quickstart.md
+  - Concepts:
+    - Styling: concepts/styling.md
+    - Markup: concepts/markup.md
+    - Full-Stack App: concepts/app.md
+    - State Management: concepts/state.md
+    - Partials & DOM: concepts/partials.md
+    - Real-Time & Shared State: concepts/realtime.md
+    - PWA: concepts/pwa.md
+  - Design Philosophy: design.md
+  - Roadmap: roadmap.md
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - tables
+  - toc:
+      permalink: true
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/apiad/violetear
+    - icon: fontawesome/brands/python
+      link: https://pypi.org/project/violetear/
