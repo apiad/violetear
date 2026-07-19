@@ -264,6 +264,7 @@ class _DOMEl {
   // Legacy helpers kept for backward compatibility (example 05)
   add(...classes) { return this.add_class(...classes); }
   append(child) { if (this._el && child._el) this._el.appendChild(child._el); return this; }
+  push(child) { return this.append(child); }  // transpiler emits .push() for Python .append()
   query(selector) {
     if (!this._el) return [];
     return Array.from(this._el.querySelectorAll(selector)).map(e => new _DOMEl(e));
