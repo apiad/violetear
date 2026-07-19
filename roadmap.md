@@ -1,7 +1,7 @@
 # Violetear — Roadmap
 
-**Status:** v2.0 released
-**Current:** v2.0 — Python→JS compiler, no Pyodide, 85 tests pass
+**Status:** v1.5.0 released
+**Current:** v1.5.0 — @app.partial + DOM manipulation API, 152 tests pass
 
 ## Summary
 `violetear` is a full-stack Python web framework. Server-Side Rendering via FastAPI, client-side logic compiled from Python to JavaScript at server startup (no Pyodide, no WASM). The core library stays zero-dependency; `violetear[server]` adds FastAPI + uvicorn.
@@ -134,3 +134,20 @@ the transpiler emits calls into (`if (_py.truthy(x))`, `_py.eq`, `_py.format`, �
 - [x] **10.1 List comprehensions**: `[f(x) for x in items if cond]` → `.filter(...).map(...)`; `.items()` → `Object.entries`
 - [x] **10.3 Computed f-string format specs**: `f"{n:{width}d}"` → `` `${_py.format(n, `${width}d`)}` ``
 - [x] **10.4 Dict comprehensions**: `{k: v for k, v in d.items()}` → `Object.fromEntries(Object.entries(d).map(...))`
+
+## Phase 10: @app.partial + DOM manipulation API (v1.5)
+
+- [x] **`@app.partial(path)`**: GET route returning a raw HTML fragment (Element.render()).
+  No `<html>`/`<head>`/`<body>` wrapper, no JS bundle injection. Clients fetch and inject.
+- [x] **`DOMElement` Python stub** (js.py): full OOP mutation surface — `html()`, `load()`,
+  `add_class/remove_class/toggle_class/has_class`, `attr/remove_attr`, `hide/show`,
+  `clear/remove`, `focus/blur/scroll_into_view`, `on/off`.
+- [x] **`DOM.query(sel)` → single element** (querySelector); `DOM.query_all(sel)` → list.
+- [x] **`_DOMEl` wrapper class** (runtime.js): async `load(url)` fetches partial → injects
+  innerHTML → calls `_hydrate_subtree` for reactive re-binding.
+- [x] **`_hydrate_subtree(root, scope)`**: extracted from `Violetear_hydrate` so partial
+  injection re-hydrates only the new subtree without re-running full page hydration.
+- [x] **`_violetear_scope`**: module-level scope stored at hydration time for `DOM.load()`.
+- [x] **`ReactiveRegistry.flush_subtree(root)`**: applies cached reactive values to newly-
+  registered elements so partials reflect current state immediately after injection.
+- [x] **Example 07**: chat message list refreshed via `@app.partial` + `DOM.load()`.
