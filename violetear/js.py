@@ -35,52 +35,91 @@ def _client_only(name: str) -> NoReturn:
 
 
 class DOMElement:
-    """Wrapper around a browser DOM element. Browser-only."""
+    """Wrapper around a live browser DOM element. Browser-only."""
 
+    # --- Content ---
     @property
     def text(self) -> str:
         _client_only("DOMElement.text")
 
     @text.setter
-    def text(self, value: Any) -> None:
+    def text(self, value: str) -> None:
         _client_only("DOMElement.text")
 
-    @property
-    def html(self) -> str:
+    def html(self, content: str) -> None:
+        """Set innerHTML without re-hydration. Use load() for reactive content."""
         _client_only("DOMElement.html")
 
-    @html.setter
-    def html(self, value: Any) -> None:
-        _client_only("DOMElement.html")
+    async def load(self, url: str) -> None:
+        """Fetch url, inject as innerHTML, and re-hydrate reactive bindings."""
+        _client_only("DOMElement.load")
 
+    # --- Classes ---
+    def add_class(self, *names: str) -> "DOMElement":
+        _client_only("DOMElement.add_class")
+
+    def remove_class(self, *names: str) -> "DOMElement":
+        _client_only("DOMElement.remove_class")
+
+    def toggle_class(self, name: str) -> "DOMElement":
+        _client_only("DOMElement.toggle_class")
+
+    def has_class(self, name: str) -> bool:
+        _client_only("DOMElement.has_class")
+
+    # --- Attributes ---
+    def attr(self, key: str, value: str | None = None) -> "str | DOMElement | None":
+        """attr(k, v) sets attribute; attr(k) gets attribute value."""
+        _client_only("DOMElement.attr")
+
+    def remove_attr(self, key: str) -> "DOMElement":
+        _client_only("DOMElement.remove_attr")
+
+    # --- Visibility ---
+    def hide(self) -> "DOMElement":
+        _client_only("DOMElement.hide")
+
+    def show(self, display: str = "") -> "DOMElement":
+        _client_only("DOMElement.show")
+
+    # --- Form values ---
     @property
-    def value(self) -> Any:
+    def value(self) -> str:
         _client_only("DOMElement.value")
 
     @value.setter
-    def value(self, v: Any) -> None:
+    def value(self, v: str) -> None:
         _client_only("DOMElement.value")
 
-    def add(self, *classes: str) -> "DOMElement":
-        _client_only("DOMElement.add")
+    # --- Structure ---
+    def clear(self) -> "DOMElement":
+        """Set innerHTML to empty string."""
+        _client_only("DOMElement.clear")
 
-    def remove(self, *classes: str) -> "DOMElement":
+    def remove(self) -> None:
+        """Remove this element from the DOM."""
         _client_only("DOMElement.remove")
 
-    def toggle(self, cls: str, force: bool | None = None) -> "DOMElement":
-        _client_only("DOMElement.toggle")
+    # --- Focus / scroll ---
+    def focus(self) -> "DOMElement":
+        _client_only("DOMElement.focus")
 
-    def append(self, child: "DOMElement") -> "DOMElement":
-        _client_only("DOMElement.append")
+    def blur(self) -> "DOMElement":
+        _client_only("DOMElement.blur")
 
-    def attr(self, name: str, value: Any = None) -> "DOMElement | str | None":
-        _client_only("DOMElement.attr")
+    def scroll_into_view(self, smooth: bool = True) -> None:
+        _client_only("DOMElement.scroll_into_view")
 
-    def on(self, event: str, handler: Any) -> "DOMElement":
+    # --- Events ---
+    def on(self, event: str, fn: Any) -> "DOMElement":
         _client_only("DOMElement.on")
 
-    def query(self, selector: str) -> list["DOMElement"]:
-        _client_only("DOMElement.query")
+    def off(self, event: str, fn: Any) -> "DOMElement":
+        _client_only("DOMElement.off")
+
+    # --- Legacy helpers (kept for backward compat with example 05) ---
+    def append(self, child: "DOMElement") -> "DOMElement":
+        _client_only("DOMElement.append")
 
 
 class _DatasetProxy:
@@ -102,24 +141,30 @@ class Event:
     target: _EventTarget = _EventTarget()  # type: ignore[assignment]
 
 
-class DOM:
-    """Static factory for DOM elements. Browser-only."""
+class _DOM:
+    """Provides access to live browser DOM elements. Browser-only."""
 
-    @staticmethod
-    def find(id: str) -> DOMElement:
+    def find(self, id: str) -> DOMElement:
+        """getElementById — returns the element with the given id."""
         _client_only("DOM.find")
 
-    @staticmethod
-    def create(tag: str) -> DOMElement:
-        _client_only("DOM.create")
-
-    @staticmethod
-    def query(selector: str) -> list[DOMElement]:
+    def query(self, selector: str) -> DOMElement:
+        """querySelector — returns the first matching element."""
         _client_only("DOM.query")
 
-    @staticmethod
-    def body() -> DOMElement:
+    def query_all(self, selector: str) -> list[DOMElement]:
+        """querySelectorAll — returns all matching elements."""
+        _client_only("DOM.query_all")
+
+    # Legacy helpers kept for backward compat
+    def create(self, tag: str) -> DOMElement:
+        _client_only("DOM.create")
+
+    def body(self) -> DOMElement:
         _client_only("DOM.body")
+
+
+DOM: _DOM = _DOM()  # type: ignore[assignment]
 
 
 # ---------------------------------------------------------------------------

@@ -173,9 +173,11 @@ const _py = {
 // ---------------------------------------------------------------------------
 const ReactiveRegistry = (() => {
   const _subs = {}; // path -> { id -> callback }
+  const _values = {}; // path -> last notified value (for flush_subtree)
   let _counter = 0;
   return {
     notify(path, value) {
+      _values[path] = value;
       const bucket = _subs[path];
       if (!bucket) return;
       for (const cb of Object.values(bucket)) {
@@ -188,55 +190,95 @@ const ReactiveRegistry = (() => {
       _subs[path][id] = callback;
       return () => { if (_subs[path]) delete _subs[path][id]; };
     },
+    // Apply cached values to all subscribers (called after partial inject to
+    // immediately reflect current state in newly-hydrated elements).
+    flush_subtree(_root) {
+      for (const [path, value] of Object.entries(_values)) {
+        const bucket = _subs[path];
+        if (!bucket) continue;
+        for (const cb of Object.values(bucket)) {
+          try { cb(value); } catch (e) { console.error("[violetear] reactive flush error:", e); }
+        }
+      }
+    },
   };
 })();
 
 // ---------------------------------------------------------------------------
-// DOMElement — wraps a native browser element
+// _DOMEl — wraps a native browser element with a fluent mutation API.
+// DOM.find / DOM.query return instances of this class.
 // ---------------------------------------------------------------------------
-class DOMElement {
+class _DOMEl {
   constructor(el) { this._el = el; }
 
-  get text() { return this._el ? this._el.innerText : ""; }
-  set text(v) { if (this._el) this._el.innerText = String(v); }
+  // Content
+  get text() { return this._el ? this._el.textContent : ""; }
+  set text(v) { if (this._el) this._el.textContent = String(v); }
+  html(content) { if (this._el) this._el.innerHTML = content; return this; }
+  async load(url) {
+    const r = await fetch(url);
+    if (!r.ok) { console.error(`[violetear] partial load failed: ${r.status} ${url}`); return; }
+    this._el.innerHTML = await r.text();
+    if (_violetear_scope) _hydrate_subtree(this._el, _violetear_scope);
+  }
 
-  get html() { return this._el ? this._el.innerHTML : ""; }
-  set html(v) { if (this._el) this._el.innerHTML = String(v); }
+  // Classes
+  add_class(...names) { if (this._el) this._el.classList.add(...names); return this; }
+  remove_class(...names) { if (this._el) this._el.classList.remove(...names); return this; }
+  toggle_class(name) { if (this._el) this._el.classList.toggle(name); return this; }
+  has_class(name) { return this._el ? this._el.classList.contains(name) : false; }
 
+  // Attributes
+  attr(key, value) {
+    if (!this._el) return value !== undefined ? this : null;
+    if (value === undefined) return this._el.getAttribute(key);
+    this._el.setAttribute(key, String(value));
+    return this;
+  }
+  remove_attr(key) { if (this._el) this._el.removeAttribute(key); return this; }
+
+  // Visibility
+  hide() { if (this._el) this._el.style.display = "none"; return this; }
+  show(display = "") { if (this._el) this._el.style.display = display; return this; }
+
+  // Form value
   get value() { return this._el ? this._el.value : undefined; }
   set value(v) { if (this._el) this._el.value = String(v); }
 
-  add(...classes) { classes.forEach(c => this._el && this._el.classList.add(c)); return this; }
-  remove(...classes) { classes.forEach(c => this._el && this._el.classList.remove(c)); return this; }
-  toggle(cls, force) {
-    if (!this._el) return this;
-    if (force === true) this._el.classList.add(cls);
-    else if (force === false) this._el.classList.remove(cls);
-    else this._el.classList.toggle(cls);
-    return this;
+  // Structure
+  clear() { if (this._el) this._el.innerHTML = ""; return this; }
+  remove() { if (this._el) this._el.remove(); }
+
+  // Focus / scroll
+  focus() { if (this._el) this._el.focus(); return this; }
+  blur() { if (this._el) this._el.blur(); return this; }
+  scroll_into_view(smooth = true) {
+    if (this._el) this._el.scrollIntoView({ behavior: smooth ? "smooth" : "instant" });
   }
+
+  // Events
+  on(event, fn) { if (this._el) this._el.addEventListener(event, fn); return this; }
+  off(event, fn) { if (this._el) this._el.removeEventListener(event, fn); return this; }
+
+  // Legacy helpers kept for backward compatibility (example 05)
+  add(...classes) { return this.add_class(...classes); }
   append(child) { if (this._el && child._el) this._el.appendChild(child._el); return this; }
-  attr(name, value) {
-    if (!this._el) return value !== undefined ? this : null;
-    if (value === undefined) return this._el.getAttribute(name);
-    this._el.setAttribute(name, String(value));
-    return this;
-  }
-  on(event, handler) { if (this._el) this._el.addEventListener(event, handler); return this; }
   query(selector) {
     if (!this._el) return [];
-    return Array.from(this._el.querySelectorAll(selector)).map(e => new DOMElement(e));
+    return Array.from(this._el.querySelectorAll(selector)).map(e => new _DOMEl(e));
   }
 }
 
 // ---------------------------------------------------------------------------
-// DOM — static factory
+// DOM — static factory for DOM element wrappers
 // ---------------------------------------------------------------------------
 const DOM = {
-  find(id) { return new DOMElement(document.getElementById(id)); },
-  create(tag) { return new DOMElement(document.createElement(tag)); },
-  query(selector) { return Array.from(document.querySelectorAll(selector)).map(e => new DOMElement(e)); },
-  body() { return new DOMElement(document.body); },
+  find(id) { return new _DOMEl(document.getElementById(id)); },
+  query(selector) { return new _DOMEl(document.querySelector(selector)); },
+  query_all(selector) { return Array.from(document.querySelectorAll(selector)).map(e => new _DOMEl(e)); },
+  // Legacy helpers kept for backward compatibility (example 05)
+  create(tag) { return new _DOMEl(document.createElement(tag)); },
+  body() { return new _DOMEl(document.body); },
 };
 
 // ---------------------------------------------------------------------------
@@ -349,10 +391,15 @@ function get_client_id() { return _CLIENT_ID; }
 function exec(js_code) { eval(js_code); } // eslint-disable-line no-eval
 
 // ---------------------------------------------------------------------------
-// Hydration — events, reactive bindings, WebSocket
+// Hydration — bind events and reactive data attributes within a subtree.
+// _violetear_scope is set on first hydration so that DOM.load() can
+// re-hydrate injected partials without needing to pass the scope through.
 // ---------------------------------------------------------------------------
-function _hydrate_events(scope) {
-  document.querySelectorAll("*").forEach(el => {
+let _violetear_scope = null;
+
+function _hydrate_subtree(root, scope) {
+  // Event bindings
+  root.querySelectorAll("*").forEach(el => {
     for (const attr of Array.from(el.attributes)) {
       if (attr.name.startsWith("data-on-")) {
         const event = attr.name.slice(8);
@@ -363,10 +410,9 @@ function _hydrate_events(scope) {
       }
     }
   });
-}
 
-function _hydrate_bindings() {
-  document.querySelectorAll("*").forEach(el => {
+  // Reactive bindings
+  root.querySelectorAll("*").forEach(el => {
     for (const attr of Array.from(el.attributes)) {
       if (!attr.name.startsWith("data-bind-")) continue;
       const prop = attr.name.slice(10); // e.g. "text", "value", "class"
@@ -383,6 +429,9 @@ function _hydrate_bindings() {
       ReactiveRegistry.bind(path, updater);
     }
   });
+
+  // Apply current reactive values to newly-registered elements
+  ReactiveRegistry.flush_subtree(root);
 }
 
 let _violetear_socket = null;
@@ -489,14 +538,16 @@ async function _dispatch_ready(scope) {
 // Entry point — called at end of bundle.js
 // ---------------------------------------------------------------------------
 async function Violetear_hydrate(scope, opts = {}) {
+  // Store scope so DOM.load() can re-hydrate injected partials
+  _violetear_scope = scope;
+
   // Apply storage prefix (namespacing)
   const prefix = opts.storage_prefix ?? "";
   localStorage = _makeStorage(window.localStorage, prefix);
   sessionStorage = _makeStorage(window.sessionStorage, prefix);
   idb = new IDBStore(prefix ? `violetear:${prefix}` : "violetear");
 
-  _hydrate_events(scope);
-  _hydrate_bindings();
+  _hydrate_subtree(document, scope);
 
   const validators = opts.validators ?? {};
   const needs_websocket = Object.keys(scope).some(k => !k.startsWith("_"));
