@@ -315,6 +315,47 @@ async def on_leave(client_id: str):
 
 Similarly, you can hook `@app.client.on("connect")` and `"disconnect"` events to execute client-side code whenever the client websocket connects and disconnects.
 
+## 🌐 Shared State: Multiplayer in One Decorator
+
+`@app.shared` makes collaborative features trivial. Decorate a `@dataclass` with `@app.shared` and every field assignment — from any client or from server code — automatically broadcasts to **all connected clients** and updates their DOM.
+
+No manual broadcast calls. No `request_history`. No `receive_history`. No `@app.client.on("connect")` to request a state dump. Everything is automatic.
+
+```python
+from dataclasses import dataclass, field
+from violetear import App
+from violetear.js import Event
+
+app = App(title="Shared Counter")
+
+@app.shared
+@dataclass
+class Room:
+    count: int = 0
+    users: dict = field(default_factory=dict)
+    # server_only=True → clients can read but cannot write
+    version: str = field(default="1.0", metadata={"server_only": True})
+
+@app.server.on("connect")
+async def on_join(client_id: str):
+    Room.users = {**Room.users, client_id: f"anon-{client_id[:6]}"}
+
+@app.server.on("disconnect")
+async def on_leave(client_id: str):
+    users = dict(Room.users)
+    users.pop(client_id, None)
+    Room.users = users
+
+@app.client.callback
+async def on_click(event: Event):
+    # Sends shared_set to server → server validates → broadcasts to ALL tabs
+    Room.count = Room.count + 1
+```
+
+Open two browser tabs. Click the button in one. The counter updates in both — instantly, with zero extra wiring.
+
+**How it works:** `Room` is a `SharedProxy` singleton on the server. Any field write intercepts `__setattr__`, which broadcasts a `shared_sync` WebSocket frame to every connection. On connect, the server pushes the full current state before the application's `on("connect")` handler fires. Client setters send `shared_set` to the server; the server is the source of truth and re-broadcasts to all clients (including the sender). The `server_only` metadata prevents clients from writing privileged fields.
+
 ## 🛣️ Roadmap
 
 The long-term vision for Violetear is to become a Python-native, full-stack, production-ready web framework. Here are some of the currently planned features:
@@ -326,7 +367,7 @@ The long-term vision for Violetear is to become a Python-native, full-stack, pro
   * [ ] **🔀 Client-Side Routing**: Define client-side routes that render specific components into a shell without reloading the page.
   * [ ] **📃 Partial Views**: Define server views that render only partial documents, which can be injected into the client-side DOM dynamically.
   * [x] **🗃️ `@app.local`**: Reactive state that lives in the browser (per user). Changes update the DOM automatically.
-  * [ ] **🌐 `@app.shared`**: Real-time state that lives on the server (multiplayer). Changes are synced to all connected clients via **WebSockets**.
+  * [x] **🌐 `@app.shared`**: Real-time state that lives on the server (multiplayer). Changes are synced to all connected clients via **WebSockets**.
 
 ## 🤝 Contribution
 

@@ -13,13 +13,18 @@ file is voice/process; **this file (AGENTS.md, plural) is structural**.
 A full-stack isomorphic Python web framework. FastAPI + uvicorn on the
 server; a Python→JS AST compiler + vanilla-JS runtime on the client (no
 Pyodide, no WASM). Ships a server-side HTML builder (`markup.Element`,
-`HTML.div(...)`), a reactive-state layer (`@app.local` + `ReactiveProxy`)
-that emits `data-bind-*` annotations during SSR and hydrates them on the
-client, a Python→JS compiler (`transpile.py`) that compiles `@app.client.*`
-functions at decoration time, a vanilla-JS runtime (`runtime.js`: ~400 lines,
-ReactiveRegistry, DOM, storage, WebSocket, hydration), browser API stubs
-(`js.py`, imported by client code for IDE/mypy support), a WebSocket RPC bus
-(`@app.server.rpc` / `@app.client.realtime`), a CSS DSL (`Style`,
+`HTML.div(...)`), a two-tier reactive state layer:
+
+- `@app.local` — per-tab reactive dataclass compiled to a JS singleton; field
+  assignments inside `@app.client.*` update the DOM automatically.
+- `@app.shared` — cross-client reactive dataclass; field assignments on the
+  server or from any client automatically broadcast a `shared_sync` WebSocket
+  frame to all connections — zero boilerplate collaborative state.
+
+Also ships: a Python→JS compiler (`transpile.py`), a vanilla-JS runtime
+(`runtime.js`: ~500 lines, ReactiveRegistry, `_shared` dispatcher, DOM,
+storage, WebSocket, hydration), browser API stubs (`js.py`), a WebSocket RPC
+bus (`@app.server.rpc` / `@app.client.realtime`), a CSS DSL (`Style`,
 `StyleSheet`), and PWA scaffolding. No JS framework, no templates, no htmx.
 
 Vault node: `vault/Efforts/Repos/violetear.md` (in Alex's workspace).
@@ -29,22 +34,24 @@ Vault node: `vault/Efforts/Repos/violetear.md` (in Alex's workspace).
 ```
 violetear/          package source
   app.py            App, ClientRegistry, ServerRegistry, SocketManager, bundle gen
+  shared.py         SharedProxy, SharedRegistry, SharedStateError (@app.shared)
   markup.py         Element, Document, HTML builder, Component
   state.py          @local decorator, ReactiveProxy, LeafProxy
-  transpile.py      Python→JS AST compiler: ClientCompileError, transpile_class, transpile_function
+  transpile.py      Python→JS AST compiler: ClientCompileError, transpile_class(shared=), transpile_function
   js.py             Browser API stubs for IDE/mypy: DOM, localStorage, sessionStorage, sleep, fetch, …
-  runtime.js        Vanilla-JS runtime: ReactiveRegistry, hydration, DOM, storage, WebSocket (~400 lines)
+  runtime.js        Vanilla-JS runtime: ReactiveRegistry, _shared dispatcher, _ws_send, hydration (~500 lines)
   style.py          fluent style builder
   stylesheet.py     stylesheet builder, selectors
   color.py          Color class + Colors named-color registry
   pwa.py            Manifest, ServiceWorker generators
   presets.py        FlexGrid, SemanticDesign, UtilitySystem, Atomic
 tests/              pytest suite
+  test_shared.py    SharedProxy, SharedRegistry, App.shared, handle_set, bundle emission
 docs/               quarto docs site + example .py files (consumed by test_examples.py)
-examples/           canonical demos, one per tier (01_static → 05_realtime)
+examples/           canonical demos, one per tier (01_static → 06_shared)
 issues/             design docs for unimplemented features
 .github/workflows/  CI (ruff format-check + pytest on push/PR)
-roadmap.md          v1.0 roadmap (Phases 1-4)
+roadmap.md          phased roadmap (Phases 1-8)
 AGENT.md            Alex's code-agent thinking protocol (orthogonal to this file)
 ```
 
@@ -57,10 +64,16 @@ AGENT.md            Alex's code-agent thinking protocol (orthogonal to this file
   (`@app.server.rpc`, `@app.server.realtime`, `@app.client.callback`,
   `@app.client.realtime`, lifecycle handlers). Sync handlers are rejected
   at decoration time with `ValueError`.
-- **Decorator order** matters for `@app.local`: `@app.local` goes
-  *outside* `@dataclass`. The standalone `local()` in `state.py` is the
-  bare-decorator version; `App.local` wraps it to also register the class
-  for bundle transpilation.
+- **Decorator order** matters for `@app.local` and `@app.shared`: the app
+  decorator goes *outside* `@dataclass`. For `@app.shared`, the class name
+  in user code becomes the `SharedProxy` singleton — identical to how
+  `@app.local` works for JS singletons.
+- **`@app.shared` field metadata**: `field(metadata={"server_only": True})`
+  marks a field as server-writable only. The client receives `shared_sync`
+  updates for it but its `_shared.set()` call is stripped from the emitted
+  setter, and the server rejects any `shared_set` frames for it with
+  `shared_error`. Enforcement is runtime-only in v1; compiler enforcement
+  is filed as issue #11.
 - **Module-level defs** for any class/function passed to `@app.local` or
   `@app.client.*`. The bundle generator dedents source so nested defs
   work in tests, but real apps should define these at module scope for
@@ -100,13 +113,13 @@ code — characterization first prevents accidental re-regression.
 ### Release
 
 ```bash
-NEW_VERSION=1.3.0 make release
+NEW_VERSION=1.4.0 make release
 ```
 
 This:
 1. Verifies formatting + runs the full suite.
 2. Bumps `pyproject.toml` and `violetear/__init__.py` (they must stay in sync).
-3. Commits, tags `v1.3.0`, pushes commit + tag, creates a GitHub release.
+3. Commits, tags `v1.4.0`, pushes commit + tag, creates a GitHub release.
 
 Never bump versions manually — the makefile is the single source of truth
 so the two version files don't drift.
@@ -132,6 +145,11 @@ test suite won't catch them:
   `@app.server.on("connect")` + `.invoke(client_id, ...)` to greet new
   clients, or `.broadcast(...)` from inside a request handler when there
   are already-connected clients.
+- Don't mutate `@app.shared` fields in-place (e.g. `Room.users[k] = v`
+  or `Room.messages.append(x)`). In-place mutation bypasses `SharedProxy.
+  __setattr__` so the change is never broadcast. Always reassign:
+  `Room.users = {**Room.users, k: v}` or
+  `Room.messages = Room.messages + [x]`.
 - Don't import `violetear.dom`, `violetear.storage`, or `violetear.client`
   — these modules were deleted in v2.0. Use `from violetear.js import DOM,
   localStorage, sessionStorage` inside `@app.client.*` functions instead.

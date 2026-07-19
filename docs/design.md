@@ -38,3 +38,34 @@ These are the core principles that guide our design.
 ## Leaky abstractions
 
 `violetear` will never be able to cover the full range of the CSS specification, though. So it will always let you sneak under the abstraction (e.g., using `Style.rules`) to bypass its abstractions and directly mess with the underlying HTML and CSS structure. This way, anything that can't be done in a pythonic way with `violetear` will still be possible with lower-level abstractions.
+
+## State management: the dataclass as source of truth
+
+Violetear's state model is built on one idea: **a Python `@dataclass` is the canonical definition of state**. Both client-side local state (`@app.local`) and cross-client shared state (`@app.shared`) use the same primitive — a plain dataclass — and the framework generates the correct reactive glue automatically.
+
+### @app.local — per-session reactive state
+
+`@app.local` compiles a dataclass to a JS reactive singleton. Field assignments inside `@app.client` functions automatically update every DOM element bound to that field. No stores, no signals, no event emitters. The dataclass is the store.
+
+### @app.shared — server-authoritative broadcast state
+
+`@app.shared` extends the same pattern across all connected clients. The dataclass instance lives on the server (in `SharedRegistry`). Any field assignment — whether from server-side code or a client `@app.client.callback` — is intercepted by `SharedProxy.__setattr__`, which broadcasts a `shared_sync` frame to every WebSocket connection.
+
+Key design decisions:
+
+- **Last-write-wins, field-level replacement.** There is no merge logic. A field assignment replaces the current value. This is the correct default for most UI state; richer semantics (shared lists with append-only ops, CRDTs) are a later abstraction layer.
+- **Server is the source of truth.** When a client writes a shared field, the write goes to the server first (`shared_set`), the server validates and re-broadcasts (`shared_sync`) to all clients including the sender. The client never applies a change locally before the server confirms it. This makes conflicts trivially impossible at the cost of one RTT per mutation.
+- **`server_only` fields** allow the server to own a field exclusively. Clients can read the value (they receive `shared_sync` for it) but their `shared_set` frames are rejected. The transpiler strips the `_shared.set()` call from the emitted setter for these fields.
+- **Late-joiner push.** On every new WebSocket connection, the server pushes one `shared_sync` frame per field per class before yielding to the application's `on("connect")` handler. New clients arrive with full state.
+- **`_shared._receiving` flag.** When the client runtime handles an incoming `shared_sync`, it sets a flag that suppresses the reactive setter's outbound `shared_set`. This prevents echo loops without any extra coordination.
+
+### When to use which
+
+| | `@app.local` | `@app.shared` |
+|---|---|---|
+| Scope | Per browser tab | All connected clients |
+| Lives in | Browser JS singleton | Server `SharedRegistry` |
+| Mutation path | Direct setter → DOM | setter → WS → server → broadcast → all DOM |
+| Persistence | Optional (`localStorage`) | In-memory (Redis in future) |
+| Conflict model | N/A (isolated) | Last-write-wins |
+| Use for | UI toggles, filters, per-user form state | Chat, counters, collaborative cursors, leaderboards |
