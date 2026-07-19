@@ -191,6 +191,12 @@ _STRING_METHODS: dict[str, str] = {
     "split": "split",
 }
 
+_LIST_METHODS: dict[str, str] = {
+    "append": "push",
+    "pop": "pop",
+    "reverse": "reverse",
+}
+
 
 class _CompileContext:
     """Tracks declared variable names within a single function body."""
@@ -205,6 +211,23 @@ class _CompileContext:
             self._declared.add(name)
             return f"let {name}"
         return name
+
+
+def _collect_assigned_names(stmts: list[ast.stmt]) -> list[str]:
+    """Return all plain-Name targets assigned in stmts (shallow + 1-level deep for if/while)."""
+    names: list[str] = []
+    for stmt in stmts:
+        if isinstance(stmt, (ast.Assign, ast.AnnAssign, ast.AugAssign)):
+            targets = stmt.targets if isinstance(stmt, ast.Assign) else [stmt.target]
+            for t in targets:
+                if isinstance(t, ast.Name):
+                    names.append(t.id)
+        elif isinstance(stmt, ast.If):
+            names.extend(_collect_assigned_names(stmt.body))
+            names.extend(_collect_assigned_names(stmt.orelse))
+        elif isinstance(stmt, ast.While):
+            names.extend(_collect_assigned_names(stmt.body))
+    return names
 
 
 def _emit_block(stmts: list[ast.stmt], ctx: _CompileContext) -> str:
@@ -273,9 +296,29 @@ def _emit_stmt(node: ast.stmt, ctx: _CompileContext) -> str:  # noqa: C901
         )
 
     if isinstance(node, ast.If):
+        # Hoist any names first-declared inside any branch to outer scope.
+        # JS `let` is block-scoped; Python if-branch variables are function-scoped.
+        all_branch_stmts = list(node.body) + list(node.orelse)
+        hoisted = [
+            n
+            for n in _collect_assigned_names(all_branch_stmts)
+            if n not in ctx._declared
+        ]
+        # Deduplicate while preserving order
+        seen: set[str] = set()
+        hoisted_unique: list[str] = []
+        for n in hoisted:
+            if n not in seen:
+                seen.add(n)
+                hoisted_unique.append(n)
+                ctx._declared.add(n)
+        hoist_line = (
+            ("let " + ", ".join(hoisted_unique) + ";\n") if hoisted_unique else ""
+        )
+
         cond = f"_py.truthy({_emit_expr(node.test, ctx)})"
         body = _emit_block(node.body, ctx)
-        out = f"if ({cond}) {{\n{body}\n}}"
+        out = f"{hoist_line}if ({cond}) {{\n{body}\n}}"
         if node.orelse:
             if len(node.orelse) == 1 and isinstance(node.orelse[0], ast.If):
                 elif_text = _emit_stmt(node.orelse[0], ctx)
@@ -497,6 +540,14 @@ def _emit_expr(node: ast.expr, ctx: _CompileContext) -> str:  # noqa: C901
                 return f"{obj}.slice({lower})"
             upper = _emit_expr(slc.upper, ctx)
             return f"{obj}.slice({lower}, {upper})"
+        # Negative integer literal — JS [−n] returns undefined; use .at().
+        if (
+            isinstance(slc, ast.UnaryOp)
+            and isinstance(slc.op, ast.USub)
+            and isinstance(slc.operand, ast.Constant)
+            and isinstance(slc.operand.value, int)
+        ):
+            return f"{obj}.at(-{slc.operand.value})"
         key = _emit_expr(slc, ctx)
         return f"{obj}[{key}]"
 
@@ -712,6 +763,11 @@ def _emit_call(node: ast.Call, ctx: _CompileContext) -> str:
         # String method translations
         if method in _STRING_METHODS:
             js_method = _STRING_METHODS[method]
+            return f"{obj}.{js_method}({', '.join(pos_args)})"
+
+        # List method translations (append→push, pop, reverse)
+        if method in _LIST_METHODS:
+            js_method = _LIST_METHODS[method]
             return f"{obj}.{js_method}({', '.join(pos_args)})"
 
         # str.join(lst) — reversed receiver in JS: lst.join(sep)
