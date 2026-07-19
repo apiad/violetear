@@ -1,0 +1,1796 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="The Full-Stack Web Framework for Pythonistas">
+      
+      
+        <meta name="author" content="Alejandro Piad Morffis">
+      
+      
+        <link rel="canonical" href="https://apiad.github.io/violetear/plans/2026-07-18-app-shared/">
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/logo.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>@app.shared Implementation Plan - violetear</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="deep-purple" data-md-color-accent="purple">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#appshared-implementation-plan" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="violetear" class="md-header__button md-logo" aria-label="violetear" data-md-component="logo">
+      
+  <img src="../../assets/logo.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            violetear
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              @app.shared Implementation Plan
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="deep-purple" data-md-color-accent="purple"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="deep-purple" data-md-color-accent="purple"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/apiad/violetear" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    apiad/violetear
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../index.md" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../install/" class="md-tabs__link">
+          
+  
+  
+  Getting Started
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../concepts/styling/" class="md-tabs__link">
+          
+  
+  
+  Concepts
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../design/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Design Philosophy
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../roadmap/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Roadmap
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+  
+
+<nav class="md-nav md-nav--primary md-nav--lifted md-nav--integrated" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="violetear" class="md-nav__button md-logo" aria-label="violetear" data-md-component="logo">
+      
+  <img src="../../assets/logo.png" alt="logo">
+
+    </a>
+    violetear
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/apiad/violetear" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    apiad/violetear
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../index.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Getting Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../install/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../quickstart/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quickstart
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Concepts
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Concepts
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../concepts/styling/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Styling
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../concepts/markup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Markup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../concepts/app/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Full-Stack App
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../concepts/state/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    State Management
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../concepts/partials/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Partials & DOM
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../concepts/realtime/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Real-Time & Shared State
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../concepts/pwa/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PWA
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Design Philosophy
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../roadmap/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Roadmap
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="appshared-implementation-plan">@app.shared Implementation Plan<a class="headerlink" href="#appshared-implementation-plan" title="Permanent link">&para;</a></h1>
+<blockquote>
+<p><strong>For agentic workers:</strong> REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (<code>- [ ]</code>) syntax for tracking.</p>
+</blockquote>
+<p><strong>Goal:</strong> Add <code>@app.shared</code> decorator — a reactive dataclass whose field assignments auto-broadcast to all connected clients via WebSocket, with automatic late-joiner push on connect.</p>
+<p><strong>Architecture:</strong> New <code>SharedProxy</code>/<code>SharedRegistry</code> in <code>violetear/shared.py</code> handles server-side interception and broadcast. <code>transpile_class(..., shared=True)</code> emits a JS reactive class whose setters also send <code>shared_set</code> WS messages. <code>runtime.js</code> gains a <code>_shared</code> dispatcher that handles <code>shared_sync</code>/<code>shared_error</code> frames from the server.</p>
+<p><strong>Tech Stack:</strong> Python 3.12+, asyncio, FastAPI WebSocket, vanilla JS (no build tooling)</p>
+<h2 id="global-constraints">Global Constraints<a class="headerlink" href="#global-constraints" title="Permanent link">&para;</a></h2>
+<ul>
+<li>No third-party JS. No build tooling. All JS goes into <code>runtime.js</code> or is emitted inline into <code>bundle.js</code>.</li>
+<li><code>asyncio.get_running_loop()</code> not <code>get_event_loop()</code> (deprecated).</li>
+<li>All new server modules import-guarded the same way <code>app.py</code> is (FastAPI optional).</li>
+<li><code>make</code> (ruff format-check + pytest) must pass before every commit.</li>
+<li>Commit message convention: <code>feat(shared): ...</code>, <code>test(shared): ...</code>, <code>fix(shared): ...</code></li>
+<li>Run <code>make format</code> before committing if ruff format-check fails.</li>
+</ul>
+<hr />
+<h3 id="task-1-sharedproxy-sharedregistry">Task 1: SharedProxy + SharedRegistry<a class="headerlink" href="#task-1-sharedproxy-sharedregistry" title="Permanent link">&para;</a></h3>
+<p><strong>Files:</strong>
+- Create: <code>violetear/shared.py</code>
+- Create: <code>tests/test_shared.py</code></p>
+<p><strong>Interfaces:</strong>
+- Produces:
+  - <code>SharedProxy(instance, registry)</code> — proxy wrapper; <code>__getattr__</code> delegates to instance; <code>__setattr__</code> updates instance + schedules async broadcast
+  - <code>SharedRegistry(app)</code> — holds <code>_classes: dict[str, SharedProxy]</code>; methods: <code>register(cls) -&gt; SharedProxy</code>, <code>broadcast_sync(cls_name, field, value) -&gt; coroutine</code>, <code>push_to_new_client(client_id) -&gt; coroutine</code>, <code>handle_set(client_id, cls_name, field, value) -&gt; coroutine</code>
+  - <code>SharedStateError(message)</code> — raised when a <code>server_only</code> field is written</p>
+<ul>
+<li>[ ] <strong>Step 1.1: Write failing tests for SharedProxy</strong></li>
+</ul>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1"># tests/test_shared.py</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="kn">import</span><span class="w"> </span><span class="nn">asyncio</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="kn">import</span><span class="w"> </span><span class="nn">dataclasses</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="kn">from</span><span class="w"> </span><span class="nn">unittest.mock</span><span class="w"> </span><span class="kn">import</span> <span class="n">AsyncMock</span><span class="p">,</span> <span class="n">MagicMock</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="kn">import</span><span class="w"> </span><span class="nn">pytest</span>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="kn">from</span><span class="w"> </span><span class="nn">violetear.shared</span><span class="w"> </span><span class="kn">import</span> <span class="n">SharedProxy</span><span class="p">,</span> <span class="n">SharedRegistry</span><span class="p">,</span> <span class="n">SharedStateError</span>
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="k">class</span><span class="w"> </span><span class="nc">_Counter</span><span class="p">:</span>
+<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>    <span class="n">count</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
+<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>    <span class="n">label</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;x&quot;</span>
+<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>    <span class="n">readonly_field</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">field</span><span class="p">(</span>
+<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>        <span class="n">default</span><span class="o">=</span><span class="s2">&quot;locked&quot;</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;server_only&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">}</span>
+<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>    <span class="p">)</span>
+<a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>
+<a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a>
+<a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a><span class="k">def</span><span class="w"> </span><span class="nf">_make_registry</span><span class="p">(</span><span class="n">broadcast_fn</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a>    <span class="n">app</span> <span class="o">=</span> <span class="n">MagicMock</span><span class="p">()</span>
+<a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a>    <span class="n">registry</span> <span class="o">=</span> <span class="n">SharedRegistry</span><span class="p">(</span><span class="n">app</span><span class="p">)</span>
+<a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a>    <span class="k">if</span> <span class="n">broadcast_fn</span><span class="p">:</span>
+<a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a>        <span class="n">registry</span><span class="o">.</span><span class="n">broadcast_sync</span> <span class="o">=</span> <span class="n">broadcast_fn</span>
+<a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a>    <span class="k">return</span> <span class="n">registry</span>
+<a id="__codelineno-0-24" name="__codelineno-0-24" href="#__codelineno-0-24"></a>
+<a id="__codelineno-0-25" name="__codelineno-0-25" href="#__codelineno-0-25"></a>
+<a id="__codelineno-0-26" name="__codelineno-0-26" href="#__codelineno-0-26"></a><span class="k">def</span><span class="w"> </span><span class="nf">test_proxy_getattr</span><span class="p">():</span>
+<a id="__codelineno-0-27" name="__codelineno-0-27" href="#__codelineno-0-27"></a>    <span class="n">registry</span> <span class="o">=</span> <span class="n">_make_registry</span><span class="p">()</span>
+<a id="__codelineno-0-28" name="__codelineno-0-28" href="#__codelineno-0-28"></a>    <span class="n">proxy</span> <span class="o">=</span> <span class="n">SharedProxy</span><span class="p">(</span><span class="n">_Counter</span><span class="p">(),</span> <span class="n">registry</span><span class="p">)</span>
+<a id="__codelineno-0-29" name="__codelineno-0-29" href="#__codelineno-0-29"></a>    <span class="k">assert</span> <span class="n">proxy</span><span class="o">.</span><span class="n">count</span> <span class="o">==</span> <span class="mi">0</span>
+<a id="__codelineno-0-30" name="__codelineno-0-30" href="#__codelineno-0-30"></a>    <span class="k">assert</span> <span class="n">proxy</span><span class="o">.</span><span class="n">label</span> <span class="o">==</span> <span class="s2">&quot;x&quot;</span>
+<a id="__codelineno-0-31" name="__codelineno-0-31" href="#__codelineno-0-31"></a>
+<a id="__codelineno-0-32" name="__codelineno-0-32" href="#__codelineno-0-32"></a>
+<a id="__codelineno-0-33" name="__codelineno-0-33" href="#__codelineno-0-33"></a><span class="k">def</span><span class="w"> </span><span class="nf">test_proxy_setattr_updates_instance</span><span class="p">():</span>
+<a id="__codelineno-0-34" name="__codelineno-0-34" href="#__codelineno-0-34"></a>    <span class="n">calls</span> <span class="o">=</span> <span class="p">[]</span>
+<a id="__codelineno-0-35" name="__codelineno-0-35" href="#__codelineno-0-35"></a>    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">fake_broadcast</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+<a id="__codelineno-0-36" name="__codelineno-0-36" href="#__codelineno-0-36"></a>        <span class="n">calls</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="bp">cls</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="n">value</span><span class="p">))</span>
+<a id="__codelineno-0-37" name="__codelineno-0-37" href="#__codelineno-0-37"></a>    <span class="n">registry</span> <span class="o">=</span> <span class="n">_make_registry</span><span class="p">(</span><span class="n">fake_broadcast</span><span class="p">)</span>
+<a id="__codelineno-0-38" name="__codelineno-0-38" href="#__codelineno-0-38"></a>    <span class="n">proxy</span> <span class="o">=</span> <span class="n">SharedProxy</span><span class="p">(</span><span class="n">_Counter</span><span class="p">(),</span> <span class="n">registry</span><span class="p">)</span>
+<a id="__codelineno-0-39" name="__codelineno-0-39" href="#__codelineno-0-39"></a>
+<a id="__codelineno-0-40" name="__codelineno-0-40" href="#__codelineno-0-40"></a>    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">():</span>
+<a id="__codelineno-0-41" name="__codelineno-0-41" href="#__codelineno-0-41"></a>        <span class="n">proxy</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="s2">&quot;count&quot;</span><span class="p">,</span> <span class="mi">42</span><span class="p">)</span>
+<a id="__codelineno-0-42" name="__codelineno-0-42" href="#__codelineno-0-42"></a>        <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>  <span class="c1"># let the created task run</span>
+<a id="__codelineno-0-43" name="__codelineno-0-43" href="#__codelineno-0-43"></a>
+<a id="__codelineno-0-44" name="__codelineno-0-44" href="#__codelineno-0-44"></a>    <span class="n">asyncio</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">run</span><span class="p">())</span>
+<a id="__codelineno-0-45" name="__codelineno-0-45" href="#__codelineno-0-45"></a>    <span class="k">assert</span> <span class="n">proxy</span><span class="o">.</span><span class="n">count</span> <span class="o">==</span> <span class="mi">42</span>
+<a id="__codelineno-0-46" name="__codelineno-0-46" href="#__codelineno-0-46"></a>    <span class="k">assert</span> <span class="p">(</span><span class="s2">&quot;_Counter&quot;</span><span class="p">,</span> <span class="s2">&quot;count&quot;</span><span class="p">,</span> <span class="mi">42</span><span class="p">)</span> <span class="ow">in</span> <span class="n">calls</span>
+<a id="__codelineno-0-47" name="__codelineno-0-47" href="#__codelineno-0-47"></a>
+<a id="__codelineno-0-48" name="__codelineno-0-48" href="#__codelineno-0-48"></a>
+<a id="__codelineno-0-49" name="__codelineno-0-49" href="#__codelineno-0-49"></a><span class="k">def</span><span class="w"> </span><span class="nf">test_proxy_server_only_write_does_not_raise_from_server</span><span class="p">():</span>
+<a id="__codelineno-0-50" name="__codelineno-0-50" href="#__codelineno-0-50"></a>    <span class="c1"># Server writes server_only fields freely — SharedProxy.__setattr__ does NOT raise</span>
+<a id="__codelineno-0-51" name="__codelineno-0-51" href="#__codelineno-0-51"></a>    <span class="n">registry</span> <span class="o">=</span> <span class="n">_make_registry</span><span class="p">(</span><span class="n">AsyncMock</span><span class="p">())</span>
+<a id="__codelineno-0-52" name="__codelineno-0-52" href="#__codelineno-0-52"></a>    <span class="n">proxy</span> <span class="o">=</span> <span class="n">SharedProxy</span><span class="p">(</span><span class="n">_Counter</span><span class="p">(),</span> <span class="n">registry</span><span class="p">)</span>
+<a id="__codelineno-0-53" name="__codelineno-0-53" href="#__codelineno-0-53"></a>    <span class="n">proxy</span><span class="o">.</span><span class="n">readonly_field</span> <span class="o">=</span> <span class="s2">&quot;new&quot;</span>  <span class="c1"># must not raise</span>
+<a id="__codelineno-0-54" name="__codelineno-0-54" href="#__codelineno-0-54"></a>    <span class="k">assert</span> <span class="n">proxy</span><span class="o">.</span><span class="n">readonly_field</span> <span class="o">==</span> <span class="s2">&quot;new&quot;</span>
+</code></pre></div>
+<ul>
+<li>[ ] <strong>Step 1.2: Run to confirm FAIL</strong></li>
+</ul>
+<p><div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="nb">cd</span><span class="w"> </span>/home/apiad/Workspace/repos/violetear<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>uv<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>tests/test_shared.py<span class="w"> </span>-v<span class="w"> </span><span class="m">2</span>&gt;<span class="p">&amp;</span><span class="m">1</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>head<span class="w"> </span>-20
+</code></pre></div>
+Expected: <code>ModuleNotFoundError: No module named 'violetear.shared'</code></p>
+<ul>
+<li>[ ] <strong>Step 1.3: Implement <code>violetear/shared.py</code></strong></li>
+</ul>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="sd">&quot;&quot;&quot;Server-side shared state: SharedProxy, SharedRegistry, SharedStateError.&quot;&quot;&quot;</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="kn">import</span><span class="w"> </span><span class="nn">asyncio</span>
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="kn">import</span><span class="w"> </span><span class="nn">dataclasses</span>
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Any</span>
+<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>
+<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>    <span class="kn">from</span><span class="w"> </span><span class="nn">.app</span><span class="w"> </span><span class="kn">import</span> <span class="n">App</span>
+<a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a>
+<a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a>
+<a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a><span class="k">class</span><span class="w"> </span><span class="nc">SharedStateError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+<a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Raised on illegal operations on shared state (e.g. unknown class).&quot;&quot;&quot;</span>
+<a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a>
+<a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a>
+<a id="__codelineno-2-16" name="__codelineno-2-16" href="#__codelineno-2-16"></a><span class="k">class</span><span class="w"> </span><span class="nc">SharedProxy</span><span class="p">:</span>
+<a id="__codelineno-2-17" name="__codelineno-2-17" href="#__codelineno-2-17"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Wraps a @dataclass instance; intercepts __setattr__ to auto-broadcast.&quot;&quot;&quot;</span>
+<a id="__codelineno-2-18" name="__codelineno-2-18" href="#__codelineno-2-18"></a>
+<a id="__codelineno-2-19" name="__codelineno-2-19" href="#__codelineno-2-19"></a>    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">instance</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">registry</span><span class="p">:</span> <span class="s2">&quot;SharedRegistry&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-2-20" name="__codelineno-2-20" href="#__codelineno-2-20"></a>        <span class="nb">object</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_instance&quot;</span><span class="p">,</span> <span class="n">instance</span><span class="p">)</span>
+<a id="__codelineno-2-21" name="__codelineno-2-21" href="#__codelineno-2-21"></a>        <span class="nb">object</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_registry&quot;</span><span class="p">,</span> <span class="n">registry</span><span class="p">)</span>
+<a id="__codelineno-2-22" name="__codelineno-2-22" href="#__codelineno-2-22"></a>
+<a id="__codelineno-2-23" name="__codelineno-2-23" href="#__codelineno-2-23"></a>    <span class="k">def</span><span class="w"> </span><span class="fm">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+<a id="__codelineno-2-24" name="__codelineno-2-24" href="#__codelineno-2-24"></a>        <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="nb">object</span><span class="o">.</span><span class="fm">__getattribute__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_instance&quot;</span><span class="p">),</span> <span class="n">name</span><span class="p">)</span>
+<a id="__codelineno-2-25" name="__codelineno-2-25" href="#__codelineno-2-25"></a>
+<a id="__codelineno-2-26" name="__codelineno-2-26" href="#__codelineno-2-26"></a>    <span class="k">def</span><span class="w"> </span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-2-27" name="__codelineno-2-27" href="#__codelineno-2-27"></a>        <span class="n">instance</span> <span class="o">=</span> <span class="nb">object</span><span class="o">.</span><span class="fm">__getattribute__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_instance&quot;</span><span class="p">)</span>
+<a id="__codelineno-2-28" name="__codelineno-2-28" href="#__codelineno-2-28"></a>        <span class="n">registry</span> <span class="o">=</span> <span class="nb">object</span><span class="o">.</span><span class="fm">__getattribute__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_registry&quot;</span><span class="p">)</span>
+<a id="__codelineno-2-29" name="__codelineno-2-29" href="#__codelineno-2-29"></a>        <span class="nb">setattr</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+<a id="__codelineno-2-30" name="__codelineno-2-30" href="#__codelineno-2-30"></a>        <span class="k">try</span><span class="p">:</span>
+<a id="__codelineno-2-31" name="__codelineno-2-31" href="#__codelineno-2-31"></a>            <span class="n">loop</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">get_running_loop</span><span class="p">()</span>
+<a id="__codelineno-2-32" name="__codelineno-2-32" href="#__codelineno-2-32"></a>        <span class="k">except</span> <span class="ne">RuntimeError</span><span class="p">:</span>
+<a id="__codelineno-2-33" name="__codelineno-2-33" href="#__codelineno-2-33"></a>            <span class="k">return</span>  <span class="c1"># no running loop (e.g. tests without asyncio)</span>
+<a id="__codelineno-2-34" name="__codelineno-2-34" href="#__codelineno-2-34"></a>        <span class="n">loop</span><span class="o">.</span><span class="n">create_task</span><span class="p">(</span>
+<a id="__codelineno-2-35" name="__codelineno-2-35" href="#__codelineno-2-35"></a>            <span class="n">registry</span><span class="o">.</span><span class="n">broadcast_sync</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">instance</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+<a id="__codelineno-2-36" name="__codelineno-2-36" href="#__codelineno-2-36"></a>        <span class="p">)</span>
+<a id="__codelineno-2-37" name="__codelineno-2-37" href="#__codelineno-2-37"></a>
+<a id="__codelineno-2-38" name="__codelineno-2-38" href="#__codelineno-2-38"></a>
+<a id="__codelineno-2-39" name="__codelineno-2-39" href="#__codelineno-2-39"></a><span class="k">class</span><span class="w"> </span><span class="nc">SharedRegistry</span><span class="p">:</span>
+<a id="__codelineno-2-40" name="__codelineno-2-40" href="#__codelineno-2-40"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Owns all @app.shared singletons; drives broadcast and late-joiner push.&quot;&quot;&quot;</span>
+<a id="__codelineno-2-41" name="__codelineno-2-41" href="#__codelineno-2-41"></a>
+<a id="__codelineno-2-42" name="__codelineno-2-42" href="#__codelineno-2-42"></a>    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">app</span><span class="p">:</span> <span class="s2">&quot;App&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-2-43" name="__codelineno-2-43" href="#__codelineno-2-43"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_app</span> <span class="o">=</span> <span class="n">app</span>
+<a id="__codelineno-2-44" name="__codelineno-2-44" href="#__codelineno-2-44"></a>        <span class="c1"># cls_name -&gt; SharedProxy</span>
+<a id="__codelineno-2-45" name="__codelineno-2-45" href="#__codelineno-2-45"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_classes</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">SharedProxy</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+<a id="__codelineno-2-46" name="__codelineno-2-46" href="#__codelineno-2-46"></a>        <span class="c1"># cls_name -&gt; {field_name -&gt; metadata dict}</span>
+<a id="__codelineno-2-47" name="__codelineno-2-47" href="#__codelineno-2-47"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_meta</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{}</span>
+<a id="__codelineno-2-48" name="__codelineno-2-48" href="#__codelineno-2-48"></a>
+<a id="__codelineno-2-49" name="__codelineno-2-49" href="#__codelineno-2-49"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">register</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">cls</span><span class="p">:</span> <span class="nb">type</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SharedProxy</span><span class="p">:</span>
+<a id="__codelineno-2-50" name="__codelineno-2-50" href="#__codelineno-2-50"></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;Instantiate cls, wrap in SharedProxy, register under cls.__name__.&quot;&quot;&quot;</span>
+<a id="__codelineno-2-51" name="__codelineno-2-51" href="#__codelineno-2-51"></a>        <span class="k">if</span> <span class="ow">not</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">is_dataclass</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+<a id="__codelineno-2-52" name="__codelineno-2-52" href="#__codelineno-2-52"></a>            <span class="k">raise</span> <span class="n">SharedStateError</span><span class="p">(</span>
+<a id="__codelineno-2-53" name="__codelineno-2-53" href="#__codelineno-2-53"></a>                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="si">!r}</span><span class="s2"> must be a @dataclass to use @app.shared&quot;</span>
+<a id="__codelineno-2-54" name="__codelineno-2-54" href="#__codelineno-2-54"></a>            <span class="p">)</span>
+<a id="__codelineno-2-55" name="__codelineno-2-55" href="#__codelineno-2-55"></a>        <span class="n">instance</span> <span class="o">=</span> <span class="bp">cls</span><span class="p">()</span>
+<a id="__codelineno-2-56" name="__codelineno-2-56" href="#__codelineno-2-56"></a>        <span class="n">proxy</span> <span class="o">=</span> <span class="n">SharedProxy</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+<a id="__codelineno-2-57" name="__codelineno-2-57" href="#__codelineno-2-57"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_classes</span><span class="p">[</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="p">]</span> <span class="o">=</span> <span class="n">proxy</span>
+<a id="__codelineno-2-58" name="__codelineno-2-58" href="#__codelineno-2-58"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_meta</span><span class="p">[</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+<a id="__codelineno-2-59" name="__codelineno-2-59" href="#__codelineno-2-59"></a>            <span class="n">f</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="nb">dict</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">metadata</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">fields</span><span class="p">(</span><span class="n">instance</span><span class="p">)</span>
+<a id="__codelineno-2-60" name="__codelineno-2-60" href="#__codelineno-2-60"></a>        <span class="p">}</span>
+<a id="__codelineno-2-61" name="__codelineno-2-61" href="#__codelineno-2-61"></a>        <span class="k">return</span> <span class="n">proxy</span>
+<a id="__codelineno-2-62" name="__codelineno-2-62" href="#__codelineno-2-62"></a>
+<a id="__codelineno-2-63" name="__codelineno-2-63" href="#__codelineno-2-63"></a>    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">broadcast_sync</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cls_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">field</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-2-64" name="__codelineno-2-64" href="#__codelineno-2-64"></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;Send shared_sync for (cls_name, field, value) to every client.&quot;&quot;&quot;</span>
+<a id="__codelineno-2-65" name="__codelineno-2-65" href="#__codelineno-2-65"></a>        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_app</span><span class="o">.</span><span class="n">socket_manager</span><span class="o">.</span><span class="n">broadcast_shared_sync</span><span class="p">(</span><span class="n">cls_name</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+<a id="__codelineno-2-66" name="__codelineno-2-66" href="#__codelineno-2-66"></a>
+<a id="__codelineno-2-67" name="__codelineno-2-67" href="#__codelineno-2-67"></a>    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">push_to_new_client</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">client_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-2-68" name="__codelineno-2-68" href="#__codelineno-2-68"></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;Push full current state of every @app.shared class to one client.&quot;&quot;&quot;</span>
+<a id="__codelineno-2-69" name="__codelineno-2-69" href="#__codelineno-2-69"></a>        <span class="k">for</span> <span class="n">cls_name</span><span class="p">,</span> <span class="n">proxy</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_classes</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+<a id="__codelineno-2-70" name="__codelineno-2-70" href="#__codelineno-2-70"></a>            <span class="n">instance</span> <span class="o">=</span> <span class="nb">object</span><span class="o">.</span><span class="fm">__getattribute__</span><span class="p">(</span><span class="n">proxy</span><span class="p">,</span> <span class="s2">&quot;_instance&quot;</span><span class="p">)</span>
+<a id="__codelineno-2-71" name="__codelineno-2-71" href="#__codelineno-2-71"></a>            <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">fields</span><span class="p">(</span><span class="n">instance</span><span class="p">):</span>
+<a id="__codelineno-2-72" name="__codelineno-2-72" href="#__codelineno-2-72"></a>                <span class="n">value</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="n">f</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+<a id="__codelineno-2-73" name="__codelineno-2-73" href="#__codelineno-2-73"></a>                <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_app</span><span class="o">.</span><span class="n">socket_manager</span><span class="o">.</span><span class="n">send_shared_sync</span><span class="p">(</span>
+<a id="__codelineno-2-74" name="__codelineno-2-74" href="#__codelineno-2-74"></a>                    <span class="n">client_id</span><span class="p">,</span> <span class="n">cls_name</span><span class="p">,</span> <span class="n">f</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">value</span>
+<a id="__codelineno-2-75" name="__codelineno-2-75" href="#__codelineno-2-75"></a>                <span class="p">)</span>
+<a id="__codelineno-2-76" name="__codelineno-2-76" href="#__codelineno-2-76"></a>
+<a id="__codelineno-2-77" name="__codelineno-2-77" href="#__codelineno-2-77"></a>    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">handle_set</span><span class="p">(</span>
+<a id="__codelineno-2-78" name="__codelineno-2-78" href="#__codelineno-2-78"></a>        <span class="bp">self</span><span class="p">,</span> <span class="n">client_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">cls_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">field</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Any</span>
+<a id="__codelineno-2-79" name="__codelineno-2-79" href="#__codelineno-2-79"></a>    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-2-80" name="__codelineno-2-80" href="#__codelineno-2-80"></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;Handle inbound shared_set from a client.&quot;&quot;&quot;</span>
+<a id="__codelineno-2-81" name="__codelineno-2-81" href="#__codelineno-2-81"></a>        <span class="n">proxy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_classes</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cls_name</span><span class="p">)</span>
+<a id="__codelineno-2-82" name="__codelineno-2-82" href="#__codelineno-2-82"></a>        <span class="k">if</span> <span class="n">proxy</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-2-83" name="__codelineno-2-83" href="#__codelineno-2-83"></a>            <span class="k">return</span>  <span class="c1"># unknown class — ignore silently</span>
+<a id="__codelineno-2-84" name="__codelineno-2-84" href="#__codelineno-2-84"></a>        <span class="n">meta</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_meta</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cls_name</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="p">{})</span>
+<a id="__codelineno-2-85" name="__codelineno-2-85" href="#__codelineno-2-85"></a>        <span class="k">if</span> <span class="n">meta</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;server_only&quot;</span><span class="p">):</span>
+<a id="__codelineno-2-86" name="__codelineno-2-86" href="#__codelineno-2-86"></a>            <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_app</span><span class="o">.</span><span class="n">socket_manager</span><span class="o">.</span><span class="n">send_shared_error</span><span class="p">(</span>
+<a id="__codelineno-2-87" name="__codelineno-2-87" href="#__codelineno-2-87"></a>                <span class="n">client_id</span><span class="p">,</span> <span class="n">cls_name</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="s2">&quot;server_only&quot;</span>
+<a id="__codelineno-2-88" name="__codelineno-2-88" href="#__codelineno-2-88"></a>            <span class="p">)</span>
+<a id="__codelineno-2-89" name="__codelineno-2-89" href="#__codelineno-2-89"></a>            <span class="k">return</span>
+<a id="__codelineno-2-90" name="__codelineno-2-90" href="#__codelineno-2-90"></a>        <span class="c1"># Apply directly to instance (bypassing SharedProxy to avoid double-broadcast)</span>
+<a id="__codelineno-2-91" name="__codelineno-2-91" href="#__codelineno-2-91"></a>        <span class="n">instance</span> <span class="o">=</span> <span class="nb">object</span><span class="o">.</span><span class="fm">__getattribute__</span><span class="p">(</span><span class="n">proxy</span><span class="p">,</span> <span class="s2">&quot;_instance&quot;</span><span class="p">)</span>
+<a id="__codelineno-2-92" name="__codelineno-2-92" href="#__codelineno-2-92"></a>        <span class="k">try</span><span class="p">:</span>
+<a id="__codelineno-2-93" name="__codelineno-2-93" href="#__codelineno-2-93"></a>            <span class="nb">setattr</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+<a id="__codelineno-2-94" name="__codelineno-2-94" href="#__codelineno-2-94"></a>        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+<a id="__codelineno-2-95" name="__codelineno-2-95" href="#__codelineno-2-95"></a>            <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_app</span><span class="o">.</span><span class="n">socket_manager</span><span class="o">.</span><span class="n">send_shared_error</span><span class="p">(</span>
+<a id="__codelineno-2-96" name="__codelineno-2-96" href="#__codelineno-2-96"></a>                <span class="n">client_id</span><span class="p">,</span> <span class="n">cls_name</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="s2">&quot;type_error&quot;</span>
+<a id="__codelineno-2-97" name="__codelineno-2-97" href="#__codelineno-2-97"></a>            <span class="p">)</span>
+<a id="__codelineno-2-98" name="__codelineno-2-98" href="#__codelineno-2-98"></a>            <span class="k">return</span>
+<a id="__codelineno-2-99" name="__codelineno-2-99" href="#__codelineno-2-99"></a>        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">broadcast_sync</span><span class="p">(</span><span class="n">cls_name</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+</code></pre></div>
+<ul>
+<li>[ ] <strong>Step 1.4: Run tests to confirm PASS</strong></li>
+</ul>
+<p><div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>uv<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>tests/test_shared.py<span class="w"> </span>-v
+</code></pre></div>
+Expected: all tests pass (some may skip due to no running loop — that's fine for now)</p>
+<ul>
+<li>[ ] <strong>Step 1.5: Commit</strong></li>
+</ul>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>git<span class="w"> </span>add<span class="w"> </span>violetear/shared.py<span class="w"> </span>tests/test_shared.py
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;feat(shared): SharedProxy + SharedRegistry with broadcast and late-joiner push&quot;</span>
+</code></pre></div>
+<hr />
+<h3 id="task-2-socketmanager-new-send-methods">Task 2: SocketManager new send methods<a class="headerlink" href="#task-2-socketmanager-new-send-methods" title="Permanent link">&para;</a></h3>
+<p><strong>Files:</strong>
+- Modify: <code>violetear/app.py</code> — <code>SocketManager</code> class (lines 284–345)
+- Modify: <code>tests/test_websocket.py</code> — add shared message assertions</p>
+<p><strong>Interfaces:</strong>
+- Consumes: existing <code>SocketManager.active_connections: dict[str, WebSocket]</code>
+- Produces:
+  - <code>SocketManager.broadcast_shared_sync(cls_name: str, field: str, value: Any) -&gt; coroutine</code>
+  - <code>SocketManager.send_shared_sync(client_id: str, cls_name: str, field: str, value: Any) -&gt; coroutine</code>
+  - <code>SocketManager.send_shared_error(client_id: str, cls_name: str, field: str, reason: str) -&gt; coroutine</code></p>
+<ul>
+<li>[ ] <strong>Step 2.1: Write failing tests</strong></li>
+</ul>
+<p>Add to <code>tests/test_websocket.py</code> (check existing file first for import style):</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="c1"># Add these tests to tests/test_websocket.py</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="kn">from</span><span class="w"> </span><span class="nn">unittest.mock</span><span class="w"> </span><span class="kn">import</span> <span class="n">AsyncMock</span><span class="p">,</span> <span class="n">MagicMock</span><span class="p">,</span> <span class="n">patch</span>
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="kn">import</span><span class="w"> </span><span class="nn">pytest</span>
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="kn">from</span><span class="w"> </span><span class="nn">violetear.app</span><span class="w"> </span><span class="kn">import</span> <span class="n">SocketManager</span>
+<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>
+<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a><span class="k">def</span><span class="w"> </span><span class="nf">_make_socket_manager</span><span class="p">():</span>
+<a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a>    <span class="n">app</span> <span class="o">=</span> <span class="n">MagicMock</span><span class="p">()</span>
+<a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a>    <span class="n">sm</span> <span class="o">=</span> <span class="n">SocketManager</span><span class="p">(</span><span class="n">app</span><span class="p">)</span>
+<a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a>    <span class="n">ws</span> <span class="o">=</span> <span class="n">AsyncMock</span><span class="p">()</span>
+<a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a>    <span class="n">sm</span><span class="o">.</span><span class="n">active_connections</span><span class="p">[</span><span class="s2">&quot;c1&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ws</span>
+<a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a>    <span class="k">return</span> <span class="n">sm</span><span class="p">,</span> <span class="n">ws</span>
+<a id="__codelineno-5-13" name="__codelineno-5-13" href="#__codelineno-5-13"></a>
+<a id="__codelineno-5-14" name="__codelineno-5-14" href="#__codelineno-5-14"></a><span class="k">def</span><span class="w"> </span><span class="nf">test_broadcast_shared_sync_sends_to_all</span><span class="p">():</span>
+<a id="__codelineno-5-15" name="__codelineno-5-15" href="#__codelineno-5-15"></a>    <span class="n">sm</span><span class="p">,</span> <span class="n">ws</span> <span class="o">=</span> <span class="n">_make_socket_manager</span><span class="p">()</span>
+<a id="__codelineno-5-16" name="__codelineno-5-16" href="#__codelineno-5-16"></a>    <span class="n">asyncio</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">sm</span><span class="o">.</span><span class="n">broadcast_shared_sync</span><span class="p">(</span><span class="s2">&quot;Room&quot;</span><span class="p">,</span> <span class="s2">&quot;count&quot;</span><span class="p">,</span> <span class="mi">42</span><span class="p">))</span>
+<a id="__codelineno-5-17" name="__codelineno-5-17" href="#__codelineno-5-17"></a>    <span class="n">ws</span><span class="o">.</span><span class="n">send_text</span><span class="o">.</span><span class="n">assert_called_once</span><span class="p">()</span>
+<a id="__codelineno-5-18" name="__codelineno-5-18" href="#__codelineno-5-18"></a>    <span class="n">payload</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">ws</span><span class="o">.</span><span class="n">send_text</span><span class="o">.</span><span class="n">call_args</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+<a id="__codelineno-5-19" name="__codelineno-5-19" href="#__codelineno-5-19"></a>    <span class="k">assert</span> <span class="n">payload</span> <span class="o">==</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;shared_sync&quot;</span><span class="p">,</span> <span class="s2">&quot;class&quot;</span><span class="p">:</span> <span class="s2">&quot;Room&quot;</span><span class="p">,</span> <span class="s2">&quot;field&quot;</span><span class="p">:</span> <span class="s2">&quot;count&quot;</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="mi">42</span><span class="p">}</span>
+<a id="__codelineno-5-20" name="__codelineno-5-20" href="#__codelineno-5-20"></a>
+<a id="__codelineno-5-21" name="__codelineno-5-21" href="#__codelineno-5-21"></a><span class="k">def</span><span class="w"> </span><span class="nf">test_send_shared_sync_sends_to_one</span><span class="p">():</span>
+<a id="__codelineno-5-22" name="__codelineno-5-22" href="#__codelineno-5-22"></a>    <span class="n">sm</span><span class="p">,</span> <span class="n">ws</span> <span class="o">=</span> <span class="n">_make_socket_manager</span><span class="p">()</span>
+<a id="__codelineno-5-23" name="__codelineno-5-23" href="#__codelineno-5-23"></a>    <span class="n">asyncio</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">sm</span><span class="o">.</span><span class="n">send_shared_sync</span><span class="p">(</span><span class="s2">&quot;c1&quot;</span><span class="p">,</span> <span class="s2">&quot;Room&quot;</span><span class="p">,</span> <span class="s2">&quot;count&quot;</span><span class="p">,</span> <span class="mi">42</span><span class="p">))</span>
+<a id="__codelineno-5-24" name="__codelineno-5-24" href="#__codelineno-5-24"></a>    <span class="n">ws</span><span class="o">.</span><span class="n">send_text</span><span class="o">.</span><span class="n">assert_called_once</span><span class="p">()</span>
+<a id="__codelineno-5-25" name="__codelineno-5-25" href="#__codelineno-5-25"></a>    <span class="n">payload</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">ws</span><span class="o">.</span><span class="n">send_text</span><span class="o">.</span><span class="n">call_args</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+<a id="__codelineno-5-26" name="__codelineno-5-26" href="#__codelineno-5-26"></a>    <span class="k">assert</span> <span class="n">payload</span> <span class="o">==</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;shared_sync&quot;</span><span class="p">,</span> <span class="s2">&quot;class&quot;</span><span class="p">:</span> <span class="s2">&quot;Room&quot;</span><span class="p">,</span> <span class="s2">&quot;field&quot;</span><span class="p">:</span> <span class="s2">&quot;count&quot;</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="mi">42</span><span class="p">}</span>
+<a id="__codelineno-5-27" name="__codelineno-5-27" href="#__codelineno-5-27"></a>
+<a id="__codelineno-5-28" name="__codelineno-5-28" href="#__codelineno-5-28"></a><span class="k">def</span><span class="w"> </span><span class="nf">test_send_shared_error_sends_error_frame</span><span class="p">():</span>
+<a id="__codelineno-5-29" name="__codelineno-5-29" href="#__codelineno-5-29"></a>    <span class="n">sm</span><span class="p">,</span> <span class="n">ws</span> <span class="o">=</span> <span class="n">_make_socket_manager</span><span class="p">()</span>
+<a id="__codelineno-5-30" name="__codelineno-5-30" href="#__codelineno-5-30"></a>    <span class="n">asyncio</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">sm</span><span class="o">.</span><span class="n">send_shared_error</span><span class="p">(</span><span class="s2">&quot;c1&quot;</span><span class="p">,</span> <span class="s2">&quot;Room&quot;</span><span class="p">,</span> <span class="s2">&quot;version&quot;</span><span class="p">,</span> <span class="s2">&quot;server_only&quot;</span><span class="p">))</span>
+<a id="__codelineno-5-31" name="__codelineno-5-31" href="#__codelineno-5-31"></a>    <span class="n">ws</span><span class="o">.</span><span class="n">send_text</span><span class="o">.</span><span class="n">assert_called_once</span><span class="p">()</span>
+<a id="__codelineno-5-32" name="__codelineno-5-32" href="#__codelineno-5-32"></a>    <span class="n">payload</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">ws</span><span class="o">.</span><span class="n">send_text</span><span class="o">.</span><span class="n">call_args</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+<a id="__codelineno-5-33" name="__codelineno-5-33" href="#__codelineno-5-33"></a>    <span class="k">assert</span> <span class="n">payload</span> <span class="o">==</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;shared_error&quot;</span><span class="p">,</span> <span class="s2">&quot;class&quot;</span><span class="p">:</span> <span class="s2">&quot;Room&quot;</span><span class="p">,</span> <span class="s2">&quot;field&quot;</span><span class="p">:</span> <span class="s2">&quot;version&quot;</span><span class="p">,</span> <span class="s2">&quot;reason&quot;</span><span class="p">:</span> <span class="s2">&quot;server_only&quot;</span><span class="p">}</span>
+</code></pre></div>
+<ul>
+<li>[ ] <strong>Step 2.2: Run to confirm FAIL</strong></li>
+</ul>
+<p><div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>uv<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>tests/test_websocket.py<span class="w"> </span>-k<span class="w"> </span><span class="s2">&quot;shared&quot;</span><span class="w"> </span>-v<span class="w"> </span><span class="m">2</span>&gt;<span class="p">&amp;</span><span class="m">1</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>head<span class="w"> </span>-20
+</code></pre></div>
+Expected: <code>AttributeError: 'SocketManager' object has no attribute 'broadcast_shared_sync'</code></p>
+<ul>
+<li>[ ] <strong>Step 2.3: Add three methods to <code>SocketManager</code> in <code>app.py</code></strong></li>
+</ul>
+<p>Add after <code>SocketManager.invoke</code> (around line 345), before the <code>class App:</code> line:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">broadcast_shared_sync</span><span class="p">(</span>
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>        <span class="bp">self</span><span class="p">,</span> <span class="n">cls_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">field</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">object</span>
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;Broadcast a shared_sync frame to all connected clients.&quot;&quot;&quot;</span>
+<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>        <span class="n">payload</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span>
+<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a>            <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;shared_sync&quot;</span><span class="p">,</span> <span class="s2">&quot;class&quot;</span><span class="p">:</span> <span class="n">cls_name</span><span class="p">,</span> <span class="s2">&quot;field&quot;</span><span class="p">:</span> <span class="n">field</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="n">value</span><span class="p">}</span>
+<a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a>        <span class="p">)</span>
+<a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a>        <span class="k">for</span> <span class="n">client_id</span><span class="p">,</span> <span class="n">conn</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">active_connections</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+<a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a>            <span class="k">try</span><span class="p">:</span>
+<a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a>                <span class="k">await</span> <span class="n">conn</span><span class="o">.</span><span class="n">send_text</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span>
+<a id="__codelineno-7-11" name="__codelineno-7-11" href="#__codelineno-7-11"></a>            <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+<a id="__codelineno-7-12" name="__codelineno-7-12" href="#__codelineno-7-12"></a>                <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">disconnect</span><span class="p">(</span><span class="n">client_id</span><span class="p">)</span>
+<a id="__codelineno-7-13" name="__codelineno-7-13" href="#__codelineno-7-13"></a>
+<a id="__codelineno-7-14" name="__codelineno-7-14" href="#__codelineno-7-14"></a>    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">send_shared_sync</span><span class="p">(</span>
+<a id="__codelineno-7-15" name="__codelineno-7-15" href="#__codelineno-7-15"></a>        <span class="bp">self</span><span class="p">,</span> <span class="n">client_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">cls_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">field</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">object</span>
+<a id="__codelineno-7-16" name="__codelineno-7-16" href="#__codelineno-7-16"></a>    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-7-17" name="__codelineno-7-17" href="#__codelineno-7-17"></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;Send a shared_sync frame to one client (late-joiner push).&quot;&quot;&quot;</span>
+<a id="__codelineno-7-18" name="__codelineno-7-18" href="#__codelineno-7-18"></a>        <span class="n">payload</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span>
+<a id="__codelineno-7-19" name="__codelineno-7-19" href="#__codelineno-7-19"></a>            <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;shared_sync&quot;</span><span class="p">,</span> <span class="s2">&quot;class&quot;</span><span class="p">:</span> <span class="n">cls_name</span><span class="p">,</span> <span class="s2">&quot;field&quot;</span><span class="p">:</span> <span class="n">field</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="n">value</span><span class="p">}</span>
+<a id="__codelineno-7-20" name="__codelineno-7-20" href="#__codelineno-7-20"></a>        <span class="p">)</span>
+<a id="__codelineno-7-21" name="__codelineno-7-21" href="#__codelineno-7-21"></a>        <span class="n">conn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">active_connections</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">client_id</span><span class="p">)</span>
+<a id="__codelineno-7-22" name="__codelineno-7-22" href="#__codelineno-7-22"></a>        <span class="k">if</span> <span class="n">conn</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-7-23" name="__codelineno-7-23" href="#__codelineno-7-23"></a>            <span class="k">return</span>
+<a id="__codelineno-7-24" name="__codelineno-7-24" href="#__codelineno-7-24"></a>        <span class="k">try</span><span class="p">:</span>
+<a id="__codelineno-7-25" name="__codelineno-7-25" href="#__codelineno-7-25"></a>            <span class="k">await</span> <span class="n">conn</span><span class="o">.</span><span class="n">send_text</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span>
+<a id="__codelineno-7-26" name="__codelineno-7-26" href="#__codelineno-7-26"></a>        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+<a id="__codelineno-7-27" name="__codelineno-7-27" href="#__codelineno-7-27"></a>            <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">disconnect</span><span class="p">(</span><span class="n">client_id</span><span class="p">)</span>
+<a id="__codelineno-7-28" name="__codelineno-7-28" href="#__codelineno-7-28"></a>
+<a id="__codelineno-7-29" name="__codelineno-7-29" href="#__codelineno-7-29"></a>    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">send_shared_error</span><span class="p">(</span>
+<a id="__codelineno-7-30" name="__codelineno-7-30" href="#__codelineno-7-30"></a>        <span class="bp">self</span><span class="p">,</span> <span class="n">client_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">cls_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">field</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">reason</span><span class="p">:</span> <span class="nb">str</span>
+<a id="__codelineno-7-31" name="__codelineno-7-31" href="#__codelineno-7-31"></a>    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-7-32" name="__codelineno-7-32" href="#__codelineno-7-32"></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;Send a shared_error rejection frame to one client.&quot;&quot;&quot;</span>
+<a id="__codelineno-7-33" name="__codelineno-7-33" href="#__codelineno-7-33"></a>        <span class="n">payload</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span>
+<a id="__codelineno-7-34" name="__codelineno-7-34" href="#__codelineno-7-34"></a>            <span class="p">{</span>
+<a id="__codelineno-7-35" name="__codelineno-7-35" href="#__codelineno-7-35"></a>                <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;shared_error&quot;</span><span class="p">,</span>
+<a id="__codelineno-7-36" name="__codelineno-7-36" href="#__codelineno-7-36"></a>                <span class="s2">&quot;class&quot;</span><span class="p">:</span> <span class="n">cls_name</span><span class="p">,</span>
+<a id="__codelineno-7-37" name="__codelineno-7-37" href="#__codelineno-7-37"></a>                <span class="s2">&quot;field&quot;</span><span class="p">:</span> <span class="n">field</span><span class="p">,</span>
+<a id="__codelineno-7-38" name="__codelineno-7-38" href="#__codelineno-7-38"></a>                <span class="s2">&quot;reason&quot;</span><span class="p">:</span> <span class="n">reason</span><span class="p">,</span>
+<a id="__codelineno-7-39" name="__codelineno-7-39" href="#__codelineno-7-39"></a>            <span class="p">}</span>
+<a id="__codelineno-7-40" name="__codelineno-7-40" href="#__codelineno-7-40"></a>        <span class="p">)</span>
+<a id="__codelineno-7-41" name="__codelineno-7-41" href="#__codelineno-7-41"></a>        <span class="n">conn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">active_connections</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">client_id</span><span class="p">)</span>
+<a id="__codelineno-7-42" name="__codelineno-7-42" href="#__codelineno-7-42"></a>        <span class="k">if</span> <span class="n">conn</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-7-43" name="__codelineno-7-43" href="#__codelineno-7-43"></a>            <span class="k">return</span>
+<a id="__codelineno-7-44" name="__codelineno-7-44" href="#__codelineno-7-44"></a>        <span class="k">try</span><span class="p">:</span>
+<a id="__codelineno-7-45" name="__codelineno-7-45" href="#__codelineno-7-45"></a>            <span class="k">await</span> <span class="n">conn</span><span class="o">.</span><span class="n">send_text</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span>
+<a id="__codelineno-7-46" name="__codelineno-7-46" href="#__codelineno-7-46"></a>        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+<a id="__codelineno-7-47" name="__codelineno-7-47" href="#__codelineno-7-47"></a>            <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">disconnect</span><span class="p">(</span><span class="n">client_id</span><span class="p">)</span>
+</code></pre></div>
+<ul>
+<li>[ ] <strong>Step 2.4: Run to confirm PASS</strong></li>
+</ul>
+<p><div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>uv<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>tests/test_websocket.py<span class="w"> </span>-v<span class="w"> </span><span class="m">2</span>&gt;<span class="p">&amp;</span><span class="m">1</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>tail<span class="w"> </span>-10
+</code></pre></div>
+Expected: all tests pass</p>
+<ul>
+<li>[ ] <strong>Step 2.5: Full suite check</strong></li>
+</ul>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>make<span class="w"> </span><span class="m">2</span>&gt;<span class="p">&amp;</span><span class="m">1</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>tail<span class="w"> </span>-5
+</code></pre></div>
+<ul>
+<li>[ ] <strong>Step 2.6: Commit</strong></li>
+</ul>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>git<span class="w"> </span>add<span class="w"> </span>violetear/app.py<span class="w"> </span>tests/test_websocket.py
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;feat(shared): SocketManager broadcast_shared_sync / send_shared_sync / send_shared_error&quot;</span>
+</code></pre></div>
+<hr />
+<h3 id="task-3-appshared-decorator-ws-dispatcher-connect-push">Task 3: App.shared() decorator + WS dispatcher + connect push<a class="headerlink" href="#task-3-appshared-decorator-ws-dispatcher-connect-push" title="Permanent link">&para;</a></h3>
+<p><strong>Files:</strong>
+- Modify: <code>violetear/app.py</code> — <code>App.__init__</code>, WS dispatcher loop, new <code>App.shared()</code> method
+- Modify: <code>tests/test_shared.py</code> — add integration tests for handle_set and connect push</p>
+<p><strong>Interfaces:</strong>
+- Consumes: <code>SharedRegistry</code> from <code>violetear.shared</code>; <code>SocketManager</code> methods from Task 2
+- Produces:
+  - <code>App.shared_registry: SharedRegistry</code> — initialized in <code>__init__</code>
+  - <code>App.shared(cls) -&gt; SharedProxy</code> — decorator; calls <code>shared_registry.register(cls)</code> and returns proxy
+  - WS dispatcher handles <code>{"type": "shared_set", "class": ..., "field": ..., "value": ...}</code>
+  - <code>SocketManager.connect()</code> calls <code>shared_registry.push_to_new_client(client_id)</code> after accepting</p>
+<ul>
+<li>[ ] <strong>Step 3.1: Write failing integration tests</strong></li>
+</ul>
+<p>Add to <code>tests/test_shared.py</code>:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="c1"># Integration: App.shared decorator</span>
+<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a><span class="kn">import</span><span class="w"> </span><span class="nn">dataclasses</span>
+<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a><span class="kn">import</span><span class="w"> </span><span class="nn">pytest</span>
+<a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a><span class="kn">from</span><span class="w"> </span><span class="nn">unittest.mock</span><span class="w"> </span><span class="kn">import</span> <span class="n">AsyncMock</span><span class="p">,</span> <span class="n">MagicMock</span><span class="p">,</span> <span class="n">patch</span>
+<a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a>
+<a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a><span class="k">def</span><span class="w"> </span><span class="nf">test_app_shared_decorator_returns_proxy</span><span class="p">():</span>
+<a id="__codelineno-11-7" name="__codelineno-11-7" href="#__codelineno-11-7"></a>    <span class="kn">from</span><span class="w"> </span><span class="nn">violetear.app</span><span class="w"> </span><span class="kn">import</span> <span class="n">App</span>
+<a id="__codelineno-11-8" name="__codelineno-11-8" href="#__codelineno-11-8"></a>    <span class="kn">from</span><span class="w"> </span><span class="nn">violetear.shared</span><span class="w"> </span><span class="kn">import</span> <span class="n">SharedProxy</span>
+<a id="__codelineno-11-9" name="__codelineno-11-9" href="#__codelineno-11-9"></a>    <span class="n">app</span> <span class="o">=</span> <span class="n">App</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;test&quot;</span><span class="p">)</span>
+<a id="__codelineno-11-10" name="__codelineno-11-10" href="#__codelineno-11-10"></a>
+<a id="__codelineno-11-11" name="__codelineno-11-11" href="#__codelineno-11-11"></a>    <span class="nd">@app</span><span class="o">.</span><span class="n">shared</span>
+<a id="__codelineno-11-12" name="__codelineno-11-12" href="#__codelineno-11-12"></a>    <span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
+<a id="__codelineno-11-13" name="__codelineno-11-13" href="#__codelineno-11-13"></a>    <span class="k">class</span><span class="w"> </span><span class="nc">Counter</span><span class="p">:</span>
+<a id="__codelineno-11-14" name="__codelineno-11-14" href="#__codelineno-11-14"></a>        <span class="n">count</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
+<a id="__codelineno-11-15" name="__codelineno-11-15" href="#__codelineno-11-15"></a>
+<a id="__codelineno-11-16" name="__codelineno-11-16" href="#__codelineno-11-16"></a>    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">Counter</span><span class="p">,</span> <span class="n">SharedProxy</span><span class="p">)</span>
+<a id="__codelineno-11-17" name="__codelineno-11-17" href="#__codelineno-11-17"></a>    <span class="k">assert</span> <span class="n">Counter</span><span class="o">.</span><span class="n">count</span> <span class="o">==</span> <span class="mi">0</span>
+<a id="__codelineno-11-18" name="__codelineno-11-18" href="#__codelineno-11-18"></a>
+<a id="__codelineno-11-19" name="__codelineno-11-19" href="#__codelineno-11-19"></a><span class="k">def</span><span class="w"> </span><span class="nf">test_app_shared_registers_in_registry</span><span class="p">():</span>
+<a id="__codelineno-11-20" name="__codelineno-11-20" href="#__codelineno-11-20"></a>    <span class="kn">from</span><span class="w"> </span><span class="nn">violetear.app</span><span class="w"> </span><span class="kn">import</span> <span class="n">App</span>
+<a id="__codelineno-11-21" name="__codelineno-11-21" href="#__codelineno-11-21"></a>    <span class="n">app</span> <span class="o">=</span> <span class="n">App</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;test&quot;</span><span class="p">)</span>
+<a id="__codelineno-11-22" name="__codelineno-11-22" href="#__codelineno-11-22"></a>
+<a id="__codelineno-11-23" name="__codelineno-11-23" href="#__codelineno-11-23"></a>    <span class="nd">@app</span><span class="o">.</span><span class="n">shared</span>
+<a id="__codelineno-11-24" name="__codelineno-11-24" href="#__codelineno-11-24"></a>    <span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
+<a id="__codelineno-11-25" name="__codelineno-11-25" href="#__codelineno-11-25"></a>    <span class="k">class</span><span class="w"> </span><span class="nc">Score</span><span class="p">:</span>
+<a id="__codelineno-11-26" name="__codelineno-11-26" href="#__codelineno-11-26"></a>        <span class="n">value</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
+<a id="__codelineno-11-27" name="__codelineno-11-27" href="#__codelineno-11-27"></a>
+<a id="__codelineno-11-28" name="__codelineno-11-28" href="#__codelineno-11-28"></a>    <span class="k">assert</span> <span class="s2">&quot;Score&quot;</span> <span class="ow">in</span> <span class="n">app</span><span class="o">.</span><span class="n">shared_registry</span><span class="o">.</span><span class="n">_classes</span>
+<a id="__codelineno-11-29" name="__codelineno-11-29" href="#__codelineno-11-29"></a>
+<a id="__codelineno-11-30" name="__codelineno-11-30" href="#__codelineno-11-30"></a><span class="k">def</span><span class="w"> </span><span class="nf">test_handle_set_updates_and_would_broadcast</span><span class="p">():</span>
+<a id="__codelineno-11-31" name="__codelineno-11-31" href="#__codelineno-11-31"></a>    <span class="kn">from</span><span class="w"> </span><span class="nn">violetear.app</span><span class="w"> </span><span class="kn">import</span> <span class="n">App</span>
+<a id="__codelineno-11-32" name="__codelineno-11-32" href="#__codelineno-11-32"></a>    <span class="n">app</span> <span class="o">=</span> <span class="n">App</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;test&quot;</span><span class="p">)</span>
+<a id="__codelineno-11-33" name="__codelineno-11-33" href="#__codelineno-11-33"></a>
+<a id="__codelineno-11-34" name="__codelineno-11-34" href="#__codelineno-11-34"></a>    <span class="nd">@app</span><span class="o">.</span><span class="n">shared</span>
+<a id="__codelineno-11-35" name="__codelineno-11-35" href="#__codelineno-11-35"></a>    <span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
+<a id="__codelineno-11-36" name="__codelineno-11-36" href="#__codelineno-11-36"></a>    <span class="k">class</span><span class="w"> </span><span class="nc">G</span><span class="p">:</span>
+<a id="__codelineno-11-37" name="__codelineno-11-37" href="#__codelineno-11-37"></a>        <span class="n">x</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
+<a id="__codelineno-11-38" name="__codelineno-11-38" href="#__codelineno-11-38"></a>
+<a id="__codelineno-11-39" name="__codelineno-11-39" href="#__codelineno-11-39"></a>    <span class="n">app</span><span class="o">.</span><span class="n">socket_manager</span><span class="o">.</span><span class="n">broadcast_shared_sync</span> <span class="o">=</span> <span class="n">AsyncMock</span><span class="p">()</span>
+<a id="__codelineno-11-40" name="__codelineno-11-40" href="#__codelineno-11-40"></a>
+<a id="__codelineno-11-41" name="__codelineno-11-41" href="#__codelineno-11-41"></a>    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">():</span>
+<a id="__codelineno-11-42" name="__codelineno-11-42" href="#__codelineno-11-42"></a>        <span class="k">await</span> <span class="n">app</span><span class="o">.</span><span class="n">shared_registry</span><span class="o">.</span><span class="n">handle_set</span><span class="p">(</span><span class="s2">&quot;c1&quot;</span><span class="p">,</span> <span class="s2">&quot;G&quot;</span><span class="p">,</span> <span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="mi">99</span><span class="p">)</span>
+<a id="__codelineno-11-43" name="__codelineno-11-43" href="#__codelineno-11-43"></a>
+<a id="__codelineno-11-44" name="__codelineno-11-44" href="#__codelineno-11-44"></a>    <span class="n">asyncio</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">run</span><span class="p">())</span>
+<a id="__codelineno-11-45" name="__codelineno-11-45" href="#__codelineno-11-45"></a>    <span class="k">assert</span> <span class="n">app</span><span class="o">.</span><span class="n">shared_registry</span><span class="o">.</span><span class="n">_classes</span><span class="p">[</span><span class="s2">&quot;G&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">x</span> <span class="o">==</span> <span class="mi">99</span>
+<a id="__codelineno-11-46" name="__codelineno-11-46" href="#__codelineno-11-46"></a>    <span class="n">app</span><span class="o">.</span><span class="n">socket_manager</span><span class="o">.</span><span class="n">broadcast_shared_sync</span><span class="o">.</span><span class="n">assert_called_once_with</span><span class="p">(</span><span class="s2">&quot;G&quot;</span><span class="p">,</span> <span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="mi">99</span><span class="p">)</span>
+<a id="__codelineno-11-47" name="__codelineno-11-47" href="#__codelineno-11-47"></a>
+<a id="__codelineno-11-48" name="__codelineno-11-48" href="#__codelineno-11-48"></a><span class="k">def</span><span class="w"> </span><span class="nf">test_handle_set_rejects_server_only</span><span class="p">():</span>
+<a id="__codelineno-11-49" name="__codelineno-11-49" href="#__codelineno-11-49"></a>    <span class="kn">from</span><span class="w"> </span><span class="nn">violetear.app</span><span class="w"> </span><span class="kn">import</span> <span class="n">App</span>
+<a id="__codelineno-11-50" name="__codelineno-11-50" href="#__codelineno-11-50"></a>    <span class="n">app</span> <span class="o">=</span> <span class="n">App</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;test&quot;</span><span class="p">)</span>
+<a id="__codelineno-11-51" name="__codelineno-11-51" href="#__codelineno-11-51"></a>
+<a id="__codelineno-11-52" name="__codelineno-11-52" href="#__codelineno-11-52"></a>    <span class="nd">@app</span><span class="o">.</span><span class="n">shared</span>
+<a id="__codelineno-11-53" name="__codelineno-11-53" href="#__codelineno-11-53"></a>    <span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
+<a id="__codelineno-11-54" name="__codelineno-11-54" href="#__codelineno-11-54"></a>    <span class="k">class</span><span class="w"> </span><span class="nc">H</span><span class="p">:</span>
+<a id="__codelineno-11-55" name="__codelineno-11-55" href="#__codelineno-11-55"></a>        <span class="n">locked</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="s2">&quot;v&quot;</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;server_only&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">})</span>
+<a id="__codelineno-11-56" name="__codelineno-11-56" href="#__codelineno-11-56"></a>
+<a id="__codelineno-11-57" name="__codelineno-11-57" href="#__codelineno-11-57"></a>    <span class="n">app</span><span class="o">.</span><span class="n">socket_manager</span><span class="o">.</span><span class="n">send_shared_error</span> <span class="o">=</span> <span class="n">AsyncMock</span><span class="p">()</span>
+<a id="__codelineno-11-58" name="__codelineno-11-58" href="#__codelineno-11-58"></a>
+<a id="__codelineno-11-59" name="__codelineno-11-59" href="#__codelineno-11-59"></a>    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">():</span>
+<a id="__codelineno-11-60" name="__codelineno-11-60" href="#__codelineno-11-60"></a>        <span class="k">await</span> <span class="n">app</span><span class="o">.</span><span class="n">shared_registry</span><span class="o">.</span><span class="n">handle_set</span><span class="p">(</span><span class="s2">&quot;c1&quot;</span><span class="p">,</span> <span class="s2">&quot;H&quot;</span><span class="p">,</span> <span class="s2">&quot;locked&quot;</span><span class="p">,</span> <span class="s2">&quot;hacked&quot;</span><span class="p">)</span>
+<a id="__codelineno-11-61" name="__codelineno-11-61" href="#__codelineno-11-61"></a>
+<a id="__codelineno-11-62" name="__codelineno-11-62" href="#__codelineno-11-62"></a>    <span class="n">asyncio</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">run</span><span class="p">())</span>
+<a id="__codelineno-11-63" name="__codelineno-11-63" href="#__codelineno-11-63"></a>    <span class="n">app</span><span class="o">.</span><span class="n">socket_manager</span><span class="o">.</span><span class="n">send_shared_error</span><span class="o">.</span><span class="n">assert_called_once_with</span><span class="p">(</span>
+<a id="__codelineno-11-64" name="__codelineno-11-64" href="#__codelineno-11-64"></a>        <span class="s2">&quot;c1&quot;</span><span class="p">,</span> <span class="s2">&quot;H&quot;</span><span class="p">,</span> <span class="s2">&quot;locked&quot;</span><span class="p">,</span> <span class="s2">&quot;server_only&quot;</span>
+<a id="__codelineno-11-65" name="__codelineno-11-65" href="#__codelineno-11-65"></a>    <span class="p">)</span>
+<a id="__codelineno-11-66" name="__codelineno-11-66" href="#__codelineno-11-66"></a>    <span class="k">assert</span> <span class="n">app</span><span class="o">.</span><span class="n">shared_registry</span><span class="o">.</span><span class="n">_classes</span><span class="p">[</span><span class="s2">&quot;H&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">locked</span> <span class="o">==</span> <span class="s2">&quot;v&quot;</span>  <span class="c1"># unchanged</span>
+</code></pre></div>
+<ul>
+<li>[ ] <strong>Step 3.2: Run to confirm FAIL</strong></li>
+</ul>
+<p><div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>uv<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>tests/test_shared.py<span class="w"> </span>-v<span class="w"> </span><span class="m">2</span>&gt;<span class="p">&amp;</span><span class="m">1</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-E<span class="w"> </span><span class="s2">&quot;PASSED|FAILED|ERROR&quot;</span>
+</code></pre></div>
+Expected: <code>AttributeError: 'App' object has no attribute 'shared'</code> or similar</p>
+<ul>
+<li>[ ] <strong>Step 3.3: Add <code>shared_registry</code> init and <code>App.shared()</code> decorator to <code>app.py</code></strong></li>
+</ul>
+<p>In <code>App.__init__</code>, add after <code>self.client = ClientRegistry(self)</code> and <code>self.server = ServerRegistry(self)</code> (around line 523):</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>        <span class="kn">from</span><span class="w"> </span><span class="nn">.shared</span><span class="w"> </span><span class="kn">import</span> <span class="n">SharedRegistry</span>
+<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">shared_registry</span> <span class="o">=</span> <span class="n">SharedRegistry</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+</code></pre></div>
+<p>After <code>App.local()</code> (around line 530), add:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">shared</span><span class="p">[</span><span class="n">T</span><span class="p">](</span><span class="bp">self</span><span class="p">,</span> <span class="bp">cls</span><span class="p">:</span> <span class="nb">type</span><span class="p">[</span><span class="n">T</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">T</span><span class="p">:</span>
+<a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;Decorator: @app.shared @dataclass — register a cross-client reactive state class.&quot;&quot;&quot;</span>
+<a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a>        <span class="n">proxy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">shared_registry</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
+<a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a>        <span class="k">return</span> <span class="n">proxy</span>  <span class="c1"># type: ignore[return-value]</span>
+</code></pre></div>
+<ul>
+<li>[ ] <strong>Step 3.4: Add <code>shared_set</code> dispatch to WS loop in <code>app.py</code></strong></li>
+</ul>
+<p>In the <code>websocket_endpoint</code> inner function, after the <code>if data.get("type") == "realtime":</code> block (around line 513), add:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>                    <span class="k">elif</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;type&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;shared_set&quot;</span><span class="p">:</span>
+<a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a>                        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">shared_registry</span><span class="o">.</span><span class="n">handle_set</span><span class="p">(</span>
+<a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a>                            <span class="n">client_id</span><span class="p">,</span>
+<a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a>                            <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;class&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">),</span>
+<a id="__codelineno-15-5" name="__codelineno-15-5" href="#__codelineno-15-5"></a>                            <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;field&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">),</span>
+<a id="__codelineno-15-6" name="__codelineno-15-6" href="#__codelineno-15-6"></a>                            <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;value&quot;</span><span class="p">),</span>
+<a id="__codelineno-15-7" name="__codelineno-15-7" href="#__codelineno-15-7"></a>                        <span class="p">)</span>
+</code></pre></div>
+<ul>
+<li>[ ] <strong>Step 3.5: Add shared state push to <code>SocketManager.connect()</code></strong></li>
+</ul>
+<p>In <code>SocketManager.connect()</code> (around line 290), after <code>await self.app.emit("connect", client_id)</code>, add:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a>        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">app</span><span class="o">.</span><span class="n">shared_registry</span><span class="o">.</span><span class="n">push_to_new_client</span><span class="p">(</span><span class="n">client_id</span><span class="p">)</span>
+</code></pre></div>
+<p>Full updated method (push BEFORE emit so client has full state when on("connect") fires):
+<div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a>    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">connect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">client_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">websocket</span><span class="p">:</span> <span class="n">WebSocket</span><span class="p">):</span>
+<a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a>        <span class="k">await</span> <span class="n">websocket</span><span class="o">.</span><span class="n">accept</span><span class="p">()</span>
+<a id="__codelineno-17-3" name="__codelineno-17-3" href="#__codelineno-17-3"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">active_connections</span><span class="p">[</span><span class="n">client_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">websocket</span>
+<a id="__codelineno-17-4" name="__codelineno-17-4" href="#__codelineno-17-4"></a>        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">app</span><span class="o">.</span><span class="n">shared_registry</span><span class="o">.</span><span class="n">push_to_new_client</span><span class="p">(</span><span class="n">client_id</span><span class="p">)</span>
+<a id="__codelineno-17-5" name="__codelineno-17-5" href="#__codelineno-17-5"></a>        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">app</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="s2">&quot;connect&quot;</span><span class="p">,</span> <span class="n">client_id</span><span class="p">)</span>
+</code></pre></div></p>
+<ul>
+<li>[ ] <strong>Step 3.6: Run tests to confirm PASS</strong></li>
+</ul>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a>uv<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>tests/test_shared.py<span class="w"> </span>-v<span class="w"> </span><span class="m">2</span>&gt;<span class="p">&amp;</span><span class="m">1</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>tail<span class="w"> </span>-15
+</code></pre></div>
+<ul>
+<li>[ ] <strong>Step 3.7: Full suite check</strong></li>
+</ul>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a>make<span class="w"> </span><span class="m">2</span>&gt;<span class="p">&amp;</span><span class="m">1</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>tail<span class="w"> </span>-5
+</code></pre></div>
+<ul>
+<li>[ ] <strong>Step 3.8: Commit</strong></li>
+</ul>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a>git<span class="w"> </span>add<span class="w"> </span>violetear/app.py<span class="w"> </span>tests/test_shared.py<span class="w"> </span>violetear/shared.py
+<a id="__codelineno-20-2" name="__codelineno-20-2" href="#__codelineno-20-2"></a>git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;feat(shared): App.shared() decorator, WS shared_set dispatch, connect push&quot;</span>
+</code></pre></div>
+<hr />
+<h3 id="task-4-transpile_class-shared-variant">Task 4: transpile_class shared variant<a class="headerlink" href="#task-4-transpile_class-shared-variant" title="Permanent link">&para;</a></h3>
+<p><strong>Files:</strong>
+- Modify: <code>violetear/transpile.py</code> — <code>transpile_class(cls, shared=False)</code>
+- Modify: <code>tests/test_transpile.py</code> — add shared class emission tests</p>
+<p><strong>Interfaces:</strong>
+- Consumes: existing <code>transpile_class(cls: type) -&gt; str</code>
+- Produces: <code>transpile_class(cls: type, shared: bool = False) -&gt; str</code>
+  - When <code>shared=True</code>: each setter also emits <code>if (!_shared._receiving) { _shared.set("ClassName", "fieldname", v); }</code>
+  - Fields with <code>metadata={"server_only": True}</code> omit the <code>_shared.set(...)</code> line even when <code>shared=True</code></p>
+<ul>
+<li>[ ] <strong>Step 4.1: Write failing tests</strong></li>
+</ul>
+<p>Add to <code>tests/test_transpile.py</code>:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a><span class="c1"># Shared class transpilation</span>
+<a id="__codelineno-21-2" name="__codelineno-21-2" href="#__codelineno-21-2"></a><span class="kn">import</span><span class="w"> </span><span class="nn">dataclasses</span>
+<a id="__codelineno-21-3" name="__codelineno-21-3" href="#__codelineno-21-3"></a>
+<a id="__codelineno-21-4" name="__codelineno-21-4" href="#__codelineno-21-4"></a><span class="k">def</span><span class="w"> </span><span class="nf">test_transpile_shared_class_setter_sends_shared_set</span><span class="p">():</span>
+<a id="__codelineno-21-5" name="__codelineno-21-5" href="#__codelineno-21-5"></a>    <span class="kn">from</span><span class="w"> </span><span class="nn">violetear.transpile</span><span class="w"> </span><span class="kn">import</span> <span class="n">transpile_class</span>
+<a id="__codelineno-21-6" name="__codelineno-21-6" href="#__codelineno-21-6"></a>
+<a id="__codelineno-21-7" name="__codelineno-21-7" href="#__codelineno-21-7"></a>    <span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
+<a id="__codelineno-21-8" name="__codelineno-21-8" href="#__codelineno-21-8"></a>    <span class="k">class</span><span class="w"> </span><span class="nc">Shared</span><span class="p">:</span>
+<a id="__codelineno-21-9" name="__codelineno-21-9" href="#__codelineno-21-9"></a>        <span class="n">count</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
+<a id="__codelineno-21-10" name="__codelineno-21-10" href="#__codelineno-21-10"></a>
+<a id="__codelineno-21-11" name="__codelineno-21-11" href="#__codelineno-21-11"></a>    <span class="n">js</span> <span class="o">=</span> <span class="n">transpile_class</span><span class="p">(</span><span class="n">Shared</span><span class="p">,</span> <span class="n">shared</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<a id="__codelineno-21-12" name="__codelineno-21-12" href="#__codelineno-21-12"></a>    <span class="k">assert</span> <span class="s1">&#39;_shared.set(&quot;Shared&quot;, &quot;count&quot;, v)&#39;</span> <span class="ow">in</span> <span class="n">js</span>
+<a id="__codelineno-21-13" name="__codelineno-21-13" href="#__codelineno-21-13"></a>    <span class="k">assert</span> <span class="s1">&#39;_shared._receiving&#39;</span> <span class="ow">in</span> <span class="n">js</span>
+<a id="__codelineno-21-14" name="__codelineno-21-14" href="#__codelineno-21-14"></a>
+<a id="__codelineno-21-15" name="__codelineno-21-15" href="#__codelineno-21-15"></a><span class="k">def</span><span class="w"> </span><span class="nf">test_transpile_shared_class_server_only_field_omits_shared_set</span><span class="p">():</span>
+<a id="__codelineno-21-16" name="__codelineno-21-16" href="#__codelineno-21-16"></a>    <span class="kn">from</span><span class="w"> </span><span class="nn">violetear.transpile</span><span class="w"> </span><span class="kn">import</span> <span class="n">transpile_class</span>
+<a id="__codelineno-21-17" name="__codelineno-21-17" href="#__codelineno-21-17"></a>
+<a id="__codelineno-21-18" name="__codelineno-21-18" href="#__codelineno-21-18"></a>    <span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
+<a id="__codelineno-21-19" name="__codelineno-21-19" href="#__codelineno-21-19"></a>    <span class="k">class</span><span class="w"> </span><span class="nc">SharedWithReadonly</span><span class="p">:</span>
+<a id="__codelineno-21-20" name="__codelineno-21-20" href="#__codelineno-21-20"></a>        <span class="n">mutable</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
+<a id="__codelineno-21-21" name="__codelineno-21-21" href="#__codelineno-21-21"></a>        <span class="n">locked</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;server_only&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">})</span>
+<a id="__codelineno-21-22" name="__codelineno-21-22" href="#__codelineno-21-22"></a>
+<a id="__codelineno-21-23" name="__codelineno-21-23" href="#__codelineno-21-23"></a>    <span class="n">js</span> <span class="o">=</span> <span class="n">transpile_class</span><span class="p">(</span><span class="n">SharedWithReadonly</span><span class="p">,</span> <span class="n">shared</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<a id="__codelineno-21-24" name="__codelineno-21-24" href="#__codelineno-21-24"></a>    <span class="c1"># mutable field has shared_set</span>
+<a id="__codelineno-21-25" name="__codelineno-21-25" href="#__codelineno-21-25"></a>    <span class="k">assert</span> <span class="s1">&#39;_shared.set(&quot;SharedWithReadonly&quot;, &quot;mutable&quot;, v)&#39;</span> <span class="ow">in</span> <span class="n">js</span>
+<a id="__codelineno-21-26" name="__codelineno-21-26" href="#__codelineno-21-26"></a>    <span class="c1"># locked field does NOT have shared_set</span>
+<a id="__codelineno-21-27" name="__codelineno-21-27" href="#__codelineno-21-27"></a>    <span class="k">assert</span> <span class="s1">&#39;_shared.set(&quot;SharedWithReadonly&quot;, &quot;locked&quot;, v)&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">js</span>
+<a id="__codelineno-21-28" name="__codelineno-21-28" href="#__codelineno-21-28"></a>
+<a id="__codelineno-21-29" name="__codelineno-21-29" href="#__codelineno-21-29"></a><span class="k">def</span><span class="w"> </span><span class="nf">test_transpile_local_class_unchanged</span><span class="p">():</span>
+<a id="__codelineno-21-30" name="__codelineno-21-30" href="#__codelineno-21-30"></a>    <span class="kn">from</span><span class="w"> </span><span class="nn">violetear.transpile</span><span class="w"> </span><span class="kn">import</span> <span class="n">transpile_class</span>
+<a id="__codelineno-21-31" name="__codelineno-21-31" href="#__codelineno-21-31"></a>
+<a id="__codelineno-21-32" name="__codelineno-21-32" href="#__codelineno-21-32"></a>    <span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
+<a id="__codelineno-21-33" name="__codelineno-21-33" href="#__codelineno-21-33"></a>    <span class="k">class</span><span class="w"> </span><span class="nc">Local</span><span class="p">:</span>
+<a id="__codelineno-21-34" name="__codelineno-21-34" href="#__codelineno-21-34"></a>        <span class="n">x</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
+<a id="__codelineno-21-35" name="__codelineno-21-35" href="#__codelineno-21-35"></a>
+<a id="__codelineno-21-36" name="__codelineno-21-36" href="#__codelineno-21-36"></a>    <span class="n">js</span> <span class="o">=</span> <span class="n">transpile_class</span><span class="p">(</span><span class="n">Local</span><span class="p">,</span> <span class="n">shared</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<a id="__codelineno-21-37" name="__codelineno-21-37" href="#__codelineno-21-37"></a>    <span class="k">assert</span> <span class="s1">&#39;_shared.set&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">js</span>
+</code></pre></div>
+<ul>
+<li>[ ] <strong>Step 4.2: Run to confirm FAIL</strong></li>
+</ul>
+<p><div class="highlight"><pre><span></span><code><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a>uv<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>tests/test_transpile.py<span class="w"> </span>-k<span class="w"> </span><span class="s2">&quot;shared&quot;</span><span class="w"> </span>-v<span class="w"> </span><span class="m">2</span>&gt;<span class="p">&amp;</span><span class="m">1</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>head<span class="w"> </span>-20
+</code></pre></div>
+Expected: <code>TypeError: transpile_class() got an unexpected keyword argument 'shared'</code></p>
+<ul>
+<li>[ ] <strong>Step 4.3: Modify <code>transpile_class</code> in <code>transpile.py</code></strong></li>
+</ul>
+<p>Change the function signature and the setter emission inside <code>transpile_class</code>. The current setter lines are around line 147–153. Change:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">transpile_class</span><span class="p">(</span><span class="bp">cls</span><span class="p">:</span> <span class="nb">type</span><span class="p">,</span> <span class="n">shared</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+</code></pre></div>
+<p>And update the setter loop — replace the <code>lines.append(...)</code> for the setter to conditionally include <code>_shared.set</code>:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a>    <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">fields</span><span class="p">:</span>
+<a id="__codelineno-24-2" name="__codelineno-24-2" href="#__codelineno-24-2"></a>        <span class="n">ann</span> <span class="o">=</span> <span class="n">hints</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+<a id="__codelineno-24-3" name="__codelineno-24-3" href="#__codelineno-24-3"></a>        <span class="n">checker</span> <span class="o">=</span> <span class="n">js_type_check</span><span class="p">(</span><span class="n">ann</span><span class="p">)</span> <span class="k">if</span> <span class="n">ann</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="s2">&quot;_checkAny&quot;</span>
+<a id="__codelineno-24-4" name="__codelineno-24-4" href="#__codelineno-24-4"></a>        <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  get </span><span class="si">{</span><span class="n">f</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">() </span><span class="se">{{</span><span class="s2"> return this._</span><span class="si">{</span><span class="n">f</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">; </span><span class="se">}}</span><span class="s2">&quot;</span><span class="p">)</span>
+<a id="__codelineno-24-5" name="__codelineno-24-5" href="#__codelineno-24-5"></a>        <span class="n">is_server_only</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">metadata</span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;server_only&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+<a id="__codelineno-24-6" name="__codelineno-24-6" href="#__codelineno-24-6"></a>        <span class="k">if</span> <span class="n">shared</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">is_server_only</span><span class="p">:</span>
+<a id="__codelineno-24-7" name="__codelineno-24-7" href="#__codelineno-24-7"></a>            <span class="n">setter_extra</span> <span class="o">=</span> <span class="p">(</span>
+<a id="__codelineno-24-8" name="__codelineno-24-8" href="#__codelineno-24-8"></a>                <span class="sa">f</span><span class="s1">&#39; if (!_shared._receiving) </span><span class="se">{{</span><span class="s1"> _shared.set(&quot;</span><span class="si">{</span><span class="n">class_name</span><span class="si">}</span><span class="s1">&quot;, &quot;</span><span class="si">{</span><span class="n">f</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">&quot;, v); </span><span class="se">}}</span><span class="s1">&#39;</span>
+<a id="__codelineno-24-9" name="__codelineno-24-9" href="#__codelineno-24-9"></a>            <span class="p">)</span>
+<a id="__codelineno-24-10" name="__codelineno-24-10" href="#__codelineno-24-10"></a>        <span class="k">else</span><span class="p">:</span>
+<a id="__codelineno-24-11" name="__codelineno-24-11" href="#__codelineno-24-11"></a>            <span class="n">setter_extra</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+<a id="__codelineno-24-12" name="__codelineno-24-12" href="#__codelineno-24-12"></a>        <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+<a id="__codelineno-24-13" name="__codelineno-24-13" href="#__codelineno-24-13"></a>            <span class="sa">f</span><span class="s2">&quot;  set </span><span class="si">{</span><span class="n">f</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">(v) </span><span class="se">{{</span><span class="s2"> &quot;</span>
+<a id="__codelineno-24-14" name="__codelineno-24-14" href="#__codelineno-24-14"></a>            <span class="sa">f</span><span class="s2">&quot;(</span><span class="si">{</span><span class="n">checker</span><span class="si">}</span><span class="s2">)(v, </span><span class="se">\&quot;</span><span class="si">{</span><span class="n">class_name</span><span class="si">}</span><span class="s2">.</span><span class="si">{</span><span class="n">f</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="se">\&quot;</span><span class="s2">); &quot;</span>
+<a id="__codelineno-24-15" name="__codelineno-24-15" href="#__codelineno-24-15"></a>            <span class="sa">f</span><span class="s2">&quot;this._</span><span class="si">{</span><span class="n">f</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> = v; &quot;</span>
+<a id="__codelineno-24-16" name="__codelineno-24-16" href="#__codelineno-24-16"></a>            <span class="sa">f</span><span class="s1">&#39;ReactiveRegistry.notify(&quot;</span><span class="si">{</span><span class="n">class_name</span><span class="si">}</span><span class="s1">.</span><span class="si">{</span><span class="n">f</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">&quot;, v);&#39;</span>
+<a id="__codelineno-24-17" name="__codelineno-24-17" href="#__codelineno-24-17"></a>            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">setter_extra</span><span class="si">}</span><span class="s2"> </span><span class="se">}}</span><span class="s2">&quot;</span>
+<a id="__codelineno-24-18" name="__codelineno-24-18" href="#__codelineno-24-18"></a>        <span class="p">)</span>
+</code></pre></div>
+<ul>
+<li>[ ] <strong>Step 4.4: Run tests to confirm PASS</strong></li>
+</ul>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-25-1" name="__codelineno-25-1" href="#__codelineno-25-1"></a>uv<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>tests/test_transpile.py<span class="w"> </span>-v<span class="w"> </span><span class="m">2</span>&gt;<span class="p">&amp;</span><span class="m">1</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>tail<span class="w"> </span>-10
+</code></pre></div>
+<ul>
+<li>[ ] <strong>Step 4.5: Full suite check</strong></li>
+</ul>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-26-1" name="__codelineno-26-1" href="#__codelineno-26-1"></a>make<span class="w"> </span><span class="m">2</span>&gt;<span class="p">&amp;</span><span class="m">1</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>tail<span class="w"> </span>-5
+</code></pre></div>
+<ul>
+<li>[ ] <strong>Step 4.6: Commit</strong></li>
+</ul>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-27-1" name="__codelineno-27-1" href="#__codelineno-27-1"></a>git<span class="w"> </span>add<span class="w"> </span>violetear/transpile.py<span class="w"> </span>tests/test_transpile.py
+<a id="__codelineno-27-2" name="__codelineno-27-2" href="#__codelineno-27-2"></a>git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;feat(shared): transpile_class shared=True emits _shared.set in setters&quot;</span>
+</code></pre></div>
+<hr />
+<h3 id="task-5-runtimejs-_shared-object-ws-dispatcher">Task 5: runtime.js <code>_shared</code> object + WS dispatcher<a class="headerlink" href="#task-5-runtimejs-_shared-object-ws-dispatcher" title="Permanent link">&para;</a></h3>
+<p><strong>Files:</strong>
+- Modify: <code>violetear/runtime.js</code> — add <code>_shared</code> object and <code>_ws_send</code> helper; update <code>socket.onmessage</code></p>
+<p><strong>Interfaces:</strong>
+- Consumes: <code>_violetear_socket</code> (already in runtime.js); <code>_shared_objects</code> map (emitted by bundle gen in Task 6)
+- Produces:
+  - <code>_shared._receiving: boolean</code> — flag preventing echo during <code>shared_sync</code> handling
+  - <code>_shared.set(cls, field, value)</code> — sends <code>shared_set</code> to server
+  - <code>_shared.handle(msg)</code> — processes <code>shared_sync</code>
+  - <code>_shared.handle_error(msg)</code> — logs <code>shared_error</code>
+  - <code>_ws_send(payload_obj)</code> — queues JSON send; safe before socket open</p>
+<p>No unit tests for JS (no test harness). The <code>test_examples_e2e.py</code> covers end-to-end. Manual verification via example 06.</p>
+<ul>
+<li>[ ] <strong>Step 5.1: Add <code>_ws_send</code> helper to <code>runtime.js</code></strong></li>
+</ul>
+<p>Add after the <code>let _violetear_socket = null;</code> line (around line 388), before <code>_setup_websocket</code>:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-28-1" name="__codelineno-28-1" href="#__codelineno-28-1"></a><span class="c1">// Queue of messages to send when the socket opens.</span>
+<a id="__codelineno-28-2" name="__codelineno-28-2" href="#__codelineno-28-2"></a><span class="kd">let</span><span class="w"> </span><span class="nx">_ws_send_queue</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[];</span>
+<a id="__codelineno-28-3" name="__codelineno-28-3" href="#__codelineno-28-3"></a>
+<a id="__codelineno-28-4" name="__codelineno-28-4" href="#__codelineno-28-4"></a><span class="kd">function</span><span class="w"> </span><span class="nx">_ws_send</span><span class="p">(</span><span class="nx">obj</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-28-5" name="__codelineno-28-5" href="#__codelineno-28-5"></a><span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">msg</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">JSON</span><span class="p">.</span><span class="nx">stringify</span><span class="p">(</span><span class="nx">obj</span><span class="p">);</span>
+<a id="__codelineno-28-6" name="__codelineno-28-6" href="#__codelineno-28-6"></a><span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nx">_violetear_socket</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nx">_violetear_socket</span><span class="p">.</span><span class="nx">readyState</span><span class="w"> </span><span class="o">===</span><span class="w"> </span><span class="nx">WebSocket</span><span class="p">.</span><span class="nx">OPEN</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-28-7" name="__codelineno-28-7" href="#__codelineno-28-7"></a><span class="w">    </span><span class="nx">_violetear_socket</span><span class="p">.</span><span class="nx">send</span><span class="p">(</span><span class="nx">msg</span><span class="p">);</span>
+<a id="__codelineno-28-8" name="__codelineno-28-8" href="#__codelineno-28-8"></a><span class="w">  </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-28-9" name="__codelineno-28-9" href="#__codelineno-28-9"></a><span class="w">    </span><span class="nx">_ws_send_queue</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">msg</span><span class="p">);</span>
+<a id="__codelineno-28-10" name="__codelineno-28-10" href="#__codelineno-28-10"></a><span class="w">  </span><span class="p">}</span>
+<a id="__codelineno-28-11" name="__codelineno-28-11" href="#__codelineno-28-11"></a><span class="p">}</span>
+</code></pre></div>
+<p>In <code>_setup_websocket</code>, inside <code>socket.onopen</code>, after the existing lifecycle dispatch, flush the queue:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-29-1" name="__codelineno-29-1" href="#__codelineno-29-1"></a><span class="w">  </span><span class="nx">socket</span><span class="p">.</span><span class="nx">onopen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-29-2" name="__codelineno-29-2" href="#__codelineno-29-2"></a><span class="w">    </span><span class="c1">// Flush any messages queued before the socket opened</span>
+<a id="__codelineno-29-3" name="__codelineno-29-3" href="#__codelineno-29-3"></a><span class="w">    </span><span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="nx">_ws_send_queue</span><span class="p">.</span><span class="nx">length</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-29-4" name="__codelineno-29-4" href="#__codelineno-29-4"></a><span class="w">      </span><span class="nx">socket</span><span class="p">.</span><span class="nx">send</span><span class="p">(</span><span class="nx">_ws_send_queue</span><span class="p">.</span><span class="nx">shift</span><span class="p">());</span>
+<a id="__codelineno-29-5" name="__codelineno-29-5" href="#__codelineno-29-5"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-29-6" name="__codelineno-29-6" href="#__codelineno-29-6"></a><span class="w">    </span><span class="kd">const</span><span class="w"> </span><span class="nx">handlers</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">scope</span><span class="p">.</span><span class="nx">_lifecycle</span><span class="o">?</span><span class="p">.</span><span class="nx">connect</span><span class="w"> </span><span class="o">??</span><span class="w"> </span><span class="p">[];</span>
+<a id="__codelineno-29-7" name="__codelineno-29-7" href="#__codelineno-29-7"></a><span class="w">    </span><span class="nx">handlers</span><span class="p">.</span><span class="nx">forEach</span><span class="p">(</span><span class="nx">fn</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nx">fn</span><span class="p">().</span><span class="k">catch</span><span class="p">(</span><span class="nx">e</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nx">console</span><span class="p">.</span><span class="nx">error</span><span class="p">(</span><span class="s2">&quot;[violetear] connect handler error:&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">e</span><span class="p">)));</span>
+<a id="__codelineno-29-8" name="__codelineno-29-8" href="#__codelineno-29-8"></a><span class="w">  </span><span class="p">};</span>
+</code></pre></div>
+<ul>
+<li>[ ] <strong>Step 5.2: Add <code>_shared</code> object to <code>runtime.js</code></strong></li>
+</ul>
+<p>Add after the <code>_ws_send</code> helper, before <code>_setup_websocket</code>:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-30-1" name="__codelineno-30-1" href="#__codelineno-30-1"></a><span class="c1">// ---------------------------------------------------------------------------</span>
+<a id="__codelineno-30-2" name="__codelineno-30-2" href="#__codelineno-30-2"></a><span class="c1">// _shared — handles shared_sync / shared_set for @app.shared state classes.</span>
+<a id="__codelineno-30-3" name="__codelineno-30-3" href="#__codelineno-30-3"></a><span class="c1">// _shared_objects is populated by bundle.js (generated per-app at startup).</span>
+<a id="__codelineno-30-4" name="__codelineno-30-4" href="#__codelineno-30-4"></a><span class="c1">// ---------------------------------------------------------------------------</span>
+<a id="__codelineno-30-5" name="__codelineno-30-5" href="#__codelineno-30-5"></a><span class="kd">let</span><span class="w"> </span><span class="nx">_shared_objects</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{};</span><span class="w">  </span><span class="c1">// overwritten by bundle.js</span>
+<a id="__codelineno-30-6" name="__codelineno-30-6" href="#__codelineno-30-6"></a>
+<a id="__codelineno-30-7" name="__codelineno-30-7" href="#__codelineno-30-7"></a><span class="kd">const</span><span class="w"> </span><span class="nx">_shared</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-30-8" name="__codelineno-30-8" href="#__codelineno-30-8"></a><span class="w">  </span><span class="nx">_receiving</span><span class="o">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<a id="__codelineno-30-9" name="__codelineno-30-9" href="#__codelineno-30-9"></a>
+<a id="__codelineno-30-10" name="__codelineno-30-10" href="#__codelineno-30-10"></a><span class="w">  </span><span class="nx">set</span><span class="p">(</span><span class="nx">cls</span><span class="p">,</span><span class="w"> </span><span class="nx">field</span><span class="p">,</span><span class="w"> </span><span class="nx">value</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-30-11" name="__codelineno-30-11" href="#__codelineno-30-11"></a><span class="w">    </span><span class="nx">_ws_send</span><span class="p">({</span><span class="w"> </span><span class="nx">type</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;shared_set&quot;</span><span class="p">,</span><span class="w"> </span><span class="kd">class</span><span class="o">:</span><span class="w"> </span><span class="nx">cls</span><span class="p">,</span><span class="w"> </span><span class="nx">field</span><span class="o">:</span><span class="w"> </span><span class="nx">field</span><span class="p">,</span><span class="w"> </span><span class="nx">value</span><span class="o">:</span><span class="w"> </span><span class="nx">value</span><span class="w"> </span><span class="p">});</span>
+<a id="__codelineno-30-12" name="__codelineno-30-12" href="#__codelineno-30-12"></a><span class="w">  </span><span class="p">},</span>
+<a id="__codelineno-30-13" name="__codelineno-30-13" href="#__codelineno-30-13"></a>
+<a id="__codelineno-30-14" name="__codelineno-30-14" href="#__codelineno-30-14"></a><span class="w">  </span><span class="nx">handle</span><span class="p">(</span><span class="nx">msg</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-30-15" name="__codelineno-30-15" href="#__codelineno-30-15"></a><span class="w">    </span><span class="kd">const</span><span class="w"> </span><span class="nx">obj</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">_shared_objects</span><span class="p">[</span><span class="nx">msg</span><span class="p">.</span><span class="kd">class</span><span class="p">];</span>
+<a id="__codelineno-30-16" name="__codelineno-30-16" href="#__codelineno-30-16"></a><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="nx">obj</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-30-17" name="__codelineno-30-17" href="#__codelineno-30-17"></a><span class="w">      </span><span class="nx">console</span><span class="p">.</span><span class="nx">warn</span><span class="p">(</span><span class="sb">`[violetear] shared_sync for unknown class: </span><span class="si">${</span><span class="nx">msg</span><span class="p">.</span><span class="kd">class</span><span class="si">}</span><span class="sb">`</span><span class="p">);</span>
+<a id="__codelineno-30-18" name="__codelineno-30-18" href="#__codelineno-30-18"></a><span class="w">      </span><span class="k">return</span><span class="p">;</span>
+<a id="__codelineno-30-19" name="__codelineno-30-19" href="#__codelineno-30-19"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-30-20" name="__codelineno-30-20" href="#__codelineno-30-20"></a><span class="w">    </span><span class="nx">_shared</span><span class="p">.</span><span class="nx">_receiving</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span><span class="p">;</span>
+<a id="__codelineno-30-21" name="__codelineno-30-21" href="#__codelineno-30-21"></a><span class="w">    </span><span class="k">try</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-30-22" name="__codelineno-30-22" href="#__codelineno-30-22"></a><span class="w">      </span><span class="nx">obj</span><span class="p">[</span><span class="nx">msg</span><span class="p">.</span><span class="nx">field</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">msg</span><span class="p">.</span><span class="nx">value</span><span class="p">;</span>
+<a id="__codelineno-30-23" name="__codelineno-30-23" href="#__codelineno-30-23"></a><span class="w">    </span><span class="p">}</span><span class="w"> </span><span class="k">catch</span><span class="w"> </span><span class="p">(</span><span class="nx">e</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-30-24" name="__codelineno-30-24" href="#__codelineno-30-24"></a><span class="w">      </span><span class="nx">console</span><span class="p">.</span><span class="nx">error</span><span class="p">(</span><span class="sb">`[violetear] shared_sync assignment error: </span><span class="si">${</span><span class="nx">e</span><span class="p">.</span><span class="nx">message</span><span class="si">}</span><span class="sb">`</span><span class="p">);</span>
+<a id="__codelineno-30-25" name="__codelineno-30-25" href="#__codelineno-30-25"></a><span class="w">    </span><span class="p">}</span><span class="w"> </span><span class="k">finally</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-30-26" name="__codelineno-30-26" href="#__codelineno-30-26"></a><span class="w">      </span><span class="nx">_shared</span><span class="p">.</span><span class="nx">_receiving</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">false</span><span class="p">;</span>
+<a id="__codelineno-30-27" name="__codelineno-30-27" href="#__codelineno-30-27"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-30-28" name="__codelineno-30-28" href="#__codelineno-30-28"></a><span class="w">  </span><span class="p">},</span>
+<a id="__codelineno-30-29" name="__codelineno-30-29" href="#__codelineno-30-29"></a>
+<a id="__codelineno-30-30" name="__codelineno-30-30" href="#__codelineno-30-30"></a><span class="w">  </span><span class="nx">handle_error</span><span class="p">(</span><span class="nx">msg</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-30-31" name="__codelineno-30-31" href="#__codelineno-30-31"></a><span class="w">    </span><span class="nx">console</span><span class="p">.</span><span class="nx">error</span><span class="p">(</span>
+<a id="__codelineno-30-32" name="__codelineno-30-32" href="#__codelineno-30-32"></a><span class="w">      </span><span class="sb">`[violetear] shared write rejected — </span><span class="si">${</span><span class="nx">msg</span><span class="p">.</span><span class="kd">class</span><span class="si">}</span><span class="sb">.</span><span class="si">${</span><span class="nx">msg</span><span class="p">.</span><span class="nx">field</span><span class="si">}</span><span class="sb">: </span><span class="si">${</span><span class="nx">msg</span><span class="p">.</span><span class="nx">reason</span><span class="si">}</span><span class="sb">`</span>
+<a id="__codelineno-30-33" name="__codelineno-30-33" href="#__codelineno-30-33"></a><span class="w">    </span><span class="p">);</span>
+<a id="__codelineno-30-34" name="__codelineno-30-34" href="#__codelineno-30-34"></a><span class="w">  </span><span class="p">},</span>
+<a id="__codelineno-30-35" name="__codelineno-30-35" href="#__codelineno-30-35"></a><span class="p">};</span>
+</code></pre></div>
+<ul>
+<li>[ ] <strong>Step 5.3: Add <code>shared_sync</code> and <code>shared_error</code> cases to <code>socket.onmessage</code> in <code>runtime.js</code></strong></li>
+</ul>
+<p>In <code>_setup_websocket</code>, inside <code>socket.onmessage</code>, after the <code>if (data.type === "rpc")</code> block, add:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-31-1" name="__codelineno-31-1" href="#__codelineno-31-1"></a><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nx">data</span><span class="p">.</span><span class="nx">type</span><span class="w"> </span><span class="o">===</span><span class="w"> </span><span class="s2">&quot;rpc&quot;</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-31-2" name="__codelineno-31-2" href="#__codelineno-31-2"></a><span class="w">      </span><span class="c1">// ... existing rpc handling (unchanged) ...</span>
+<a id="__codelineno-31-3" name="__codelineno-31-3" href="#__codelineno-31-3"></a><span class="w">    </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nx">data</span><span class="p">.</span><span class="nx">type</span><span class="w"> </span><span class="o">===</span><span class="w"> </span><span class="s2">&quot;shared_sync&quot;</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-31-4" name="__codelineno-31-4" href="#__codelineno-31-4"></a><span class="w">      </span><span class="nx">_shared</span><span class="p">.</span><span class="nx">handle</span><span class="p">(</span><span class="nx">data</span><span class="p">);</span>
+<a id="__codelineno-31-5" name="__codelineno-31-5" href="#__codelineno-31-5"></a><span class="w">    </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nx">data</span><span class="p">.</span><span class="nx">type</span><span class="w"> </span><span class="o">===</span><span class="w"> </span><span class="s2">&quot;shared_error&quot;</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-31-6" name="__codelineno-31-6" href="#__codelineno-31-6"></a><span class="w">      </span><span class="nx">_shared</span><span class="p">.</span><span class="nx">handle_error</span><span class="p">(</span><span class="nx">data</span><span class="p">);</span>
+<a id="__codelineno-31-7" name="__codelineno-31-7" href="#__codelineno-31-7"></a><span class="w">    </span><span class="p">}</span>
+</code></pre></div>
+<ul>
+<li>[ ] <strong>Step 5.4: Verify runtime.js is syntactically valid</strong></li>
+</ul>
+<p><div class="highlight"><pre><span></span><code><a id="__codelineno-32-1" name="__codelineno-32-1" href="#__codelineno-32-1"></a>node<span class="w"> </span>--check<span class="w"> </span>/home/apiad/Workspace/repos/violetear/violetear/runtime.js<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;OK&quot;</span>
+</code></pre></div>
+Expected: <code>OK</code> (no syntax errors)</p>
+<ul>
+<li>[ ] <strong>Step 5.5: Full suite check</strong></li>
+</ul>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-33-1" name="__codelineno-33-1" href="#__codelineno-33-1"></a>make<span class="w"> </span><span class="m">2</span>&gt;<span class="p">&amp;</span><span class="m">1</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>tail<span class="w"> </span>-5
+</code></pre></div>
+<ul>
+<li>[ ] <strong>Step 5.6: Commit</strong></li>
+</ul>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-34-1" name="__codelineno-34-1" href="#__codelineno-34-1"></a>git<span class="w"> </span>add<span class="w"> </span>violetear/runtime.js
+<a id="__codelineno-34-2" name="__codelineno-34-2" href="#__codelineno-34-2"></a>git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;feat(shared): runtime.js _shared dispatcher + _ws_send queue&quot;</span>
+</code></pre></div>
+<hr />
+<h3 id="task-6-bundle-generation-emit-shared-classes-_shared_objects-map">Task 6: Bundle generation — emit shared classes + <code>_shared_objects</code> map<a class="headerlink" href="#task-6-bundle-generation-emit-shared-classes-_shared_objects-map" title="Permanent link">&para;</a></h3>
+<p><strong>Files:</strong>
+- Modify: <code>violetear/app.py</code> — <code>App._generate_bundle_js()</code> (around line 606)
+- Modify: <code>tests/test_unit.py</code> or <code>tests/test_shared.py</code> — bundle emission test</p>
+<p><strong>Interfaces:</strong>
+- Consumes: <code>App.shared_registry._classes: dict[str, SharedProxy]</code>; <code>transpile_class(cls, shared=True)</code>
+- Produces: bundle.js contains shared class JS + <code>_shared_objects = { ClassName: ClassName, ... };</code></p>
+<ul>
+<li>[ ] <strong>Step 6.1: Write failing test</strong></li>
+</ul>
+<p>Add to <code>tests/test_shared.py</code>:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-35-1" name="__codelineno-35-1" href="#__codelineno-35-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">test_bundle_contains_shared_class_and_objects_map</span><span class="p">():</span>
+<a id="__codelineno-35-2" name="__codelineno-35-2" href="#__codelineno-35-2"></a>    <span class="kn">from</span><span class="w"> </span><span class="nn">violetear.app</span><span class="w"> </span><span class="kn">import</span> <span class="n">App</span>
+<a id="__codelineno-35-3" name="__codelineno-35-3" href="#__codelineno-35-3"></a>    <span class="kn">import</span><span class="w"> </span><span class="nn">dataclasses</span>
+<a id="__codelineno-35-4" name="__codelineno-35-4" href="#__codelineno-35-4"></a>
+<a id="__codelineno-35-5" name="__codelineno-35-5" href="#__codelineno-35-5"></a>    <span class="n">app</span> <span class="o">=</span> <span class="n">App</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;test&quot;</span><span class="p">)</span>
+<a id="__codelineno-35-6" name="__codelineno-35-6" href="#__codelineno-35-6"></a>
+<a id="__codelineno-35-7" name="__codelineno-35-7" href="#__codelineno-35-7"></a>    <span class="nd">@app</span><span class="o">.</span><span class="n">shared</span>
+<a id="__codelineno-35-8" name="__codelineno-35-8" href="#__codelineno-35-8"></a>    <span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
+<a id="__codelineno-35-9" name="__codelineno-35-9" href="#__codelineno-35-9"></a>    <span class="k">class</span><span class="w"> </span><span class="nc">Score</span><span class="p">:</span>
+<a id="__codelineno-35-10" name="__codelineno-35-10" href="#__codelineno-35-10"></a>        <span class="n">value</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
+<a id="__codelineno-35-11" name="__codelineno-35-11" href="#__codelineno-35-11"></a>
+<a id="__codelineno-35-12" name="__codelineno-35-12" href="#__codelineno-35-12"></a>    <span class="n">bundle</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">_generate_bundle_js</span><span class="p">()</span>
+<a id="__codelineno-35-13" name="__codelineno-35-13" href="#__codelineno-35-13"></a>    <span class="c1"># Shared class emitted with _shared.set in setter</span>
+<a id="__codelineno-35-14" name="__codelineno-35-14" href="#__codelineno-35-14"></a>    <span class="k">assert</span> <span class="s1">&#39;_shared.set(&quot;Score&quot;, &quot;value&quot;, v)&#39;</span> <span class="ow">in</span> <span class="n">bundle</span>
+<a id="__codelineno-35-15" name="__codelineno-35-15" href="#__codelineno-35-15"></a>    <span class="c1"># _shared_objects map emitted</span>
+<a id="__codelineno-35-16" name="__codelineno-35-16" href="#__codelineno-35-16"></a>    <span class="k">assert</span> <span class="s1">&#39;_shared_objects = {&#39;</span> <span class="ow">in</span> <span class="n">bundle</span>
+<a id="__codelineno-35-17" name="__codelineno-35-17" href="#__codelineno-35-17"></a>    <span class="k">assert</span> <span class="s1">&#39;&quot;Score&quot;: Score&#39;</span> <span class="ow">in</span> <span class="n">bundle</span>
+</code></pre></div>
+<ul>
+<li>[ ] <strong>Step 6.2: Run to confirm FAIL</strong></li>
+</ul>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-36-1" name="__codelineno-36-1" href="#__codelineno-36-1"></a>uv<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>tests/test_shared.py<span class="w"> </span>-k<span class="w"> </span><span class="s2">&quot;bundle&quot;</span><span class="w"> </span>-v<span class="w"> </span><span class="m">2</span>&gt;<span class="p">&amp;</span><span class="m">1</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>head<span class="w"> </span>-20
+</code></pre></div>
+<ul>
+<li>[ ] <strong>Step 6.3: Update <code>_generate_bundle_js</code> in <code>app.py</code></strong></li>
+</ul>
+<p>In <code>_generate_bundle_js</code> (around line 606), after the <code># 1. Compiled state classes</code> block, add a new block for shared classes:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-37-1" name="__codelineno-37-1" href="#__codelineno-37-1"></a>        <span class="c1"># 1b. Shared state classes (transpiled with shared=True for WS setter)</span>
+<a id="__codelineno-37-2" name="__codelineno-37-2" href="#__codelineno-37-2"></a>        <span class="k">for</span> <span class="n">cls_name</span><span class="p">,</span> <span class="n">proxy</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">shared_registry</span><span class="o">.</span><span class="n">_classes</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+<a id="__codelineno-37-3" name="__codelineno-37-3" href="#__codelineno-37-3"></a>            <span class="n">instance</span> <span class="o">=</span> <span class="nb">object</span><span class="o">.</span><span class="fm">__getattribute__</span><span class="p">(</span><span class="n">proxy</span><span class="p">,</span> <span class="s2">&quot;_instance&quot;</span><span class="p">)</span>
+<a id="__codelineno-37-4" name="__codelineno-37-4" href="#__codelineno-37-4"></a>            <span class="n">js</span> <span class="o">=</span> <span class="n">transpile_class</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">instance</span><span class="p">),</span> <span class="n">shared</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<a id="__codelineno-37-5" name="__codelineno-37-5" href="#__codelineno-37-5"></a>            <span class="n">parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">js</span><span class="p">)</span>
+<a id="__codelineno-37-6" name="__codelineno-37-6" href="#__codelineno-37-6"></a>
+<a id="__codelineno-37-7" name="__codelineno-37-7" href="#__codelineno-37-7"></a>        <span class="c1"># 1c. _shared_objects map — tells _shared.handle() which JS singletons to write</span>
+<a id="__codelineno-37-8" name="__codelineno-37-8" href="#__codelineno-37-8"></a>        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">shared_registry</span><span class="o">.</span><span class="n">_classes</span><span class="p">:</span>
+<a id="__codelineno-37-9" name="__codelineno-37-9" href="#__codelineno-37-9"></a>            <span class="n">entries</span> <span class="o">=</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+<a id="__codelineno-37-10" name="__codelineno-37-10" href="#__codelineno-37-10"></a>                <span class="sa">f</span><span class="s1">&#39;&quot;</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s1">&quot;: </span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s1">&#39;</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">shared_registry</span><span class="o">.</span><span class="n">_classes</span>
+<a id="__codelineno-37-11" name="__codelineno-37-11" href="#__codelineno-37-11"></a>            <span class="p">)</span>
+<a id="__codelineno-37-12" name="__codelineno-37-12" href="#__codelineno-37-12"></a>            <span class="n">parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;_shared_objects = </span><span class="se">{{</span><span class="si">{</span><span class="n">entries</span><span class="si">}</span><span class="se">}}</span><span class="s2">;&quot;</span><span class="p">)</span>
+</code></pre></div>
+<p>Add this after the existing <code>for js in self.client._compiled_classes.values():</code> block.</p>
+<ul>
+<li>[ ] <strong>Step 6.4: Run tests to confirm PASS</strong></li>
+</ul>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-38-1" name="__codelineno-38-1" href="#__codelineno-38-1"></a>uv<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>tests/test_shared.py<span class="w"> </span>-v<span class="w"> </span><span class="m">2</span>&gt;<span class="p">&amp;</span><span class="m">1</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>tail<span class="w"> </span>-10
+</code></pre></div>
+<ul>
+<li>[ ] <strong>Step 6.5: Full suite check</strong></li>
+</ul>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-39-1" name="__codelineno-39-1" href="#__codelineno-39-1"></a>make<span class="w"> </span><span class="m">2</span>&gt;<span class="p">&amp;</span><span class="m">1</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>tail<span class="w"> </span>-5
+</code></pre></div>
+<ul>
+<li>[ ] <strong>Step 6.6: Commit</strong></li>
+</ul>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-40-1" name="__codelineno-40-1" href="#__codelineno-40-1"></a>git<span class="w"> </span>add<span class="w"> </span>violetear/app.py<span class="w"> </span>tests/test_shared.py
+<a id="__codelineno-40-2" name="__codelineno-40-2" href="#__codelineno-40-2"></a>git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;feat(shared): bundle emits shared classes + _shared_objects map&quot;</span>
+</code></pre></div>
+<hr />
+<h3 id="task-7-example-06-roadmap-update">Task 7: Example 06 + roadmap update<a class="headerlink" href="#task-7-example-06-roadmap-update" title="Permanent link">&para;</a></h3>
+<p><strong>Files:</strong>
+- Create: <code>examples/06_shared.py</code>
+- Modify: <code>roadmap.md</code> — add Phase 8 entry
+- Modify: <code>tests/test_examples.py</code> — ensure example 06 is collected</p>
+<p><strong>Interfaces:</strong>
+- Consumes: all prior tasks; <code>App</code>, <code>@app.shared</code>, <code>@dataclass</code>, <code>Document</code>, <code>StyleSheet</code></p>
+<ul>
+<li>[ ] <strong>Step 7.1: Create <code>examples/06_shared.py</code></strong></li>
+</ul>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-41-1" name="__codelineno-41-1" href="#__codelineno-41-1"></a><span class="sd">&quot;&quot;&quot;Tier 6 canonical example — shared state counter across all connected clients.</span>
+<a id="__codelineno-41-2" name="__codelineno-41-2" href="#__codelineno-41-2"></a>
+<a id="__codelineno-41-3" name="__codelineno-41-3" href="#__codelineno-41-3"></a><span class="sd">Demonstrates @app.shared: a reactive dataclass whose fields auto-broadcast</span>
+<a id="__codelineno-41-4" name="__codelineno-41-4" href="#__codelineno-41-4"></a><span class="sd">to every connected client. No manual broadcast calls. No request_history.</span>
+<a id="__codelineno-41-5" name="__codelineno-41-5" href="#__codelineno-41-5"></a><span class="sd">Open two browser tabs — clicking + in one tab updates the counter in both.</span>
+<a id="__codelineno-41-6" name="__codelineno-41-6" href="#__codelineno-41-6"></a>
+<a id="__codelineno-41-7" name="__codelineno-41-7" href="#__codelineno-41-7"></a><span class="sd">Run:</span>
+<a id="__codelineno-41-8" name="__codelineno-41-8" href="#__codelineno-41-8"></a><span class="sd">    python examples/06_shared.py</span>
+<a id="__codelineno-41-9" name="__codelineno-41-9" href="#__codelineno-41-9"></a>
+<a id="__codelineno-41-10" name="__codelineno-41-10" href="#__codelineno-41-10"></a><span class="sd">Then open http://localhost:8000 in two browser tabs.</span>
+<a id="__codelineno-41-11" name="__codelineno-41-11" href="#__codelineno-41-11"></a><span class="sd">&quot;&quot;&quot;</span>
+<a id="__codelineno-41-12" name="__codelineno-41-12" href="#__codelineno-41-12"></a><span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span><span class="p">,</span> <span class="n">field</span>
+<a id="__codelineno-41-13" name="__codelineno-41-13" href="#__codelineno-41-13"></a>
+<a id="__codelineno-41-14" name="__codelineno-41-14" href="#__codelineno-41-14"></a><span class="kn">from</span><span class="w"> </span><span class="nn">violetear</span><span class="w"> </span><span class="kn">import</span> <span class="n">App</span><span class="p">,</span> <span class="n">Document</span><span class="p">,</span> <span class="n">StyleSheet</span>
+<a id="__codelineno-41-15" name="__codelineno-41-15" href="#__codelineno-41-15"></a><span class="kn">from</span><span class="w"> </span><span class="nn">violetear.color</span><span class="w"> </span><span class="kn">import</span> <span class="n">Colors</span>
+<a id="__codelineno-41-16" name="__codelineno-41-16" href="#__codelineno-41-16"></a><span class="kn">from</span><span class="w"> </span><span class="nn">violetear.js</span><span class="w"> </span><span class="kn">import</span> <span class="n">DOM</span><span class="p">,</span> <span class="n">Event</span>
+<a id="__codelineno-41-17" name="__codelineno-41-17" href="#__codelineno-41-17"></a><span class="kn">from</span><span class="w"> </span><span class="nn">violetear.units</span><span class="w"> </span><span class="kn">import</span> <span class="n">px</span><span class="p">,</span> <span class="n">rem</span>
+<a id="__codelineno-41-18" name="__codelineno-41-18" href="#__codelineno-41-18"></a>
+<a id="__codelineno-41-19" name="__codelineno-41-19" href="#__codelineno-41-19"></a><span class="n">app</span> <span class="o">=</span> <span class="n">App</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;Shared Counter&quot;</span><span class="p">)</span>
+<a id="__codelineno-41-20" name="__codelineno-41-20" href="#__codelineno-41-20"></a>
+<a id="__codelineno-41-21" name="__codelineno-41-21" href="#__codelineno-41-21"></a>
+<a id="__codelineno-41-22" name="__codelineno-41-22" href="#__codelineno-41-22"></a><span class="nd">@app</span><span class="o">.</span><span class="n">shared</span>
+<a id="__codelineno-41-23" name="__codelineno-41-23" href="#__codelineno-41-23"></a><span class="nd">@dataclass</span>
+<a id="__codelineno-41-24" name="__codelineno-41-24" href="#__codelineno-41-24"></a><span class="k">class</span><span class="w"> </span><span class="nc">Room</span><span class="p">:</span>
+<a id="__codelineno-41-25" name="__codelineno-41-25" href="#__codelineno-41-25"></a>    <span class="n">count</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
+<a id="__codelineno-41-26" name="__codelineno-41-26" href="#__codelineno-41-26"></a>    <span class="n">label</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;clicks&quot;</span>
+<a id="__codelineno-41-27" name="__codelineno-41-27" href="#__codelineno-41-27"></a>    <span class="n">server_version</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span>
+<a id="__codelineno-41-28" name="__codelineno-41-28" href="#__codelineno-41-28"></a>        <span class="n">default</span><span class="o">=</span><span class="s2">&quot;1.0&quot;</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;server_only&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">}</span>
+<a id="__codelineno-41-29" name="__codelineno-41-29" href="#__codelineno-41-29"></a>    <span class="p">)</span>
+<a id="__codelineno-41-30" name="__codelineno-41-30" href="#__codelineno-41-30"></a>
+<a id="__codelineno-41-31" name="__codelineno-41-31" href="#__codelineno-41-31"></a>
+<a id="__codelineno-41-32" name="__codelineno-41-32" href="#__codelineno-41-32"></a><span class="n">sheet</span> <span class="o">=</span> <span class="n">StyleSheet</span><span class="p">(</span><span class="n">normalize</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<a id="__codelineno-41-33" name="__codelineno-41-33" href="#__codelineno-41-33"></a><span class="n">sheet</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s2">&quot;body&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">font</span><span class="p">(</span>
+<a id="__codelineno-41-34" name="__codelineno-41-34" href="#__codelineno-41-34"></a>    <span class="n">size</span><span class="o">=</span><span class="n">rem</span><span class="p">(</span><span class="mf">1.0</span><span class="p">),</span> <span class="n">family</span><span class="o">=</span><span class="s2">&quot;system-ui, sans-serif&quot;</span>
+<a id="__codelineno-41-35" name="__codelineno-41-35" href="#__codelineno-41-35"></a><span class="p">)</span><span class="o">.</span><span class="n">background</span><span class="p">(</span><span class="n">Colors</span><span class="o">.</span><span class="n">WhiteSmoke</span><span class="p">)</span><span class="o">.</span><span class="n">padding</span><span class="p">(</span><span class="n">rem</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
+<a id="__codelineno-41-36" name="__codelineno-41-36" href="#__codelineno-41-36"></a><span class="n">sheet</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s2">&quot;.card&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">rules</span><span class="p">(</span><span class="n">max_width</span><span class="o">=</span><span class="s2">&quot;360px&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">margin</span><span class="p">(</span><span class="s2">&quot;auto&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">background</span><span class="p">(</span>
+<a id="__codelineno-41-37" name="__codelineno-41-37" href="#__codelineno-41-37"></a>    <span class="n">Colors</span><span class="o">.</span><span class="n">White</span>
+<a id="__codelineno-41-38" name="__codelineno-41-38" href="#__codelineno-41-38"></a><span class="p">)</span><span class="o">.</span><span class="n">padding</span><span class="p">(</span><span class="n">rem</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span><span class="o">.</span><span class="n">rounded</span><span class="p">(</span><span class="n">px</span><span class="p">(</span><span class="mi">8</span><span class="p">))</span><span class="o">.</span><span class="n">border</span><span class="p">(</span><span class="n">px</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">Colors</span><span class="o">.</span><span class="n">Gainsboro</span><span class="p">)</span>
+<a id="__codelineno-41-39" name="__codelineno-41-39" href="#__codelineno-41-39"></a><span class="n">sheet</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s2">&quot;.count&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">font</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">rem</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span> <span class="n">weight</span><span class="o">=</span><span class="mi">700</span><span class="p">)</span><span class="o">.</span><span class="n">color</span><span class="p">(</span><span class="n">Colors</span><span class="o">.</span><span class="n">Indigo</span><span class="p">)</span><span class="o">.</span><span class="n">rules</span><span class="p">(</span>
+<a id="__codelineno-41-40" name="__codelineno-41-40" href="#__codelineno-41-40"></a>    <span class="n">text_align</span><span class="o">=</span><span class="s2">&quot;center&quot;</span>
+<a id="__codelineno-41-41" name="__codelineno-41-41" href="#__codelineno-41-41"></a><span class="p">)</span>
+<a id="__codelineno-41-42" name="__codelineno-41-42" href="#__codelineno-41-42"></a><span class="n">sheet</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s2">&quot;.btn&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">rules</span><span class="p">(</span>
+<a id="__codelineno-41-43" name="__codelineno-41-43" href="#__codelineno-41-43"></a>    <span class="n">display</span><span class="o">=</span><span class="s2">&quot;block&quot;</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="s2">&quot;100%&quot;</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="s2">&quot;12px&quot;</span><span class="p">,</span>
+<a id="__codelineno-41-44" name="__codelineno-41-44" href="#__codelineno-41-44"></a>    <span class="n">border</span><span class="o">=</span><span class="s2">&quot;none&quot;</span><span class="p">,</span> <span class="n">cursor</span><span class="o">=</span><span class="s2">&quot;pointer&quot;</span><span class="p">,</span> <span class="n">font_size</span><span class="o">=</span><span class="s2">&quot;1.25rem&quot;</span><span class="p">,</span>
+<a id="__codelineno-41-45" name="__codelineno-41-45" href="#__codelineno-41-45"></a>    <span class="n">font_weight</span><span class="o">=</span><span class="mi">700</span><span class="p">,</span> <span class="n">margin_top</span><span class="o">=</span><span class="s2">&quot;1rem&quot;</span><span class="p">,</span>
+<a id="__codelineno-41-46" name="__codelineno-41-46" href="#__codelineno-41-46"></a><span class="p">)</span><span class="o">.</span><span class="n">background</span><span class="p">(</span><span class="n">Colors</span><span class="o">.</span><span class="n">Indigo</span><span class="p">)</span><span class="o">.</span><span class="n">color</span><span class="p">(</span><span class="n">Colors</span><span class="o">.</span><span class="n">White</span><span class="p">)</span><span class="o">.</span><span class="n">rounded</span><span class="p">(</span><span class="n">px</span><span class="p">(</span><span class="mi">6</span><span class="p">))</span>
+<a id="__codelineno-41-47" name="__codelineno-41-47" href="#__codelineno-41-47"></a><span class="n">sheet</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s2">&quot;.label&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">font</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">rem</span><span class="p">(</span><span class="mf">0.875</span><span class="p">))</span><span class="o">.</span><span class="n">color</span><span class="p">(</span><span class="n">Colors</span><span class="o">.</span><span class="n">SlateGray</span><span class="p">)</span><span class="o">.</span><span class="n">rules</span><span class="p">(</span>
+<a id="__codelineno-41-48" name="__codelineno-41-48" href="#__codelineno-41-48"></a>    <span class="n">text_align</span><span class="o">=</span><span class="s2">&quot;center&quot;</span><span class="p">,</span> <span class="n">margin_top</span><span class="o">=</span><span class="s2">&quot;0.25rem&quot;</span>
+<a id="__codelineno-41-49" name="__codelineno-41-49" href="#__codelineno-41-49"></a><span class="p">)</span>
+<a id="__codelineno-41-50" name="__codelineno-41-50" href="#__codelineno-41-50"></a>
+<a id="__codelineno-41-51" name="__codelineno-41-51" href="#__codelineno-41-51"></a>
+<a id="__codelineno-41-52" name="__codelineno-41-52" href="#__codelineno-41-52"></a><span class="nd">@app</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">callback</span>
+<a id="__codelineno-41-53" name="__codelineno-41-53" href="#__codelineno-41-53"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">on_increment</span><span class="p">(</span><span class="n">event</span><span class="p">:</span> <span class="n">Event</span><span class="p">):</span>
+<a id="__codelineno-41-54" name="__codelineno-41-54" href="#__codelineno-41-54"></a>    <span class="n">Room</span><span class="o">.</span><span class="n">count</span> <span class="o">=</span> <span class="n">Room</span><span class="o">.</span><span class="n">count</span> <span class="o">+</span> <span class="mi">1</span>
+<a id="__codelineno-41-55" name="__codelineno-41-55" href="#__codelineno-41-55"></a>
+<a id="__codelineno-41-56" name="__codelineno-41-56" href="#__codelineno-41-56"></a>
+<a id="__codelineno-41-57" name="__codelineno-41-57" href="#__codelineno-41-57"></a><span class="nd">@app</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)</span>
+<a id="__codelineno-41-58" name="__codelineno-41-58" href="#__codelineno-41-58"></a><span class="k">def</span><span class="w"> </span><span class="nf">index</span><span class="p">():</span>
+<a id="__codelineno-41-59" name="__codelineno-41-59" href="#__codelineno-41-59"></a>    <span class="n">doc</span> <span class="o">=</span> <span class="n">Document</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;Shared Counter&quot;</span><span class="p">)</span>
+<a id="__codelineno-41-60" name="__codelineno-41-60" href="#__codelineno-41-60"></a>    <span class="n">doc</span><span class="o">.</span><span class="n">style</span><span class="p">(</span><span class="n">href</span><span class="o">=</span><span class="s2">&quot;/style.css&quot;</span><span class="p">,</span> <span class="n">sheet</span><span class="o">=</span><span class="n">sheet</span><span class="p">)</span>
+<a id="__codelineno-41-61" name="__codelineno-41-61" href="#__codelineno-41-61"></a>
+<a id="__codelineno-41-62" name="__codelineno-41-62" href="#__codelineno-41-62"></a>    <span class="k">with</span> <span class="n">doc</span><span class="o">.</span><span class="n">body</span> <span class="k">as</span> <span class="n">body</span><span class="p">:</span>
+<a id="__codelineno-41-63" name="__codelineno-41-63" href="#__codelineno-41-63"></a>        <span class="k">with</span> <span class="n">body</span><span class="o">.</span><span class="n">div</span><span class="p">(</span><span class="n">classes</span><span class="o">=</span><span class="s2">&quot;card&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">card</span><span class="p">:</span>
+<a id="__codelineno-41-64" name="__codelineno-41-64" href="#__codelineno-41-64"></a>            <span class="n">card</span><span class="o">.</span><span class="n">div</span><span class="p">(</span><span class="n">classes</span><span class="o">=</span><span class="s2">&quot;count&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">Room</span><span class="o">.</span><span class="n">count</span><span class="p">)</span>
+<a id="__codelineno-41-65" name="__codelineno-41-65" href="#__codelineno-41-65"></a>            <span class="n">card</span><span class="o">.</span><span class="n">div</span><span class="p">(</span><span class="n">classes</span><span class="o">=</span><span class="s2">&quot;label&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">Room</span><span class="o">.</span><span class="n">label</span><span class="p">)</span>
+<a id="__codelineno-41-66" name="__codelineno-41-66" href="#__codelineno-41-66"></a>            <span class="n">card</span><span class="o">.</span><span class="n">button</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s2">&quot;+1&quot;</span><span class="p">,</span> <span class="n">classes</span><span class="o">=</span><span class="s2">&quot;btn&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">on</span><span class="p">(</span><span class="s2">&quot;click&quot;</span><span class="p">,</span> <span class="n">on_increment</span><span class="p">)</span>
+<a id="__codelineno-41-67" name="__codelineno-41-67" href="#__codelineno-41-67"></a>
+<a id="__codelineno-41-68" name="__codelineno-41-68" href="#__codelineno-41-68"></a>    <span class="k">return</span> <span class="n">doc</span>
+<a id="__codelineno-41-69" name="__codelineno-41-69" href="#__codelineno-41-69"></a>
+<a id="__codelineno-41-70" name="__codelineno-41-70" href="#__codelineno-41-70"></a>
+<a id="__codelineno-41-71" name="__codelineno-41-71" href="#__codelineno-41-71"></a><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+<a id="__codelineno-41-72" name="__codelineno-41-72" href="#__codelineno-41-72"></a>    <span class="n">app</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+</code></pre></div>
+<ul>
+<li>[ ] <strong>Step 7.2: Smoke-test the example renders without error</strong></li>
+</ul>
+<p><div class="highlight"><pre><span></span><code><a id="__codelineno-42-1" name="__codelineno-42-1" href="#__codelineno-42-1"></a>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;</span>
+<a id="__codelineno-42-2" name="__codelineno-42-2" href="#__codelineno-42-2"></a><span class="s2">import examples.06_shared as ex</span>
+<a id="__codelineno-42-3" name="__codelineno-42-3" href="#__codelineno-42-3"></a><span class="s2">doc = ex.index()</span>
+<a id="__codelineno-42-4" name="__codelineno-42-4" href="#__codelineno-42-4"></a><span class="s2">html = doc.render()</span>
+<a id="__codelineno-42-5" name="__codelineno-42-5" href="#__codelineno-42-5"></a><span class="s2">assert &#39;Shared Counter&#39; in html</span>
+<a id="__codelineno-42-6" name="__codelineno-42-6" href="#__codelineno-42-6"></a><span class="s2">print(&#39;OK:&#39;, len(html), &#39;bytes&#39;)</span>
+<a id="__codelineno-42-7" name="__codelineno-42-7" href="#__codelineno-42-7"></a><span class="s2">&quot;</span>
+</code></pre></div>
+Expected: <code>OK: &lt;some number&gt; bytes</code></p>
+<ul>
+<li>[ ] <strong>Step 7.3: Update <code>roadmap.md</code></strong></li>
+</ul>
+<p>Append to <code>roadmap.md</code>:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-43-1" name="__codelineno-43-1" href="#__codelineno-43-1"></a><span class="gu">## Phase 8: @app.shared — Realtime Cross-Client State Sync</span>
+<a id="__codelineno-43-2" name="__codelineno-43-2" href="#__codelineno-43-2"></a>
+<a id="__codelineno-43-3" name="__codelineno-43-3" href="#__codelineno-43-3"></a><span class="k">- [ ]</span> <span class="gs">**SharedProxy + SharedRegistry**</span>: server-side interception of field assignments; auto-broadcast via <span class="sb">`SocketManager`</span>
+<a id="__codelineno-43-4" name="__codelineno-43-4" href="#__codelineno-43-4"></a><span class="k">- [ ]</span> <span class="gs">**SocketManager**</span>: <span class="sb">`broadcast_shared_sync`</span>, <span class="sb">`send_shared_sync`</span>, <span class="sb">`send_shared_error`</span>
+<a id="__codelineno-43-5" name="__codelineno-43-5" href="#__codelineno-43-5"></a><span class="k">- [ ]</span> <span class="gs">**App.shared() decorator**</span>: registers <span class="sb">`@app.shared @dataclass`</span>; returns proxy singleton
+<a id="__codelineno-43-6" name="__codelineno-43-6" href="#__codelineno-43-6"></a><span class="k">- [ ]</span> <span class="gs">**WS dispatcher**</span>: <span class="sb">`shared_set`</span> → <span class="sb">`SharedRegistry.handle_set`</span>; <span class="sb">`shared_sync`</span>/<span class="sb">`shared_error`</span> client-side
+<a id="__codelineno-43-7" name="__codelineno-43-7" href="#__codelineno-43-7"></a><span class="k">- [ ]</span> <span class="gs">**transpile_class(shared=True)**</span>: setters emit <span class="sb">`_shared.set(...)`</span>; <span class="sb">`server_only`</span> fields skip it
+<a id="__codelineno-43-8" name="__codelineno-43-8" href="#__codelineno-43-8"></a><span class="k">- [ ]</span> <span class="gs">**runtime.js**</span>: <span class="sb">`_shared`</span> object, <span class="sb">`_ws_send`</span> queue, <span class="sb">`shared_sync`</span>/<span class="sb">`shared_error`</span> handlers
+<a id="__codelineno-43-9" name="__codelineno-43-9" href="#__codelineno-43-9"></a><span class="k">- [ ]</span> <span class="gs">**Bundle generation**</span>: shared classes + <span class="sb">`_shared_objects`</span> map emitted into bundle.js
+<a id="__codelineno-43-10" name="__codelineno-43-10" href="#__codelineno-43-10"></a><span class="k">- [ ]</span> <span class="gs">**Example 06**</span>: counter shared across all tabs; demonstrates zero boilerplate
+</code></pre></div>
+<ul>
+<li>[ ] <strong>Step 7.4: Full suite check</strong></li>
+</ul>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-44-1" name="__codelineno-44-1" href="#__codelineno-44-1"></a>make<span class="w"> </span><span class="m">2</span>&gt;<span class="p">&amp;</span><span class="m">1</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>tail<span class="w"> </span>-5
+</code></pre></div>
+<ul>
+<li>[ ] <strong>Step 7.5: Commit</strong></li>
+</ul>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-45-1" name="__codelineno-45-1" href="#__codelineno-45-1"></a>git<span class="w"> </span>add<span class="w"> </span>examples/06_shared.py<span class="w"> </span>roadmap.md
+<a id="__codelineno-45-2" name="__codelineno-45-2" href="#__codelineno-45-2"></a>git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;feat(shared): example 06 shared counter + roadmap Phase 8&quot;</span>
+</code></pre></div>
+<ul>
+<li>[ ] <strong>Step 7.6: Push</strong></li>
+</ul>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-46-1" name="__codelineno-46-1" href="#__codelineno-46-1"></a>git<span class="w"> </span>push<span class="w"> </span>origin<span class="w"> </span>main
+</code></pre></div>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/apiad/violetear" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://pypi.org/project/violetear/" target="_blank" rel="noopener" title="pypi.org" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.8 200.5c-7.7-30.9-22.3-54.2-53.4-54.2h-40.1v47.4c0 36.8-31.2 67.8-66.8 67.8H172.7c-29.2 0-53.4 25-53.4 54.3v101.8c0 29 25.2 46 53.4 54.3 33.8 9.9 66.3 11.7 106.8 0 26.9-7.8 53.4-23.5 53.4-54.3v-40.7H226.2v-13.6h160.2c31.1 0 42.6-21.7 53.4-54.2 11.2-33.5 10.7-65.7 0-108.6M286.2 444.7a20.4 20.4 0 1 1 0-40.7 20.4 20.4 0 1 1 0 40.7M167.8 248.1h106.8c29.7 0 53.4-24.5 53.4-54.3V91.9c0-29-24.4-50.7-53.4-55.6-35.8-5.9-74.7-5.6-106.8.1-45.2 8-53.4 24.7-53.4 55.6v40.7h106.9v13.6h-147c-31.1 0-58.3 18.7-66.8 54.2-9.8 40.7-10.2 66.1 0 108.6 7.6 31.6 25.7 54.2 56.8 54.2H101v-48.8c0-35.3 30.5-66.4 66.8-66.4m-6.6-183.4a20.4 20.4 0 1 1 0 40.8 20.4 20.4 0 1 1 0-40.8"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.sections", "navigation.top", "toc.integrate", "content.code.copy", "content.code.annotate"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>

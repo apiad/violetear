@@ -1,0 +1,1707 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="The Full-Stack Web Framework for Pythonistas">
+      
+      
+        <meta name="author" content="Alejandro Piad Morffis">
+      
+      
+        <link rel="canonical" href="https://apiad.github.io/violetear/examples/utilities/">
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/logo.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Creating a library of utility classes - violetear</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="deep-purple" data-md-color-accent="purple">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#creating-a-library-of-utility-classes" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="violetear" class="md-header__button md-logo" aria-label="violetear" data-md-component="logo">
+      
+  <img src="../../assets/logo.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            violetear
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Creating a library of utility classes
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="deep-purple" data-md-color-accent="purple"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="deep-purple" data-md-color-accent="purple"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/apiad/violetear" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    apiad/violetear
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../index.md" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../install/" class="md-tabs__link">
+          
+  
+  
+  Getting Started
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../concepts/styling/" class="md-tabs__link">
+          
+  
+  
+  Concepts
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../design/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Design Philosophy
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../roadmap/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Roadmap
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+  
+
+<nav class="md-nav md-nav--primary md-nav--lifted md-nav--integrated" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="violetear" class="md-nav__button md-logo" aria-label="violetear" data-md-component="logo">
+      
+  <img src="../../assets/logo.png" alt="logo">
+
+    </a>
+    violetear
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/apiad/violetear" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    apiad/violetear
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../index.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Getting Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../install/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../quickstart/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quickstart
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Concepts
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Concepts
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../concepts/styling/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Styling
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../concepts/markup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Markup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../concepts/app/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Full-Stack App
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../concepts/state/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    State Management
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../concepts/partials/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Partials & DOM
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../concepts/realtime/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Real-Time & Shared State
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../concepts/pwa/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PWA
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Design Philosophy
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../roadmap/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Roadmap
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="creating-a-library-of-utility-classes">Creating a library of utility classes<a class="headerlink" href="#creating-a-library-of-utility-classes" title="Permanent link">&para;</a></h1>
+<p>Some design systems are based around utility classes, tiny styles that define one or a few rules
+for a single CSS concept.
+For example, classes like <code>text-xs</code>, <code>text-sm</code>, <code>text-lg</code>, etc., for different font sizes,
+or classes like <code>w-1</code>, <code>w-2</code>, etc., for different widths.</p>
+<p>In this example we will create a few of these utility classes to show you how you
+can leverage <code>violetear</code> to create hundreds of tiny CSS rules on the fly.
+We won't create utilities for everything, of course, because once you see the basic pattern,
+all that's left is doing the same over and over.</p>
+<p>Instead, we will focus on a few key patterns: font properties, geometry properties (padding, margin),
+and color palettes.</p>
+<p>As usual, we will create an empty stylesheet to begin.</p>
+<div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">utilities.py</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-13">13</a></span>
+<span class="normal"><a href="#__codelineno-0-14">14</a></span>
+<span class="normal"><a href="#__codelineno-0-15">15</a></span>
+<span class="normal"><a href="#__codelineno-0-16">16</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-13" name="__codelineno-0-13"></a><span class="kn">from</span><span class="w"> </span><span class="nn">violetear.style</span><span class="w"> </span><span class="kn">import</span> <span class="n">Style</span>
+<a id="__codelineno-0-14" name="__codelineno-0-14"></a><span class="kn">from</span><span class="w"> </span><span class="nn">violetear.stylesheet</span><span class="w"> </span><span class="kn">import</span> <span class="n">StyleSheet</span>
+<a id="__codelineno-0-15" name="__codelineno-0-15"></a>
+<a id="__codelineno-0-16" name="__codelineno-0-16"></a><span class="n">sheet</span> <span class="o">=</span> <span class="n">StyleSheet</span><span class="p">(</span><span class="n">normalize</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+<h2 id="defining-text-utilities">Defining text utilities<a class="headerlink" href="#defining-text-utilities" title="Permanent link">&para;</a></h2>
+<p>For font sizes, we will create 5 different styles using <code>Unit.scale</code>.
+The classes will go from <code>text-xs</code> to <code>text-xl</code>.</p>
+<div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">utilities.py</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-1-20">20</a></span>
+<span class="normal"><a href="#__codelineno-1-21">21</a></span>
+<span class="normal"><a href="#__codelineno-1-22">22</a></span>
+<span class="normal"><a href="#__codelineno-1-23">23</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-1-20" name="__codelineno-1-20"></a><span class="kn">from</span><span class="w"> </span><span class="nn">violetear.units</span><span class="w"> </span><span class="kn">import</span> <span class="n">Unit</span><span class="p">,</span> <span class="n">rem</span>
+<a id="__codelineno-1-21" name="__codelineno-1-21"></a>
+<a id="__codelineno-1-22" name="__codelineno-1-22"></a><span class="n">sizes</span> <span class="o">=</span> <span class="n">Unit</span><span class="o">.</span><span class="n">scale</span><span class="p">(</span><span class="n">rem</span><span class="p">,</span> <span class="mf">0.8</span><span class="p">,</span> <span class="mf">3.0</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+<a id="__codelineno-1-23" name="__codelineno-1-23"></a><span class="n">labels</span> <span class="o">=</span> <span class="s2">&quot;xs sm md lg xl&quot;</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+</code></pre></div></td></tr></table></div>
+<p>Once we have all definitions in place, we can create all 5 classes with a single loop.</p>
+<div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">utilities.py</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-2-25">25</a></span>
+<span class="normal"><a href="#__codelineno-2-26">26</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-2-25" name="__codelineno-2-25"></a><span class="k">for</span> <span class="n">size</span><span class="p">,</span> <span class="n">label</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">sizes</span><span class="p">,</span> <span class="n">labels</span><span class="p">):</span>
+<a id="__codelineno-2-26" name="__codelineno-2-26"></a>    <span class="n">sheet</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;.text-</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">font</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">size</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+<p>Take a look at our <a href="./utilities.css">generated CSS</a> and you'll see our newly created classes.</p>
+<div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">utilites.css</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-3-295">295</a></span>
+<span class="normal"><a href="#__codelineno-3-296">296</a></span>
+<span class="normal"><a href="#__codelineno-3-297">297</a></span>
+<span class="normal"><a href="#__codelineno-3-298">298</a></span>
+<span class="normal"><a href="#__codelineno-3-299">299</a></span>
+<span class="normal"><a href="#__codelineno-3-300">300</a></span>
+<span class="normal"><a href="#__codelineno-3-301">301</a></span>
+<span class="normal"><a href="#__codelineno-3-302">302</a></span>
+<span class="normal"><a href="#__codelineno-3-303">303</a></span>
+<span class="normal"><a href="#__codelineno-3-304">304</a></span>
+<span class="normal"><a href="#__codelineno-3-305">305</a></span>
+<span class="normal"><a href="#__codelineno-3-306">306</a></span>
+<span class="normal"><a href="#__codelineno-3-307">307</a></span>
+<span class="normal"><a href="#__codelineno-3-308">308</a></span>
+<span class="normal"><a href="#__codelineno-3-309">309</a></span>
+<span class="normal"><a href="#__codelineno-3-310">310</a></span>
+<span class="normal"><a href="#__codelineno-3-311">311</a></span>
+<span class="normal"><a href="#__codelineno-3-312">312</a></span>
+<span class="normal"><a href="#__codelineno-3-313">313</a></span>
+<span class="normal"><a href="#__codelineno-3-314">314</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-3-295" name="__codelineno-3-295"></a><span class="p">.</span><span class="nc">text-xs</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-3-296" name="__codelineno-3-296"></a><span class="w">    </span><span class="k">font-size</span><span class="p">:</span><span class="w"> </span><span class="mf">0.8</span><span class="kt">rem</span><span class="p">;</span>
+<a id="__codelineno-3-297" name="__codelineno-3-297"></a><span class="p">}</span>
+<a id="__codelineno-3-298" name="__codelineno-3-298"></a>
+<a id="__codelineno-3-299" name="__codelineno-3-299"></a><span class="p">.</span><span class="nc">text-sm</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-3-300" name="__codelineno-3-300"></a><span class="w">    </span><span class="k">font-size</span><span class="p">:</span><span class="w"> </span><span class="mf">1.35</span><span class="kt">rem</span><span class="p">;</span>
+<a id="__codelineno-3-301" name="__codelineno-3-301"></a><span class="p">}</span>
+<a id="__codelineno-3-302" name="__codelineno-3-302"></a>
+<a id="__codelineno-3-303" name="__codelineno-3-303"></a><span class="p">.</span><span class="nc">text-md</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-3-304" name="__codelineno-3-304"></a><span class="w">    </span><span class="k">font-size</span><span class="p">:</span><span class="w"> </span><span class="mf">1.9</span><span class="kt">rem</span><span class="p">;</span>
+<a id="__codelineno-3-305" name="__codelineno-3-305"></a><span class="p">}</span>
+<a id="__codelineno-3-306" name="__codelineno-3-306"></a>
+<a id="__codelineno-3-307" name="__codelineno-3-307"></a><span class="p">.</span><span class="nc">text-lg</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-3-308" name="__codelineno-3-308"></a><span class="w">    </span><span class="k">font-size</span><span class="p">:</span><span class="w"> </span><span class="mf">2.45</span><span class="kt">rem</span><span class="p">;</span>
+<a id="__codelineno-3-309" name="__codelineno-3-309"></a><span class="p">}</span>
+<a id="__codelineno-3-310" name="__codelineno-3-310"></a>
+<a id="__codelineno-3-311" name="__codelineno-3-311"></a><span class="p">.</span><span class="nc">text-xl</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-3-312" name="__codelineno-3-312"></a><span class="w">    </span><span class="k">font-size</span><span class="p">:</span><span class="w"> </span><span class="mf">3.0</span><span class="kt">rem</span><span class="p">;</span>
+<a id="__codelineno-3-313" name="__codelineno-3-313"></a><span class="p">}</span>
+<a id="__codelineno-3-314" name="__codelineno-3-314"></a><span class="o">...</span>
+</code></pre></div></td></tr></table></div>
+<p>Similary, we can define font weight style (<code>font-100</code>, ..., <code>font-900</code>) with a single loop:</p>
+<div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">utilities.py</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-4-33">33</a></span>
+<span class="normal"><a href="#__codelineno-4-34">34</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-4-33" name="__codelineno-4-33"></a><span class="k">for</span> <span class="n">weight</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">):</span>
+<a id="__codelineno-4-34" name="__codelineno-4-34"></a>    <span class="n">sheet</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;.font-</span><span class="si">{</span><span class="n">weight</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">font</span><span class="p">(</span><span class="n">weight</span><span class="o">=</span><span class="n">weight</span> <span class="o">*</span> <span class="mi">100</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+<p>And you can confirm that the 9 corresponding classes were created.</p>
+<div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">utilites.css</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-5-315">315</a></span>
+<span class="normal"><a href="#__codelineno-5-316">316</a></span>
+<span class="normal"><a href="#__codelineno-5-317">317</a></span>
+<span class="normal"><a href="#__codelineno-5-318">318</a></span>
+<span class="normal"><a href="#__codelineno-5-319">319</a></span>
+<span class="normal"><a href="#__codelineno-5-320">320</a></span>
+<span class="normal"><a href="#__codelineno-5-321">321</a></span>
+<span class="normal"><a href="#__codelineno-5-322">322</a></span>
+<span class="normal"><a href="#__codelineno-5-323">323</a></span>
+<span class="normal"><a href="#__codelineno-5-324">324</a></span>
+<span class="normal"><a href="#__codelineno-5-325">325</a></span>
+<span class="normal"><a href="#__codelineno-5-326">326</a></span>
+<span class="normal"><a href="#__codelineno-5-327">327</a></span>
+<span class="normal"><a href="#__codelineno-5-328">328</a></span>
+<span class="normal"><a href="#__codelineno-5-329">329</a></span>
+<span class="normal"><a href="#__codelineno-5-330">330</a></span>
+<span class="normal"><a href="#__codelineno-5-331">331</a></span>
+<span class="normal"><a href="#__codelineno-5-332">332</a></span>
+<span class="normal"><a href="#__codelineno-5-333">333</a></span>
+<span class="normal"><a href="#__codelineno-5-334">334</a></span>
+<span class="normal"><a href="#__codelineno-5-335">335</a></span>
+<span class="normal"><a href="#__codelineno-5-336">336</a></span>
+<span class="normal"><a href="#__codelineno-5-337">337</a></span>
+<span class="normal"><a href="#__codelineno-5-338">338</a></span>
+<span class="normal"><a href="#__codelineno-5-339">339</a></span>
+<span class="normal"><a href="#__codelineno-5-340">340</a></span>
+<span class="normal"><a href="#__codelineno-5-341">341</a></span>
+<span class="normal"><a href="#__codelineno-5-342">342</a></span>
+<span class="normal"><a href="#__codelineno-5-343">343</a></span>
+<span class="normal"><a href="#__codelineno-5-344">344</a></span>
+<span class="normal"><a href="#__codelineno-5-345">345</a></span>
+<span class="normal"><a href="#__codelineno-5-346">346</a></span>
+<span class="normal"><a href="#__codelineno-5-347">347</a></span>
+<span class="normal"><a href="#__codelineno-5-348">348</a></span>
+<span class="normal"><a href="#__codelineno-5-349">349</a></span>
+<span class="normal"><a href="#__codelineno-5-350">350</a></span>
+<span class="normal"><a href="#__codelineno-5-351">351</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-5-315" name="__codelineno-5-315"></a><span class="p">.</span><span class="nc">font-1</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-5-316" name="__codelineno-5-316"></a><span class="w">    </span><span class="k">font-weight</span><span class="p">:</span><span class="w"> </span><span class="mi">100</span><span class="p">;</span>
+<a id="__codelineno-5-317" name="__codelineno-5-317"></a><span class="p">}</span>
+<a id="__codelineno-5-318" name="__codelineno-5-318"></a>
+<a id="__codelineno-5-319" name="__codelineno-5-319"></a><span class="p">.</span><span class="nc">font-2</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-5-320" name="__codelineno-5-320"></a><span class="w">    </span><span class="k">font-weight</span><span class="p">:</span><span class="w"> </span><span class="mi">200</span><span class="p">;</span>
+<a id="__codelineno-5-321" name="__codelineno-5-321"></a><span class="p">}</span>
+<a id="__codelineno-5-322" name="__codelineno-5-322"></a>
+<a id="__codelineno-5-323" name="__codelineno-5-323"></a><span class="p">.</span><span class="nc">font-3</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-5-324" name="__codelineno-5-324"></a><span class="w">    </span><span class="k">font-weight</span><span class="p">:</span><span class="w"> </span><span class="mi">300</span><span class="p">;</span>
+<a id="__codelineno-5-325" name="__codelineno-5-325"></a><span class="p">}</span>
+<a id="__codelineno-5-326" name="__codelineno-5-326"></a>
+<a id="__codelineno-5-327" name="__codelineno-5-327"></a><span class="p">.</span><span class="nc">font-4</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-5-328" name="__codelineno-5-328"></a><span class="w">    </span><span class="k">font-weight</span><span class="p">:</span><span class="w"> </span><span class="mi">400</span><span class="p">;</span>
+<a id="__codelineno-5-329" name="__codelineno-5-329"></a><span class="p">}</span>
+<a id="__codelineno-5-330" name="__codelineno-5-330"></a>
+<a id="__codelineno-5-331" name="__codelineno-5-331"></a><span class="p">.</span><span class="nc">font-5</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-5-332" name="__codelineno-5-332"></a><span class="w">    </span><span class="k">font-weight</span><span class="p">:</span><span class="w"> </span><span class="mi">500</span><span class="p">;</span>
+<a id="__codelineno-5-333" name="__codelineno-5-333"></a><span class="p">}</span>
+<a id="__codelineno-5-334" name="__codelineno-5-334"></a>
+<a id="__codelineno-5-335" name="__codelineno-5-335"></a><span class="p">.</span><span class="nc">font-6</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-5-336" name="__codelineno-5-336"></a><span class="w">    </span><span class="k">font-weight</span><span class="p">:</span><span class="w"> </span><span class="mi">600</span><span class="p">;</span>
+<a id="__codelineno-5-337" name="__codelineno-5-337"></a><span class="p">}</span>
+<a id="__codelineno-5-338" name="__codelineno-5-338"></a>
+<a id="__codelineno-5-339" name="__codelineno-5-339"></a><span class="p">.</span><span class="nc">font-7</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-5-340" name="__codelineno-5-340"></a><span class="w">    </span><span class="k">font-weight</span><span class="p">:</span><span class="w"> </span><span class="mi">700</span><span class="p">;</span>
+<a id="__codelineno-5-341" name="__codelineno-5-341"></a><span class="p">}</span>
+<a id="__codelineno-5-342" name="__codelineno-5-342"></a>
+<a id="__codelineno-5-343" name="__codelineno-5-343"></a><span class="p">.</span><span class="nc">font-8</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-5-344" name="__codelineno-5-344"></a><span class="w">    </span><span class="k">font-weight</span><span class="p">:</span><span class="w"> </span><span class="mi">800</span><span class="p">;</span>
+<a id="__codelineno-5-345" name="__codelineno-5-345"></a><span class="p">}</span>
+<a id="__codelineno-5-346" name="__codelineno-5-346"></a>
+<a id="__codelineno-5-347" name="__codelineno-5-347"></a><span class="p">.</span><span class="nc">font-9</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-5-348" name="__codelineno-5-348"></a><span class="w">    </span><span class="k">font-weight</span><span class="p">:</span><span class="w"> </span><span class="mi">900</span><span class="p">;</span>
+<a id="__codelineno-5-349" name="__codelineno-5-349"></a><span class="p">}</span>
+<a id="__codelineno-5-350" name="__codelineno-5-350"></a>
+<a id="__codelineno-5-351" name="__codelineno-5-351"></a><span class="o">...</span>
+</code></pre></div></td></tr></table></div>
+<h2 id="defining-color-classes">Defining color classes<a class="headerlink" href="#defining-color-classes" title="Permanent link">&para;</a></h2>
+<p>Colors are even easier to create, since <code>violetear</code> already ships with lots
+of utilities for manipulating colors.</p>
+<div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">utilities.py</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-6-43">43</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-6-43" name="__codelineno-6-43"></a><span class="kn">from</span><span class="w"> </span><span class="nn">violetear.color</span><span class="w"> </span><span class="kn">import</span> <span class="n">Colors</span>
+</code></pre></div></td></tr></table></div>
+<p>Let's start by creating the 9 variants of each of the basic colors.</p>
+<div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">utilities.py</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-7-45">45</a></span>
+<span class="normal"><a href="#__codelineno-7-46">46</a></span>
+<span class="normal"><a href="#__codelineno-7-47">47</a></span>
+<span class="normal"><a href="#__codelineno-7-48">48</a></span>
+<span class="normal"><a href="#__codelineno-7-49">49</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-7-45" name="__codelineno-7-45"></a><span class="k">for</span> <span class="n">color</span> <span class="ow">in</span> <span class="n">Colors</span><span class="o">.</span><span class="n">basic_palette</span><span class="p">():</span>
+<a id="__codelineno-7-46" name="__codelineno-7-46"></a>    <span class="n">sheet</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;.</span><span class="si">{</span><span class="n">color</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">color</span><span class="p">(</span><span class="n">color</span><span class="p">)</span>
+<a id="__codelineno-7-47" name="__codelineno-7-47"></a>
+<a id="__codelineno-7-48" name="__codelineno-7-48"></a>    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">):</span>
+<a id="__codelineno-7-49" name="__codelineno-7-49"></a>        <span class="n">sheet</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;.</span><span class="si">{</span><span class="n">color</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="si">}</span><span class="s2">-</span><span class="si">{</span><span class="n">i</span><span class="o">*</span><span class="mi">100</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">color</span><span class="p">(</span><span class="n">color</span><span class="o">.</span><span class="n">lit</span><span class="p">(</span><span class="n">i</span> <span class="o">/</span> <span class="mi">10</span><span class="p">))</span>
+</code></pre></div></td></tr></table></div>
+<p>Again, check the CSS file and you'll lots and lots of color styles.</p>
+<div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">utilites.css</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-8-831">831</a></span>
+<span class="normal"><a href="#__codelineno-8-832">832</a></span>
+<span class="normal"><a href="#__codelineno-8-833">833</a></span>
+<span class="normal"><a href="#__codelineno-8-834">834</a></span>
+<span class="normal"><a href="#__codelineno-8-835">835</a></span>
+<span class="normal"><a href="#__codelineno-8-836">836</a></span>
+<span class="normal"><a href="#__codelineno-8-837">837</a></span>
+<span class="normal"><a href="#__codelineno-8-838">838</a></span>
+<span class="normal"><a href="#__codelineno-8-839">839</a></span>
+<span class="normal"><a href="#__codelineno-8-840">840</a></span>
+<span class="normal"><a href="#__codelineno-8-841">841</a></span>
+<span class="normal"><a href="#__codelineno-8-842">842</a></span>
+<span class="normal"><a href="#__codelineno-8-843">843</a></span>
+<span class="normal"><a href="#__codelineno-8-844">844</a></span>
+<span class="normal"><a href="#__codelineno-8-845">845</a></span>
+<span class="normal"><a href="#__codelineno-8-846">846</a></span>
+<span class="normal"><a href="#__codelineno-8-847">847</a></span>
+<span class="normal"><a href="#__codelineno-8-848">848</a></span>
+<span class="normal"><a href="#__codelineno-8-849">849</a></span>
+<span class="normal"><a href="#__codelineno-8-850">850</a></span>
+<span class="normal"><a href="#__codelineno-8-851">851</a></span>
+<span class="normal"><a href="#__codelineno-8-852">852</a></span>
+<span class="normal"><a href="#__codelineno-8-853">853</a></span>
+<span class="normal"><a href="#__codelineno-8-854">854</a></span>
+<span class="normal"><a href="#__codelineno-8-855">855</a></span>
+<span class="normal"><a href="#__codelineno-8-856">856</a></span>
+<span class="normal"><a href="#__codelineno-8-857">857</a></span>
+<span class="normal"><a href="#__codelineno-8-858">858</a></span>
+<span class="normal"><a href="#__codelineno-8-859">859</a></span>
+<span class="normal"><a href="#__codelineno-8-860">860</a></span>
+<span class="normal"><a href="#__codelineno-8-861">861</a></span>
+<span class="normal"><a href="#__codelineno-8-862">862</a></span>
+<span class="normal"><a href="#__codelineno-8-863">863</a></span>
+<span class="normal"><a href="#__codelineno-8-864">864</a></span>
+<span class="normal"><a href="#__codelineno-8-865">865</a></span>
+<span class="normal"><a href="#__codelineno-8-866">866</a></span>
+<span class="normal"><a href="#__codelineno-8-867">867</a></span>
+<span class="normal"><a href="#__codelineno-8-868">868</a></span>
+<span class="normal"><a href="#__codelineno-8-869">869</a></span>
+<span class="normal"><a href="#__codelineno-8-870">870</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-8-831" name="__codelineno-8-831"></a><span class="p">.</span><span class="nc">blue</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-8-832" name="__codelineno-8-832"></a><span class="w">    </span><span class="k">color</span><span class="p">:</span><span class="w"> </span><span class="nb">rgba</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">255</span><span class="p">,</span><span class="mf">1.0</span><span class="p">);</span>
+<a id="__codelineno-8-833" name="__codelineno-8-833"></a><span class="p">}</span>
+<a id="__codelineno-8-834" name="__codelineno-8-834"></a>
+<a id="__codelineno-8-835" name="__codelineno-8-835"></a><span class="p">.</span><span class="nc">blue-100</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-8-836" name="__codelineno-8-836"></a><span class="w">    </span><span class="k">color</span><span class="p">:</span><span class="w"> </span><span class="nb">rgba</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">51</span><span class="p">,</span><span class="mf">1.0</span><span class="p">);</span>
+<a id="__codelineno-8-837" name="__codelineno-8-837"></a><span class="p">}</span>
+<a id="__codelineno-8-838" name="__codelineno-8-838"></a>
+<a id="__codelineno-8-839" name="__codelineno-8-839"></a><span class="p">.</span><span class="nc">blue-200</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-8-840" name="__codelineno-8-840"></a><span class="w">    </span><span class="k">color</span><span class="p">:</span><span class="w"> </span><span class="nb">rgba</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">102</span><span class="p">,</span><span class="mf">1.0</span><span class="p">);</span>
+<a id="__codelineno-8-841" name="__codelineno-8-841"></a><span class="p">}</span>
+<a id="__codelineno-8-842" name="__codelineno-8-842"></a>
+<a id="__codelineno-8-843" name="__codelineno-8-843"></a><span class="p">.</span><span class="nc">blue-300</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-8-844" name="__codelineno-8-844"></a><span class="w">    </span><span class="k">color</span><span class="p">:</span><span class="w"> </span><span class="nb">rgba</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">153</span><span class="p">,</span><span class="mf">1.0</span><span class="p">);</span>
+<a id="__codelineno-8-845" name="__codelineno-8-845"></a><span class="p">}</span>
+<a id="__codelineno-8-846" name="__codelineno-8-846"></a>
+<a id="__codelineno-8-847" name="__codelineno-8-847"></a><span class="p">.</span><span class="nc">blue-400</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-8-848" name="__codelineno-8-848"></a><span class="w">    </span><span class="k">color</span><span class="p">:</span><span class="w"> </span><span class="nb">rgba</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">204</span><span class="p">,</span><span class="mf">1.0</span><span class="p">);</span>
+<a id="__codelineno-8-849" name="__codelineno-8-849"></a><span class="p">}</span>
+<a id="__codelineno-8-850" name="__codelineno-8-850"></a>
+<a id="__codelineno-8-851" name="__codelineno-8-851"></a><span class="p">.</span><span class="nc">blue-500</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-8-852" name="__codelineno-8-852"></a><span class="w">    </span><span class="k">color</span><span class="p">:</span><span class="w"> </span><span class="nb">rgba</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">255</span><span class="p">,</span><span class="mf">1.0</span><span class="p">);</span>
+<a id="__codelineno-8-853" name="__codelineno-8-853"></a><span class="p">}</span>
+<a id="__codelineno-8-854" name="__codelineno-8-854"></a>
+<a id="__codelineno-8-855" name="__codelineno-8-855"></a><span class="p">.</span><span class="nc">blue-600</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-8-856" name="__codelineno-8-856"></a><span class="w">    </span><span class="k">color</span><span class="p">:</span><span class="w"> </span><span class="nb">rgba</span><span class="p">(</span><span class="mi">50</span><span class="p">,</span><span class="mi">50</span><span class="p">,</span><span class="mi">255</span><span class="p">,</span><span class="mf">1.0</span><span class="p">);</span>
+<a id="__codelineno-8-857" name="__codelineno-8-857"></a><span class="p">}</span>
+<a id="__codelineno-8-858" name="__codelineno-8-858"></a>
+<a id="__codelineno-8-859" name="__codelineno-8-859"></a><span class="p">.</span><span class="nc">blue-700</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-8-860" name="__codelineno-8-860"></a><span class="w">    </span><span class="k">color</span><span class="p">:</span><span class="w"> </span><span class="nb">rgba</span><span class="p">(</span><span class="mi">101</span><span class="p">,</span><span class="mi">101</span><span class="p">,</span><span class="mi">255</span><span class="p">,</span><span class="mf">1.0</span><span class="p">);</span>
+<a id="__codelineno-8-861" name="__codelineno-8-861"></a><span class="p">}</span>
+<a id="__codelineno-8-862" name="__codelineno-8-862"></a>
+<a id="__codelineno-8-863" name="__codelineno-8-863"></a><span class="p">.</span><span class="nc">blue-800</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-8-864" name="__codelineno-8-864"></a><span class="w">    </span><span class="k">color</span><span class="p">:</span><span class="w"> </span><span class="nb">rgba</span><span class="p">(</span><span class="mi">153</span><span class="p">,</span><span class="mi">153</span><span class="p">,</span><span class="mi">255</span><span class="p">,</span><span class="mf">1.0</span><span class="p">);</span>
+<a id="__codelineno-8-865" name="__codelineno-8-865"></a><span class="p">}</span>
+<a id="__codelineno-8-866" name="__codelineno-8-866"></a>
+<a id="__codelineno-8-867" name="__codelineno-8-867"></a><span class="p">.</span><span class="nc">blue-900</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-8-868" name="__codelineno-8-868"></a><span class="w">    </span><span class="k">color</span><span class="p">:</span><span class="w"> </span><span class="nb">rgba</span><span class="p">(</span><span class="mi">204</span><span class="p">,</span><span class="mi">204</span><span class="p">,</span><span class="mi">254</span><span class="p">,</span><span class="mf">1.0</span><span class="p">);</span>
+<a id="__codelineno-8-869" name="__codelineno-8-869"></a><span class="p">}</span>
+<a id="__codelineno-8-870" name="__codelineno-8-870"></a><span class="o">...</span>
+</code></pre></div></td></tr></table></div>
+<h2 id="defining-utility-classes-with-presets">Defining utility classes with presets<a class="headerlink" href="#defining-utility-classes-with-presets" title="Permanent link">&para;</a></h2>
+<p>Now that you get the basic idea, you can see how easy it is to build a full
+utility system.
+However, it is boring as hell to keep writing all those <code>for</code> loops zipping
+class names and values.
+For this reason, in <code>violetear.presets</code> you'll find a configurable <code>UtilitySystem</code>
+that helps you create these clases.</p>
+<div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">utilities.py</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-9-62">62</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-9-62" name="__codelineno-9-62"></a><span class="kn">from</span><span class="w"> </span><span class="nn">violetear.presets</span><span class="w"> </span><span class="kn">import</span> <span class="n">UtilitySystem</span>
+</code></pre></div></td></tr></table></div>
+<p>The simplest use case is defining a style where the variant names are the same
+as the attribute values.</p>
+<p>For example, here's how you define all font weight variants.</p>
+<div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">utilities.py</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-10-66">66</a></span>
+<span class="normal"><a href="#__codelineno-10-67">67</a></span>
+<span class="normal"><a href="#__codelineno-10-68">68</a></span>
+<span class="normal"><a href="#__codelineno-10-69">69</a></span>
+<span class="normal"><a href="#__codelineno-10-70">70</a></span>
+<span class="normal"><a href="#__codelineno-10-71">71</a></span>
+<span class="normal"><a href="#__codelineno-10-72">72</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-10-66" name="__codelineno-10-66"></a><span class="n">sheet</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
+<a id="__codelineno-10-67" name="__codelineno-10-67"></a>    <span class="n">UtilitySystem</span><span class="p">()</span><span class="o">.</span><span class="n">define</span><span class="p">(</span>
+<a id="__codelineno-10-68" name="__codelineno-10-68"></a>        <span class="n">clss</span><span class="o">=</span><span class="s2">&quot;weight&quot;</span><span class="p">,</span>  
+<a id="__codelineno-10-69" name="__codelineno-10-69"></a>        <span class="n">variants</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;lighter&quot;</span><span class="p">,</span> <span class="s2">&quot;normal&quot;</span><span class="p">,</span> <span class="s2">&quot;bold&quot;</span><span class="p">,</span> <span class="s2">&quot;bolder&quot;</span><span class="p">],</span>  
+<a id="__codelineno-10-70" name="__codelineno-10-70"></a>        <span class="n">rule</span><span class="o">=</span><span class="k">lambda</span> <span class="n">style</span><span class="p">,</span> <span class="n">variant</span><span class="p">:</span> <span class="n">style</span><span class="o">.</span><span class="n">font</span><span class="p">(</span><span class="n">weight</span><span class="o">=</span><span class="n">variant</span><span class="p">),</span>  
+<a id="__codelineno-10-71" name="__codelineno-10-71"></a>    <span class="p">)</span>
+<a id="__codelineno-10-72" name="__codelineno-10-72"></a><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+<p>The <code>clss</code> argument gives a base name for the CSS class that will be created.
+In this case, we'll create classes called <code>weight-*</code>.</p>
+<div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">utilities.py</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-11-66">66</a></span>
+<span class="normal"><a href="#__codelineno-11-67">67</a></span>
+<span class="normal"><a href="#__codelineno-11-68">68</a></span>
+<span class="normal"><a href="#__codelineno-11-69">69</a></span>
+<span class="normal"><a href="#__codelineno-11-70">70</a></span>
+<span class="normal"><a href="#__codelineno-11-71">71</a></span>
+<span class="normal"><a href="#__codelineno-11-72">72</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-11-66" name="__codelineno-11-66"></a><span class="n">sheet</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
+<a id="__codelineno-11-67" name="__codelineno-11-67"></a>    <span class="n">UtilitySystem</span><span class="p">()</span><span class="o">.</span><span class="n">define</span><span class="p">(</span>
+<a id="__codelineno-11-68" name="__codelineno-11-68"></a><span class="hll">        <span class="n">clss</span><span class="o">=</span><span class="s2">&quot;weight&quot;</span><span class="p">,</span>  
+</span><a id="__codelineno-11-69" name="__codelineno-11-69"></a>        <span class="n">variants</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;lighter&quot;</span><span class="p">,</span> <span class="s2">&quot;normal&quot;</span><span class="p">,</span> <span class="s2">&quot;bold&quot;</span><span class="p">,</span> <span class="s2">&quot;bolder&quot;</span><span class="p">],</span>  
+<a id="__codelineno-11-70" name="__codelineno-11-70"></a>        <span class="n">rule</span><span class="o">=</span><span class="k">lambda</span> <span class="n">style</span><span class="p">,</span> <span class="n">variant</span><span class="p">:</span> <span class="n">style</span><span class="o">.</span><span class="n">font</span><span class="p">(</span><span class="n">weight</span><span class="o">=</span><span class="n">variant</span><span class="p">),</span>  
+<a id="__codelineno-11-71" name="__codelineno-11-71"></a>    <span class="p">)</span>
+<a id="__codelineno-11-72" name="__codelineno-11-72"></a><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+<p>The <code>variants</code> argument generates the possible variant names.
+In this case we will have classes <code>weight-lighter</code>, ..., <code>weight-bolder</code>.</p>
+<div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">utilities.py</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-12-66">66</a></span>
+<span class="normal"><a href="#__codelineno-12-67">67</a></span>
+<span class="normal"><a href="#__codelineno-12-68">68</a></span>
+<span class="normal"><a href="#__codelineno-12-69">69</a></span>
+<span class="normal"><a href="#__codelineno-12-70">70</a></span>
+<span class="normal"><a href="#__codelineno-12-71">71</a></span>
+<span class="normal"><a href="#__codelineno-12-72">72</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-12-66" name="__codelineno-12-66"></a><span class="n">sheet</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
+<a id="__codelineno-12-67" name="__codelineno-12-67"></a>    <span class="n">UtilitySystem</span><span class="p">()</span><span class="o">.</span><span class="n">define</span><span class="p">(</span>
+<a id="__codelineno-12-68" name="__codelineno-12-68"></a>        <span class="n">clss</span><span class="o">=</span><span class="s2">&quot;weight&quot;</span><span class="p">,</span>  
+<a id="__codelineno-12-69" name="__codelineno-12-69"></a><span class="hll">        <span class="n">variants</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;lighter&quot;</span><span class="p">,</span> <span class="s2">&quot;normal&quot;</span><span class="p">,</span> <span class="s2">&quot;bold&quot;</span><span class="p">,</span> <span class="s2">&quot;bolder&quot;</span><span class="p">],</span>  
+</span><a id="__codelineno-12-70" name="__codelineno-12-70"></a>        <span class="n">rule</span><span class="o">=</span><span class="k">lambda</span> <span class="n">style</span><span class="p">,</span> <span class="n">variant</span><span class="p">:</span> <span class="n">style</span><span class="o">.</span><span class="n">font</span><span class="p">(</span><span class="n">weight</span><span class="o">=</span><span class="n">variant</span><span class="p">),</span>  
+<a id="__codelineno-12-71" name="__codelineno-12-71"></a>    <span class="p">)</span>
+<a id="__codelineno-12-72" name="__codelineno-12-72"></a><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+<p>And the rule argument is a function that takes an empty style created
+for each specific variant and applies the necessary rules to configure it.
+In this case it will be called for times, each with an empty style selecting
+<code>.weight-lighter</code>, ..., <code>.weight-bolder</code> and the correspoding variant.</p>
+<div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">utilities.py</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-13-66">66</a></span>
+<span class="normal"><a href="#__codelineno-13-67">67</a></span>
+<span class="normal"><a href="#__codelineno-13-68">68</a></span>
+<span class="normal"><a href="#__codelineno-13-69">69</a></span>
+<span class="normal"><a href="#__codelineno-13-70">70</a></span>
+<span class="normal"><a href="#__codelineno-13-71">71</a></span>
+<span class="normal"><a href="#__codelineno-13-72">72</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-13-66" name="__codelineno-13-66"></a><span class="n">sheet</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
+<a id="__codelineno-13-67" name="__codelineno-13-67"></a>    <span class="n">UtilitySystem</span><span class="p">()</span><span class="o">.</span><span class="n">define</span><span class="p">(</span>
+<a id="__codelineno-13-68" name="__codelineno-13-68"></a>        <span class="n">clss</span><span class="o">=</span><span class="s2">&quot;weight&quot;</span><span class="p">,</span>  
+<a id="__codelineno-13-69" name="__codelineno-13-69"></a>        <span class="n">variants</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;lighter&quot;</span><span class="p">,</span> <span class="s2">&quot;normal&quot;</span><span class="p">,</span> <span class="s2">&quot;bold&quot;</span><span class="p">,</span> <span class="s2">&quot;bolder&quot;</span><span class="p">],</span>  
+<a id="__codelineno-13-70" name="__codelineno-13-70"></a><span class="hll">        <span class="n">rule</span><span class="o">=</span><span class="k">lambda</span> <span class="n">style</span><span class="p">,</span> <span class="n">variant</span><span class="p">:</span> <span class="n">style</span><span class="o">.</span><span class="n">font</span><span class="p">(</span><span class="n">weight</span><span class="o">=</span><span class="n">variant</span><span class="p">),</span>  
+</span><a id="__codelineno-13-71" name="__codelineno-13-71"></a>    <span class="p">)</span>
+<a id="__codelineno-13-72" name="__codelineno-13-72"></a><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+<p>And this is the result:</p>
+<div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">utilites.css</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-14-990"> 990</a></span>
+<span class="normal"><a href="#__codelineno-14-991"> 991</a></span>
+<span class="normal"><a href="#__codelineno-14-992"> 992</a></span>
+<span class="normal"><a href="#__codelineno-14-993"> 993</a></span>
+<span class="normal"><a href="#__codelineno-14-994"> 994</a></span>
+<span class="normal"><a href="#__codelineno-14-995"> 995</a></span>
+<span class="normal"><a href="#__codelineno-14-996"> 996</a></span>
+<span class="normal"><a href="#__codelineno-14-997"> 997</a></span>
+<span class="normal"><a href="#__codelineno-14-998"> 998</a></span>
+<span class="normal"><a href="#__codelineno-14-999"> 999</a></span>
+<span class="normal"><a href="#__codelineno-14-1000">1000</a></span>
+<span class="normal"><a href="#__codelineno-14-1001">1001</a></span>
+<span class="normal"><a href="#__codelineno-14-1002">1002</a></span>
+<span class="normal"><a href="#__codelineno-14-1003">1003</a></span>
+<span class="normal"><a href="#__codelineno-14-1004">1004</a></span>
+<span class="normal"><a href="#__codelineno-14-1005">1005</a></span>
+<span class="normal"><a href="#__codelineno-14-1006">1006</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-14-990" name="__codelineno-14-990"></a><span class="o">...</span>
+<a id="__codelineno-14-991" name="__codelineno-14-991"></a><span class="p">.</span><span class="nc">weight-lighter</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-14-992" name="__codelineno-14-992"></a><span class="w">    </span><span class="k">font-weight</span><span class="p">:</span><span class="w"> </span><span class="kc">lighter</span><span class="p">;</span>
+<a id="__codelineno-14-993" name="__codelineno-14-993"></a><span class="p">}</span>
+<a id="__codelineno-14-994" name="__codelineno-14-994"></a>
+<a id="__codelineno-14-995" name="__codelineno-14-995"></a><span class="p">.</span><span class="nc">weight-normal</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-14-996" name="__codelineno-14-996"></a><span class="w">    </span><span class="k">font-weight</span><span class="p">:</span><span class="w"> </span><span class="kc">normal</span><span class="p">;</span>
+<a id="__codelineno-14-997" name="__codelineno-14-997"></a><span class="p">}</span>
+<a id="__codelineno-14-998" name="__codelineno-14-998"></a>
+<a id="__codelineno-14-999" name="__codelineno-14-999"></a><span class="p">.</span><span class="nc">weight-bold</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-14-1000" name="__codelineno-14-1000"></a><span class="w">    </span><span class="k">font-weight</span><span class="p">:</span><span class="w"> </span><span class="kc">bold</span><span class="p">;</span>
+<a id="__codelineno-14-1001" name="__codelineno-14-1001"></a><span class="p">}</span>
+<a id="__codelineno-14-1002" name="__codelineno-14-1002"></a>
+<a id="__codelineno-14-1003" name="__codelineno-14-1003"></a><span class="p">.</span><span class="nc">weight-bolder</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-14-1004" name="__codelineno-14-1004"></a><span class="w">    </span><span class="k">font-weight</span><span class="p">:</span><span class="w"> </span><span class="kc">bolder</span><span class="p">;</span>
+<a id="__codelineno-14-1005" name="__codelineno-14-1005"></a><span class="p">}</span>
+<a id="__codelineno-14-1006" name="__codelineno-14-1006"></a><span class="o">...</span>
+</code></pre></div></td></tr></table></div>
+<p>A more advanced use case is when you pass an additional set of values to match the variants.
+In this case, the style for <code>.p-0</code> will match with value <code>0.0</code>, <code>.p-10</code> with value <code>4.0</code>,
+and correspondingly all in-between values.</p>
+<div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">utilities.py</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-15-93"> 93</a></span>
+<span class="normal"><a href="#__codelineno-15-94"> 94</a></span>
+<span class="normal"><a href="#__codelineno-15-95"> 95</a></span>
+<span class="normal"><a href="#__codelineno-15-96"> 96</a></span>
+<span class="normal"><a href="#__codelineno-15-97"> 97</a></span>
+<span class="normal"><a href="#__codelineno-15-98"> 98</a></span>
+<span class="normal"><a href="#__codelineno-15-99"> 99</a></span>
+<span class="normal"><a href="#__codelineno-15-100">100</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-15-93" name="__codelineno-15-93"></a><span class="n">sheet</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
+<a id="__codelineno-15-94" name="__codelineno-15-94"></a>    <span class="n">UtilitySystem</span><span class="p">()</span><span class="o">.</span><span class="n">define</span><span class="p">(</span>
+<a id="__codelineno-15-95" name="__codelineno-15-95"></a>        <span class="n">clss</span><span class="o">=</span><span class="s2">&quot;p&quot;</span><span class="p">,</span>
+<a id="__codelineno-15-96" name="__codelineno-15-96"></a>        <span class="n">variants</span><span class="o">=</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">11</span><span class="p">),</span>
+<a id="__codelineno-15-97" name="__codelineno-15-97"></a><span class="hll">        <span class="n">values</span><span class="o">=</span><span class="n">Unit</span><span class="o">.</span><span class="n">scale</span><span class="p">(</span><span class="n">rem</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">4.0</span><span class="p">,</span> <span class="mi">11</span><span class="p">),</span>  
+</span><a id="__codelineno-15-98" name="__codelineno-15-98"></a>        <span class="n">rule</span><span class="o">=</span><span class="k">lambda</span> <span class="n">style</span><span class="p">,</span> <span class="n">v</span><span class="p">:</span> <span class="n">style</span><span class="o">.</span><span class="n">padding</span><span class="p">(</span><span class="n">v</span><span class="p">),</span>
+<a id="__codelineno-15-99" name="__codelineno-15-99"></a>    <span class="p">)</span>
+<a id="__codelineno-15-100" name="__codelineno-15-100"></a><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+<p>And here's how those rules look alike.</p>
+<div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">utilites.css</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-16-1006">1006</a></span>
+<span class="normal"><a href="#__codelineno-16-1007">1007</a></span>
+<span class="normal"><a href="#__codelineno-16-1008">1008</a></span>
+<span class="normal"><a href="#__codelineno-16-1009">1009</a></span>
+<span class="normal"><a href="#__codelineno-16-1010">1010</a></span>
+<span class="normal"><a href="#__codelineno-16-1011">1011</a></span>
+<span class="normal"><a href="#__codelineno-16-1012">1012</a></span>
+<span class="normal"><a href="#__codelineno-16-1013">1013</a></span>
+<span class="normal"><a href="#__codelineno-16-1014">1014</a></span>
+<span class="normal"><a href="#__codelineno-16-1015">1015</a></span>
+<span class="normal"><a href="#__codelineno-16-1016">1016</a></span>
+<span class="normal"><a href="#__codelineno-16-1017">1017</a></span>
+<span class="normal"><a href="#__codelineno-16-1018">1018</a></span>
+<span class="normal"><a href="#__codelineno-16-1019">1019</a></span>
+<span class="normal"><a href="#__codelineno-16-1020">1020</a></span>
+<span class="normal"><a href="#__codelineno-16-1021">1021</a></span>
+<span class="normal"><a href="#__codelineno-16-1022">1022</a></span>
+<span class="normal"><a href="#__codelineno-16-1023">1023</a></span>
+<span class="normal"><a href="#__codelineno-16-1024">1024</a></span>
+<span class="normal"><a href="#__codelineno-16-1025">1025</a></span>
+<span class="normal"><a href="#__codelineno-16-1026">1026</a></span>
+<span class="normal"><a href="#__codelineno-16-1027">1027</a></span>
+<span class="normal"><a href="#__codelineno-16-1028">1028</a></span>
+<span class="normal"><a href="#__codelineno-16-1029">1029</a></span>
+<span class="normal"><a href="#__codelineno-16-1030">1030</a></span>
+<span class="normal"><a href="#__codelineno-16-1031">1031</a></span>
+<span class="normal"><a href="#__codelineno-16-1032">1032</a></span>
+<span class="normal"><a href="#__codelineno-16-1033">1033</a></span>
+<span class="normal"><a href="#__codelineno-16-1034">1034</a></span>
+<span class="normal"><a href="#__codelineno-16-1035">1035</a></span>
+<span class="normal"><a href="#__codelineno-16-1036">1036</a></span>
+<span class="normal"><a href="#__codelineno-16-1037">1037</a></span>
+<span class="normal"><a href="#__codelineno-16-1038">1038</a></span>
+<span class="normal"><a href="#__codelineno-16-1039">1039</a></span>
+<span class="normal"><a href="#__codelineno-16-1040">1040</a></span>
+<span class="normal"><a href="#__codelineno-16-1041">1041</a></span>
+<span class="normal"><a href="#__codelineno-16-1042">1042</a></span>
+<span class="normal"><a href="#__codelineno-16-1043">1043</a></span>
+<span class="normal"><a href="#__codelineno-16-1044">1044</a></span>
+<span class="normal"><a href="#__codelineno-16-1045">1045</a></span>
+<span class="normal"><a href="#__codelineno-16-1046">1046</a></span>
+<span class="normal"><a href="#__codelineno-16-1047">1047</a></span>
+<span class="normal"><a href="#__codelineno-16-1048">1048</a></span>
+<span class="normal"><a href="#__codelineno-16-1049">1049</a></span>
+<span class="normal"><a href="#__codelineno-16-1050">1050</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-16-1006" name="__codelineno-16-1006"></a><span class="o">...</span>
+<a id="__codelineno-16-1007" name="__codelineno-16-1007"></a><span class="p">.</span><span class="nc">p-0</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-16-1008" name="__codelineno-16-1008"></a><span class="w">    </span><span class="k">padding</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="kt">rem</span><span class="p">;</span>
+<a id="__codelineno-16-1009" name="__codelineno-16-1009"></a><span class="p">}</span>
+<a id="__codelineno-16-1010" name="__codelineno-16-1010"></a>
+<a id="__codelineno-16-1011" name="__codelineno-16-1011"></a><span class="p">.</span><span class="nc">p-1</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-16-1012" name="__codelineno-16-1012"></a><span class="w">    </span><span class="k">padding</span><span class="p">:</span><span class="w"> </span><span class="mf">0.4</span><span class="kt">rem</span><span class="p">;</span>
+<a id="__codelineno-16-1013" name="__codelineno-16-1013"></a><span class="p">}</span>
+<a id="__codelineno-16-1014" name="__codelineno-16-1014"></a>
+<a id="__codelineno-16-1015" name="__codelineno-16-1015"></a><span class="p">.</span><span class="nc">p-2</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-16-1016" name="__codelineno-16-1016"></a><span class="w">    </span><span class="k">padding</span><span class="p">:</span><span class="w"> </span><span class="mf">0.8</span><span class="kt">rem</span><span class="p">;</span>
+<a id="__codelineno-16-1017" name="__codelineno-16-1017"></a><span class="p">}</span>
+<a id="__codelineno-16-1018" name="__codelineno-16-1018"></a>
+<a id="__codelineno-16-1019" name="__codelineno-16-1019"></a><span class="p">.</span><span class="nc">p-3</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-16-1020" name="__codelineno-16-1020"></a><span class="w">    </span><span class="k">padding</span><span class="p">:</span><span class="w"> </span><span class="mf">1.2</span><span class="kt">rem</span><span class="p">;</span>
+<a id="__codelineno-16-1021" name="__codelineno-16-1021"></a><span class="p">}</span>
+<a id="__codelineno-16-1022" name="__codelineno-16-1022"></a>
+<a id="__codelineno-16-1023" name="__codelineno-16-1023"></a><span class="p">.</span><span class="nc">p-4</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-16-1024" name="__codelineno-16-1024"></a><span class="w">    </span><span class="k">padding</span><span class="p">:</span><span class="w"> </span><span class="mf">1.6</span><span class="kt">rem</span><span class="p">;</span>
+<a id="__codelineno-16-1025" name="__codelineno-16-1025"></a><span class="p">}</span>
+<a id="__codelineno-16-1026" name="__codelineno-16-1026"></a>
+<a id="__codelineno-16-1027" name="__codelineno-16-1027"></a><span class="p">.</span><span class="nc">p-5</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-16-1028" name="__codelineno-16-1028"></a><span class="w">    </span><span class="k">padding</span><span class="p">:</span><span class="w"> </span><span class="mf">2.0</span><span class="kt">rem</span><span class="p">;</span>
+<a id="__codelineno-16-1029" name="__codelineno-16-1029"></a><span class="p">}</span>
+<a id="__codelineno-16-1030" name="__codelineno-16-1030"></a>
+<a id="__codelineno-16-1031" name="__codelineno-16-1031"></a><span class="p">.</span><span class="nc">p-6</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-16-1032" name="__codelineno-16-1032"></a><span class="w">    </span><span class="k">padding</span><span class="p">:</span><span class="w"> </span><span class="mf">2.4</span><span class="kt">rem</span><span class="p">;</span>
+<a id="__codelineno-16-1033" name="__codelineno-16-1033"></a><span class="p">}</span>
+<a id="__codelineno-16-1034" name="__codelineno-16-1034"></a>
+<a id="__codelineno-16-1035" name="__codelineno-16-1035"></a><span class="p">.</span><span class="nc">p-7</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-16-1036" name="__codelineno-16-1036"></a><span class="w">    </span><span class="k">padding</span><span class="p">:</span><span class="w"> </span><span class="mf">2.8</span><span class="kt">rem</span><span class="p">;</span>
+<a id="__codelineno-16-1037" name="__codelineno-16-1037"></a><span class="p">}</span>
+<a id="__codelineno-16-1038" name="__codelineno-16-1038"></a>
+<a id="__codelineno-16-1039" name="__codelineno-16-1039"></a><span class="p">.</span><span class="nc">p-8</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-16-1040" name="__codelineno-16-1040"></a><span class="w">    </span><span class="k">padding</span><span class="p">:</span><span class="w"> </span><span class="mf">3.2</span><span class="kt">rem</span><span class="p">;</span>
+<a id="__codelineno-16-1041" name="__codelineno-16-1041"></a><span class="p">}</span>
+<a id="__codelineno-16-1042" name="__codelineno-16-1042"></a>
+<a id="__codelineno-16-1043" name="__codelineno-16-1043"></a><span class="p">.</span><span class="nc">p-9</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-16-1044" name="__codelineno-16-1044"></a><span class="w">    </span><span class="k">padding</span><span class="p">:</span><span class="w"> </span><span class="mf">3.6</span><span class="kt">rem</span><span class="p">;</span>
+<a id="__codelineno-16-1045" name="__codelineno-16-1045"></a><span class="p">}</span>
+<a id="__codelineno-16-1046" name="__codelineno-16-1046"></a>
+<a id="__codelineno-16-1047" name="__codelineno-16-1047"></a><span class="p">.</span><span class="nc">p-10</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-16-1048" name="__codelineno-16-1048"></a><span class="w">    </span><span class="k">padding</span><span class="p">:</span><span class="w"> </span><span class="mf">4.0</span><span class="kt">rem</span><span class="p">;</span>
+<a id="__codelineno-16-1049" name="__codelineno-16-1049"></a><span class="p">}</span>
+<a id="__codelineno-16-1050" name="__codelineno-16-1050"></a><span class="o">...</span>
+</code></pre></div></td></tr></table></div>
+<p>Of course, in the <code>rule</code> callable you can chain as many styling methods as you need.</p>
+<div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">utilities.py</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-17-108">108</a></span>
+<span class="normal"><a href="#__codelineno-17-109">109</a></span>
+<span class="normal"><a href="#__codelineno-17-110">110</a></span>
+<span class="normal"><a href="#__codelineno-17-111">111</a></span>
+<span class="normal"><a href="#__codelineno-17-112">112</a></span>
+<span class="normal"><a href="#__codelineno-17-113">113</a></span>
+<span class="normal"><a href="#__codelineno-17-114">114</a></span>
+<span class="normal"><a href="#__codelineno-17-115">115</a></span>
+<span class="normal"><a href="#__codelineno-17-116">116</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-17-108" name="__codelineno-17-108"></a><span class="n">sheet</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
+<a id="__codelineno-17-109" name="__codelineno-17-109"></a>    <span class="n">UtilitySystem</span><span class="p">()</span><span class="o">.</span><span class="n">define</span><span class="p">(</span>
+<a id="__codelineno-17-110" name="__codelineno-17-110"></a>        <span class="n">clss</span><span class="o">=</span><span class="s2">&quot;shadow&quot;</span><span class="p">,</span>
+<a id="__codelineno-17-111" name="__codelineno-17-111"></a>        <span class="n">variants</span><span class="o">=</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">6</span><span class="p">),</span>
+<a id="__codelineno-17-112" name="__codelineno-17-112"></a><span class="hll">        <span class="n">rule</span><span class="o">=</span><span class="k">lambda</span> <span class="n">style</span><span class="p">,</span> <span class="n">v</span><span class="p">:</span> <span class="n">style</span><span class="o">.</span><span class="n">color</span><span class="p">(</span><span class="n">Colors</span><span class="o">.</span><span class="n">Black</span><span class="p">)</span><span class="o">.</span><span class="n">shadow</span><span class="p">(</span>  
+</span><a id="__codelineno-17-113" name="__codelineno-17-113"></a><span class="hll">            <span class="n">Colors</span><span class="o">.</span><span class="n">Black</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="n">v</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">v</span><span class="p">,</span> <span class="n">blur</span><span class="o">=</span><span class="n">v</span><span class="p">,</span> <span class="n">spread</span><span class="o">=</span><span class="n">v</span> <span class="o">/</span> <span class="mi">2</span>  
+</span><a id="__codelineno-17-114" name="__codelineno-17-114"></a><span class="hll">        <span class="p">),</span>  
+</span><a id="__codelineno-17-115" name="__codelineno-17-115"></a>    <span class="p">)</span>
+<a id="__codelineno-17-116" name="__codelineno-17-116"></a><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+<div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">utilites.css</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-18-1050">1050</a></span>
+<span class="normal"><a href="#__codelineno-18-1051">1051</a></span>
+<span class="normal"><a href="#__codelineno-18-1052">1052</a></span>
+<span class="normal"><a href="#__codelineno-18-1053">1053</a></span>
+<span class="normal"><a href="#__codelineno-18-1054">1054</a></span>
+<span class="normal"><a href="#__codelineno-18-1055">1055</a></span>
+<span class="normal"><a href="#__codelineno-18-1056">1056</a></span>
+<span class="normal"><a href="#__codelineno-18-1057">1057</a></span>
+<span class="normal"><a href="#__codelineno-18-1058">1058</a></span>
+<span class="normal"><a href="#__codelineno-18-1059">1059</a></span>
+<span class="normal"><a href="#__codelineno-18-1060">1060</a></span>
+<span class="normal"><a href="#__codelineno-18-1061">1061</a></span>
+<span class="normal"><a href="#__codelineno-18-1062">1062</a></span>
+<span class="normal"><a href="#__codelineno-18-1063">1063</a></span>
+<span class="normal"><a href="#__codelineno-18-1064">1064</a></span>
+<span class="normal"><a href="#__codelineno-18-1065">1065</a></span>
+<span class="normal"><a href="#__codelineno-18-1066">1066</a></span>
+<span class="normal"><a href="#__codelineno-18-1067">1067</a></span>
+<span class="normal"><a href="#__codelineno-18-1068">1068</a></span>
+<span class="normal"><a href="#__codelineno-18-1069">1069</a></span>
+<span class="normal"><a href="#__codelineno-18-1070">1070</a></span>
+<span class="normal"><a href="#__codelineno-18-1071">1071</a></span>
+<span class="normal"><a href="#__codelineno-18-1072">1072</a></span>
+<span class="normal"><a href="#__codelineno-18-1073">1073</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-18-1050" name="__codelineno-18-1050"></a><span class="o">...</span>
+<a id="__codelineno-18-1051" name="__codelineno-18-1051"></a><span class="p">.</span><span class="nc">shadow-1</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-18-1052" name="__codelineno-18-1052"></a><span class="w">    </span><span class="k">color</span><span class="p">:</span><span class="w"> </span><span class="nb">rgba</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mf">1.0</span><span class="p">);</span>
+<a id="__codelineno-18-1053" name="__codelineno-18-1053"></a><span class="w">    </span><span class="k">box-shadow</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="kt">px</span><span class="w"> </span><span class="mi">1</span><span class="kt">px</span><span class="w"> </span><span class="mi">1</span><span class="kt">px</span><span class="w"> </span><span class="mf">0.5</span><span class="kt">rem</span><span class="w"> </span><span class="nb">rgba</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mf">1.0</span><span class="p">);</span>
+<a id="__codelineno-18-1054" name="__codelineno-18-1054"></a><span class="p">}</span>
+<a id="__codelineno-18-1055" name="__codelineno-18-1055"></a>
+<a id="__codelineno-18-1056" name="__codelineno-18-1056"></a><span class="p">.</span><span class="nc">shadow-2</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-18-1057" name="__codelineno-18-1057"></a><span class="w">    </span><span class="k">color</span><span class="p">:</span><span class="w"> </span><span class="nb">rgba</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mf">1.0</span><span class="p">);</span>
+<a id="__codelineno-18-1058" name="__codelineno-18-1058"></a><span class="w">    </span><span class="k">box-shadow</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="kt">px</span><span class="w"> </span><span class="mi">2</span><span class="kt">px</span><span class="w"> </span><span class="mi">2</span><span class="kt">px</span><span class="w"> </span><span class="mf">1.0</span><span class="kt">rem</span><span class="w"> </span><span class="nb">rgba</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mf">1.0</span><span class="p">);</span>
+<a id="__codelineno-18-1059" name="__codelineno-18-1059"></a><span class="p">}</span>
+<a id="__codelineno-18-1060" name="__codelineno-18-1060"></a>
+<a id="__codelineno-18-1061" name="__codelineno-18-1061"></a><span class="p">.</span><span class="nc">shadow-3</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-18-1062" name="__codelineno-18-1062"></a><span class="w">    </span><span class="k">color</span><span class="p">:</span><span class="w"> </span><span class="nb">rgba</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mf">1.0</span><span class="p">);</span>
+<a id="__codelineno-18-1063" name="__codelineno-18-1063"></a><span class="w">    </span><span class="k">box-shadow</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="kt">px</span><span class="w"> </span><span class="mi">3</span><span class="kt">px</span><span class="w"> </span><span class="mi">3</span><span class="kt">px</span><span class="w"> </span><span class="mf">1.5</span><span class="kt">rem</span><span class="w"> </span><span class="nb">rgba</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mf">1.0</span><span class="p">);</span>
+<a id="__codelineno-18-1064" name="__codelineno-18-1064"></a><span class="p">}</span>
+<a id="__codelineno-18-1065" name="__codelineno-18-1065"></a>
+<a id="__codelineno-18-1066" name="__codelineno-18-1066"></a><span class="p">.</span><span class="nc">shadow-4</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-18-1067" name="__codelineno-18-1067"></a><span class="w">    </span><span class="k">color</span><span class="p">:</span><span class="w"> </span><span class="nb">rgba</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mf">1.0</span><span class="p">);</span>
+<a id="__codelineno-18-1068" name="__codelineno-18-1068"></a><span class="w">    </span><span class="k">box-shadow</span><span class="p">:</span><span class="w"> </span><span class="mi">4</span><span class="kt">px</span><span class="w"> </span><span class="mi">4</span><span class="kt">px</span><span class="w"> </span><span class="mi">4</span><span class="kt">px</span><span class="w"> </span><span class="mf">2.0</span><span class="kt">rem</span><span class="w"> </span><span class="nb">rgba</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mf">1.0</span><span class="p">);</span>
+<a id="__codelineno-18-1069" name="__codelineno-18-1069"></a><span class="p">}</span>
+<a id="__codelineno-18-1070" name="__codelineno-18-1070"></a>
+<a id="__codelineno-18-1071" name="__codelineno-18-1071"></a><span class="p">.</span><span class="nc">shadow-5</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-18-1072" name="__codelineno-18-1072"></a><span class="w">    </span><span class="k">color</span><span class="p">:</span><span class="w"> </span><span class="nb">rgba</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mf">1.0</span><span class="p">);</span>
+<a id="__codelineno-18-1073" name="__codelineno-18-1073"></a><span class="err">...</span>
+</code></pre></div></td></tr></table></div>
+<p>If you pass a list of lists for variants, you'll get the cartesian product of all variants.
+Additionally, you can pass a <code>name</code> callable to define the name of the variant as well,
+and in this case you can forgo the <code>clss</code> parameter.</p>
+<div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">utilities.py</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-19-125">125</a></span>
+<span class="normal"><a href="#__codelineno-19-126">126</a></span>
+<span class="normal"><a href="#__codelineno-19-127">127</a></span>
+<span class="normal"><a href="#__codelineno-19-128">128</a></span>
+<span class="normal"><a href="#__codelineno-19-129">129</a></span>
+<span class="normal"><a href="#__codelineno-19-130">130</a></span>
+<span class="normal"><a href="#__codelineno-19-131">131</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-19-125" name="__codelineno-19-125"></a><span class="n">sheet</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
+<a id="__codelineno-19-126" name="__codelineno-19-126"></a>    <span class="n">UtilitySystem</span><span class="p">()</span><span class="o">.</span><span class="n">define</span><span class="p">(</span>
+<a id="__codelineno-19-127" name="__codelineno-19-127"></a>        <span class="n">variants</span><span class="o">=</span><span class="p">[</span><span class="n">Colors</span><span class="o">.</span><span class="n">basic_palette</span><span class="p">(),</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">)],</span>
+<a id="__codelineno-19-128" name="__codelineno-19-128"></a>        <span class="n">rule</span><span class="o">=</span><span class="k">lambda</span> <span class="n">style</span><span class="p">,</span> <span class="n">color</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">style</span><span class="o">.</span><span class="n">color</span><span class="p">(</span><span class="n">color</span><span class="o">.</span><span class="n">shade</span><span class="p">(</span><span class="n">value</span> <span class="o">/</span> <span class="mi">10</span><span class="p">)),</span>
+<a id="__codelineno-19-129" name="__codelineno-19-129"></a>        <span class="n">name</span><span class="o">=</span><span class="k">lambda</span> <span class="n">color</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;bg-</span><span class="si">{</span><span class="n">color</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="si">}</span><span class="s2">-</span><span class="si">{</span><span class="n">value</span><span class="o">*</span><span class="mi">100</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+<a id="__codelineno-19-130" name="__codelineno-19-130"></a>    <span class="p">)</span>
+<a id="__codelineno-19-131" name="__codelineno-19-131"></a><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+<p>And just like that we created 16 * 9 background color utility classes.</p>
+<div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">utilites.css</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-20-1615">1615</a></span>
+<span class="normal"><a href="#__codelineno-20-1616">1616</a></span>
+<span class="normal"><a href="#__codelineno-20-1617">1617</a></span>
+<span class="normal"><a href="#__codelineno-20-1618">1618</a></span>
+<span class="normal"><a href="#__codelineno-20-1619">1619</a></span>
+<span class="normal"><a href="#__codelineno-20-1620">1620</a></span>
+<span class="normal"><a href="#__codelineno-20-1621">1621</a></span>
+<span class="normal"><a href="#__codelineno-20-1622">1622</a></span>
+<span class="normal"><a href="#__codelineno-20-1623">1623</a></span>
+<span class="normal"><a href="#__codelineno-20-1624">1624</a></span>
+<span class="normal"><a href="#__codelineno-20-1625">1625</a></span>
+<span class="normal"><a href="#__codelineno-20-1626">1626</a></span>
+<span class="normal"><a href="#__codelineno-20-1627">1627</a></span>
+<span class="normal"><a href="#__codelineno-20-1628">1628</a></span>
+<span class="normal"><a href="#__codelineno-20-1629">1629</a></span>
+<span class="normal"><a href="#__codelineno-20-1630">1630</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-20-1615" name="__codelineno-20-1615"></a><span class="o">...</span>
+<a id="__codelineno-20-1616" name="__codelineno-20-1616"></a><span class="p">.</span><span class="nc">bg-purple-100</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-20-1617" name="__codelineno-20-1617"></a><span class="w">    </span><span class="k">color</span><span class="p">:</span><span class="w"> </span><span class="nb">rgba</span><span class="p">(</span><span class="mi">25</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">25</span><span class="p">,</span><span class="mf">1.0</span><span class="p">);</span>
+<a id="__codelineno-20-1618" name="__codelineno-20-1618"></a><span class="p">}</span>
+<a id="__codelineno-20-1619" name="__codelineno-20-1619"></a>
+<a id="__codelineno-20-1620" name="__codelineno-20-1620"></a><span class="p">.</span><span class="nc">bg-purple-200</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-20-1621" name="__codelineno-20-1621"></a><span class="w">    </span><span class="k">color</span><span class="p">:</span><span class="w"> </span><span class="nb">rgba</span><span class="p">(</span><span class="mi">51</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">51</span><span class="p">,</span><span class="mf">1.0</span><span class="p">);</span>
+<a id="__codelineno-20-1622" name="__codelineno-20-1622"></a><span class="p">}</span>
+<a id="__codelineno-20-1623" name="__codelineno-20-1623"></a>
+<a id="__codelineno-20-1624" name="__codelineno-20-1624"></a><span class="p">.</span><span class="nc">bg-purple-300</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-20-1625" name="__codelineno-20-1625"></a><span class="w">    </span><span class="k">color</span><span class="p">:</span><span class="w"> </span><span class="nb">rgba</span><span class="p">(</span><span class="mi">76</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">76</span><span class="p">,</span><span class="mf">1.0</span><span class="p">);</span>
+<a id="__codelineno-20-1626" name="__codelineno-20-1626"></a><span class="p">}</span>
+<a id="__codelineno-20-1627" name="__codelineno-20-1627"></a>
+<a id="__codelineno-20-1628" name="__codelineno-20-1628"></a><span class="p">.</span><span class="nc">bg-purple-400</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-20-1629" name="__codelineno-20-1629"></a><span class="w">    </span><span class="k">color</span><span class="p">:</span><span class="w"> </span><span class="nb">rgba</span><span class="p">(</span><span class="mi">102</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">102</span><span class="p">,</span><span class="mf">1.0</span><span class="p">);</span>
+<a id="__codelineno-20-1630" name="__codelineno-20-1630"></a><span class="err">...</span>
+</code></pre></div></td></tr></table></div>
+<p>Here's a more sophisticated example in which we want to create several
+subvariants, such as <code>pl-*</code> for <code>padding-left</code>, <code>pr-*</code>  for <code>padding-right</code>, etc.</p>
+<div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">utilities.py</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-21-140">140</a></span>
+<span class="normal"><a href="#__codelineno-21-141">141</a></span>
+<span class="normal"><a href="#__codelineno-21-142">142</a></span>
+<span class="normal"><a href="#__codelineno-21-143">143</a></span>
+<span class="normal"><a href="#__codelineno-21-144">144</a></span>
+<span class="normal"><a href="#__codelineno-21-145">145</a></span>
+<span class="normal"><a href="#__codelineno-21-146">146</a></span>
+<span class="normal"><a href="#__codelineno-21-147">147</a></span>
+<span class="normal"><a href="#__codelineno-21-148">148</a></span>
+<span class="normal"><a href="#__codelineno-21-149">149</a></span>
+<span class="normal"><a href="#__codelineno-21-150">150</a></span>
+<span class="normal"><a href="#__codelineno-21-151">151</a></span>
+<span class="normal"><a href="#__codelineno-21-152">152</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-21-140" name="__codelineno-21-140"></a><span class="n">sheet</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
+<a id="__codelineno-21-141" name="__codelineno-21-141"></a>    <span class="n">UtilitySystem</span><span class="p">()</span><span class="o">.</span><span class="n">define</span><span class="p">(</span>
+<a id="__codelineno-21-142" name="__codelineno-21-142"></a>        <span class="n">variants</span><span class="o">=</span><span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="s2">&quot;lrtb&quot;</span><span class="p">),</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">11</span><span class="p">)],</span>  
+<a id="__codelineno-21-143" name="__codelineno-21-143"></a>        <span class="n">values</span><span class="o">=</span><span class="p">[</span>
+<a id="__codelineno-21-144" name="__codelineno-21-144"></a>            <span class="s2">&quot;left right top bottom&quot;</span><span class="o">.</span><span class="n">split</span><span class="p">(),</span>
+<a id="__codelineno-21-145" name="__codelineno-21-145"></a>            <span class="n">Unit</span><span class="o">.</span><span class="n">scale</span><span class="p">(</span><span class="n">rem</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">4.0</span><span class="p">,</span> <span class="mi">11</span><span class="p">),</span>
+<a id="__codelineno-21-146" name="__codelineno-21-146"></a>        <span class="p">],</span>  
+<a id="__codelineno-21-147" name="__codelineno-21-147"></a>        <span class="n">rule</span><span class="o">=</span><span class="k">lambda</span> <span class="n">style</span><span class="p">,</span> <span class="n">side</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">style</span><span class="o">.</span><span class="n">padding</span><span class="p">(</span>
+<a id="__codelineno-21-148" name="__codelineno-21-148"></a>            <span class="o">**</span><span class="p">{</span><span class="n">side</span><span class="p">:</span> <span class="n">value</span><span class="p">}</span>
+<a id="__codelineno-21-149" name="__codelineno-21-149"></a>        <span class="p">),</span>  
+<a id="__codelineno-21-150" name="__codelineno-21-150"></a>        <span class="n">name</span><span class="o">=</span><span class="k">lambda</span> <span class="n">side</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;p</span><span class="si">{</span><span class="n">side</span><span class="si">}</span><span class="s2">-</span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>  
+<a id="__codelineno-21-151" name="__codelineno-21-151"></a>    <span class="p">)</span>
+<a id="__codelineno-21-152" name="__codelineno-21-152"></a><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+<p>Here's how that looks like when generated.</p>
+<div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">utilites.css</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-22-1694">1694</a></span>
+<span class="normal"><a href="#__codelineno-22-1695">1695</a></span>
+<span class="normal"><a href="#__codelineno-22-1696">1696</a></span>
+<span class="normal"><a href="#__codelineno-22-1697">1697</a></span>
+<span class="normal"><a href="#__codelineno-22-1698">1698</a></span>
+<span class="normal"><a href="#__codelineno-22-1699">1699</a></span>
+<span class="normal"><a href="#__codelineno-22-1700">1700</a></span>
+<span class="normal"><a href="#__codelineno-22-1701">1701</a></span>
+<span class="normal"><a href="#__codelineno-22-1702">1702</a></span>
+<span class="normal"><a href="#__codelineno-22-1703">1703</a></span>
+<span class="normal"><a href="#__codelineno-22-1704">1704</a></span>
+<span class="normal"><a href="#__codelineno-22-1705">1705</a></span>
+<span class="normal"><a href="#__codelineno-22-1706">1706</a></span>
+<span class="normal"><a href="#__codelineno-22-1707">1707</a></span>
+<span class="normal"><a href="#__codelineno-22-1708">1708</a></span>
+<span class="normal"><a href="#__codelineno-22-1709">1709</a></span>
+<span class="normal"><a href="#__codelineno-22-1710">1710</a></span>
+<span class="normal"><a href="#__codelineno-22-1711">1711</a></span>
+<span class="normal"><a href="#__codelineno-22-1712">1712</a></span>
+<span class="normal"><a href="#__codelineno-22-1713">1713</a></span>
+<span class="normal"><a href="#__codelineno-22-1714">1714</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-22-1694" name="__codelineno-22-1694"></a><span class="o">...</span>
+<a id="__codelineno-22-1695" name="__codelineno-22-1695"></a>
+<a id="__codelineno-22-1696" name="__codelineno-22-1696"></a><span class="p">.</span><span class="nc">pr-0</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-22-1697" name="__codelineno-22-1697"></a><span class="w">    </span><span class="k">padding-right</span><span class="p">:</span><span class="w"> </span><span class="mf">0.0</span><span class="kt">rem</span><span class="p">;</span>
+<a id="__codelineno-22-1698" name="__codelineno-22-1698"></a><span class="p">}</span>
+<a id="__codelineno-22-1699" name="__codelineno-22-1699"></a>
+<a id="__codelineno-22-1700" name="__codelineno-22-1700"></a><span class="p">.</span><span class="nc">pr-1</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-22-1701" name="__codelineno-22-1701"></a><span class="w">    </span><span class="k">padding-right</span><span class="p">:</span><span class="w"> </span><span class="mf">0.4</span><span class="kt">rem</span><span class="p">;</span>
+<a id="__codelineno-22-1702" name="__codelineno-22-1702"></a><span class="p">}</span>
+<a id="__codelineno-22-1703" name="__codelineno-22-1703"></a>
+<a id="__codelineno-22-1704" name="__codelineno-22-1704"></a><span class="p">.</span><span class="nc">pr-2</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-22-1705" name="__codelineno-22-1705"></a><span class="w">    </span><span class="k">padding-right</span><span class="p">:</span><span class="w"> </span><span class="mf">0.8</span><span class="kt">rem</span><span class="p">;</span>
+<a id="__codelineno-22-1706" name="__codelineno-22-1706"></a><span class="p">}</span>
+<a id="__codelineno-22-1707" name="__codelineno-22-1707"></a>
+<a id="__codelineno-22-1708" name="__codelineno-22-1708"></a><span class="p">.</span><span class="nc">pr-3</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-22-1709" name="__codelineno-22-1709"></a><span class="w">    </span><span class="k">padding-right</span><span class="p">:</span><span class="w"> </span><span class="mf">1.2</span><span class="kt">rem</span><span class="p">;</span>
+<a id="__codelineno-22-1710" name="__codelineno-22-1710"></a><span class="p">}</span>
+<a id="__codelineno-22-1711" name="__codelineno-22-1711"></a>
+<a id="__codelineno-22-1712" name="__codelineno-22-1712"></a><span class="p">.</span><span class="nc">pr-4</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-22-1713" name="__codelineno-22-1713"></a><span class="w">    </span><span class="k">padding-right</span><span class="p">:</span><span class="w"> </span><span class="mf">1.6</span><span class="kt">rem</span><span class="p">;</span>
+<a id="__codelineno-22-1714" name="__codelineno-22-1714"></a><span class="err">...</span>
+</code></pre></div></td></tr></table></div>
+<p>And here's how that works.
+Our variants will be the combinations of the characters <code>l</code>, <code>r</code>, <code>t</code> and <code>b</code>
+with the numbers from <code>1</code> to <code>10</code>.</p>
+<div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">utilities.py</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-23-140">140</a></span>
+<span class="normal"><a href="#__codelineno-23-141">141</a></span>
+<span class="normal"><a href="#__codelineno-23-142">142</a></span>
+<span class="normal"><a href="#__codelineno-23-143">143</a></span>
+<span class="normal"><a href="#__codelineno-23-144">144</a></span>
+<span class="normal"><a href="#__codelineno-23-145">145</a></span>
+<span class="normal"><a href="#__codelineno-23-146">146</a></span>
+<span class="normal"><a href="#__codelineno-23-147">147</a></span>
+<span class="normal"><a href="#__codelineno-23-148">148</a></span>
+<span class="normal"><a href="#__codelineno-23-149">149</a></span>
+<span class="normal"><a href="#__codelineno-23-150">150</a></span>
+<span class="normal"><a href="#__codelineno-23-151">151</a></span>
+<span class="normal"><a href="#__codelineno-23-152">152</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-23-140" name="__codelineno-23-140"></a><span class="n">sheet</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
+<a id="__codelineno-23-141" name="__codelineno-23-141"></a>    <span class="n">UtilitySystem</span><span class="p">()</span><span class="o">.</span><span class="n">define</span><span class="p">(</span>
+<a id="__codelineno-23-142" name="__codelineno-23-142"></a><span class="hll">        <span class="n">variants</span><span class="o">=</span><span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="s2">&quot;lrtb&quot;</span><span class="p">),</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">11</span><span class="p">)],</span>  
+</span><a id="__codelineno-23-143" name="__codelineno-23-143"></a>        <span class="n">values</span><span class="o">=</span><span class="p">[</span>
+<a id="__codelineno-23-144" name="__codelineno-23-144"></a>            <span class="s2">&quot;left right top bottom&quot;</span><span class="o">.</span><span class="n">split</span><span class="p">(),</span>
+<a id="__codelineno-23-145" name="__codelineno-23-145"></a>            <span class="n">Unit</span><span class="o">.</span><span class="n">scale</span><span class="p">(</span><span class="n">rem</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">4.0</span><span class="p">,</span> <span class="mi">11</span><span class="p">),</span>
+<a id="__codelineno-23-146" name="__codelineno-23-146"></a>        <span class="p">],</span>  
+<a id="__codelineno-23-147" name="__codelineno-23-147"></a>        <span class="n">rule</span><span class="o">=</span><span class="k">lambda</span> <span class="n">style</span><span class="p">,</span> <span class="n">side</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">style</span><span class="o">.</span><span class="n">padding</span><span class="p">(</span>
+<a id="__codelineno-23-148" name="__codelineno-23-148"></a>            <span class="o">**</span><span class="p">{</span><span class="n">side</span><span class="p">:</span> <span class="n">value</span><span class="p">}</span>
+<a id="__codelineno-23-149" name="__codelineno-23-149"></a>        <span class="p">),</span>  
+<a id="__codelineno-23-150" name="__codelineno-23-150"></a>        <span class="n">name</span><span class="o">=</span><span class="k">lambda</span> <span class="n">side</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;p</span><span class="si">{</span><span class="n">side</span><span class="si">}</span><span class="s2">-</span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>  
+<a id="__codelineno-23-151" name="__codelineno-23-151"></a>    <span class="p">)</span>
+<a id="__codelineno-23-152" name="__codelineno-23-152"></a><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+<p>The values will be correspondingly the combinations of <code>left</code>, <code>right</code>, <code>top</code> and <code>bottom</code> with
+the corresponding <code>rem</code> measure as computed using <code>Unit.scale</code>.</p>
+<div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">utilities.py</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-24-140">140</a></span>
+<span class="normal"><a href="#__codelineno-24-141">141</a></span>
+<span class="normal"><a href="#__codelineno-24-142">142</a></span>
+<span class="normal"><a href="#__codelineno-24-143">143</a></span>
+<span class="normal"><a href="#__codelineno-24-144">144</a></span>
+<span class="normal"><a href="#__codelineno-24-145">145</a></span>
+<span class="normal"><a href="#__codelineno-24-146">146</a></span>
+<span class="normal"><a href="#__codelineno-24-147">147</a></span>
+<span class="normal"><a href="#__codelineno-24-148">148</a></span>
+<span class="normal"><a href="#__codelineno-24-149">149</a></span>
+<span class="normal"><a href="#__codelineno-24-150">150</a></span>
+<span class="normal"><a href="#__codelineno-24-151">151</a></span>
+<span class="normal"><a href="#__codelineno-24-152">152</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-24-140" name="__codelineno-24-140"></a><span class="n">sheet</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
+<a id="__codelineno-24-141" name="__codelineno-24-141"></a>    <span class="n">UtilitySystem</span><span class="p">()</span><span class="o">.</span><span class="n">define</span><span class="p">(</span>
+<a id="__codelineno-24-142" name="__codelineno-24-142"></a>        <span class="n">variants</span><span class="o">=</span><span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="s2">&quot;lrtb&quot;</span><span class="p">),</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">11</span><span class="p">)],</span>  
+<a id="__codelineno-24-143" name="__codelineno-24-143"></a>        <span class="n">values</span><span class="o">=</span><span class="p">[</span>
+<a id="__codelineno-24-144" name="__codelineno-24-144"></a>            <span class="s2">&quot;left right top bottom&quot;</span><span class="o">.</span><span class="n">split</span><span class="p">(),</span>
+<a id="__codelineno-24-145" name="__codelineno-24-145"></a>            <span class="n">Unit</span><span class="o">.</span><span class="n">scale</span><span class="p">(</span><span class="n">rem</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">4.0</span><span class="p">,</span> <span class="mi">11</span><span class="p">),</span>
+<a id="__codelineno-24-146" name="__codelineno-24-146"></a><span class="hll">        <span class="p">],</span>  
+</span><a id="__codelineno-24-147" name="__codelineno-24-147"></a>        <span class="n">rule</span><span class="o">=</span><span class="k">lambda</span> <span class="n">style</span><span class="p">,</span> <span class="n">side</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">style</span><span class="o">.</span><span class="n">padding</span><span class="p">(</span>
+<a id="__codelineno-24-148" name="__codelineno-24-148"></a>            <span class="o">**</span><span class="p">{</span><span class="n">side</span><span class="p">:</span> <span class="n">value</span><span class="p">}</span>
+<a id="__codelineno-24-149" name="__codelineno-24-149"></a>        <span class="p">),</span>  
+<a id="__codelineno-24-150" name="__codelineno-24-150"></a>        <span class="n">name</span><span class="o">=</span><span class="k">lambda</span> <span class="n">side</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;p</span><span class="si">{</span><span class="n">side</span><span class="si">}</span><span class="s2">-</span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>  
+<a id="__codelineno-24-151" name="__codelineno-24-151"></a>    <span class="p">)</span>
+<a id="__codelineno-24-152" name="__codelineno-24-152"></a><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+<p>Now, the magic happens in the <code>rule</code> callable, where we call <code>style.padding</code> but instead of
+explicitely passing an argument by name, we take advantage of Python's keyword operator <code>**</code>
+to call <code>padding</code> with the argument taken from <code>left</code>, <code>right</code>, etc., and the corresponding value.</p>
+<div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">utilities.py</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-25-140">140</a></span>
+<span class="normal"><a href="#__codelineno-25-141">141</a></span>
+<span class="normal"><a href="#__codelineno-25-142">142</a></span>
+<span class="normal"><a href="#__codelineno-25-143">143</a></span>
+<span class="normal"><a href="#__codelineno-25-144">144</a></span>
+<span class="normal"><a href="#__codelineno-25-145">145</a></span>
+<span class="normal"><a href="#__codelineno-25-146">146</a></span>
+<span class="normal"><a href="#__codelineno-25-147">147</a></span>
+<span class="normal"><a href="#__codelineno-25-148">148</a></span>
+<span class="normal"><a href="#__codelineno-25-149">149</a></span>
+<span class="normal"><a href="#__codelineno-25-150">150</a></span>
+<span class="normal"><a href="#__codelineno-25-151">151</a></span>
+<span class="normal"><a href="#__codelineno-25-152">152</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-25-140" name="__codelineno-25-140"></a><span class="n">sheet</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
+<a id="__codelineno-25-141" name="__codelineno-25-141"></a>    <span class="n">UtilitySystem</span><span class="p">()</span><span class="o">.</span><span class="n">define</span><span class="p">(</span>
+<a id="__codelineno-25-142" name="__codelineno-25-142"></a>        <span class="n">variants</span><span class="o">=</span><span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="s2">&quot;lrtb&quot;</span><span class="p">),</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">11</span><span class="p">)],</span>  
+<a id="__codelineno-25-143" name="__codelineno-25-143"></a>        <span class="n">values</span><span class="o">=</span><span class="p">[</span>
+<a id="__codelineno-25-144" name="__codelineno-25-144"></a>            <span class="s2">&quot;left right top bottom&quot;</span><span class="o">.</span><span class="n">split</span><span class="p">(),</span>
+<a id="__codelineno-25-145" name="__codelineno-25-145"></a>            <span class="n">Unit</span><span class="o">.</span><span class="n">scale</span><span class="p">(</span><span class="n">rem</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">4.0</span><span class="p">,</span> <span class="mi">11</span><span class="p">),</span>
+<a id="__codelineno-25-146" name="__codelineno-25-146"></a>        <span class="p">],</span>  
+<a id="__codelineno-25-147" name="__codelineno-25-147"></a>        <span class="n">rule</span><span class="o">=</span><span class="k">lambda</span> <span class="n">style</span><span class="p">,</span> <span class="n">side</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">style</span><span class="o">.</span><span class="n">padding</span><span class="p">(</span>
+<a id="__codelineno-25-148" name="__codelineno-25-148"></a>            <span class="o">**</span><span class="p">{</span><span class="n">side</span><span class="p">:</span> <span class="n">value</span><span class="p">}</span>
+<a id="__codelineno-25-149" name="__codelineno-25-149"></a><span class="hll">        <span class="p">),</span>  
+</span><a id="__codelineno-25-150" name="__codelineno-25-150"></a>        <span class="n">name</span><span class="o">=</span><span class="k">lambda</span> <span class="n">side</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;p</span><span class="si">{</span><span class="n">side</span><span class="si">}</span><span class="s2">-</span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>  
+<a id="__codelineno-25-151" name="__codelineno-25-151"></a>    <span class="p">)</span>
+<a id="__codelineno-25-152" name="__codelineno-25-152"></a><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+<p>Finally, since <code>p-l-3</code> is kind of a mouthful, we define a custom name function.
+Keep in mind that the <code>name</code> callable is called with the variants, not the values.</p>
+<div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">utilities.py</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-26-140">140</a></span>
+<span class="normal"><a href="#__codelineno-26-141">141</a></span>
+<span class="normal"><a href="#__codelineno-26-142">142</a></span>
+<span class="normal"><a href="#__codelineno-26-143">143</a></span>
+<span class="normal"><a href="#__codelineno-26-144">144</a></span>
+<span class="normal"><a href="#__codelineno-26-145">145</a></span>
+<span class="normal"><a href="#__codelineno-26-146">146</a></span>
+<span class="normal"><a href="#__codelineno-26-147">147</a></span>
+<span class="normal"><a href="#__codelineno-26-148">148</a></span>
+<span class="normal"><a href="#__codelineno-26-149">149</a></span>
+<span class="normal"><a href="#__codelineno-26-150">150</a></span>
+<span class="normal"><a href="#__codelineno-26-151">151</a></span>
+<span class="normal"><a href="#__codelineno-26-152">152</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-26-140" name="__codelineno-26-140"></a><span class="n">sheet</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
+<a id="__codelineno-26-141" name="__codelineno-26-141"></a>    <span class="n">UtilitySystem</span><span class="p">()</span><span class="o">.</span><span class="n">define</span><span class="p">(</span>
+<a id="__codelineno-26-142" name="__codelineno-26-142"></a>        <span class="n">variants</span><span class="o">=</span><span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="s2">&quot;lrtb&quot;</span><span class="p">),</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">11</span><span class="p">)],</span>  
+<a id="__codelineno-26-143" name="__codelineno-26-143"></a>        <span class="n">values</span><span class="o">=</span><span class="p">[</span>
+<a id="__codelineno-26-144" name="__codelineno-26-144"></a>            <span class="s2">&quot;left right top bottom&quot;</span><span class="o">.</span><span class="n">split</span><span class="p">(),</span>
+<a id="__codelineno-26-145" name="__codelineno-26-145"></a>            <span class="n">Unit</span><span class="o">.</span><span class="n">scale</span><span class="p">(</span><span class="n">rem</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">4.0</span><span class="p">,</span> <span class="mi">11</span><span class="p">),</span>
+<a id="__codelineno-26-146" name="__codelineno-26-146"></a>        <span class="p">],</span>  
+<a id="__codelineno-26-147" name="__codelineno-26-147"></a>        <span class="n">rule</span><span class="o">=</span><span class="k">lambda</span> <span class="n">style</span><span class="p">,</span> <span class="n">side</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">style</span><span class="o">.</span><span class="n">padding</span><span class="p">(</span>
+<a id="__codelineno-26-148" name="__codelineno-26-148"></a>            <span class="o">**</span><span class="p">{</span><span class="n">side</span><span class="p">:</span> <span class="n">value</span><span class="p">}</span>
+<a id="__codelineno-26-149" name="__codelineno-26-149"></a>        <span class="p">),</span>  
+<a id="__codelineno-26-150" name="__codelineno-26-150"></a><span class="hll">        <span class="n">name</span><span class="o">=</span><span class="k">lambda</span> <span class="n">side</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;p</span><span class="si">{</span><span class="n">side</span><span class="si">}</span><span class="s2">-</span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>  
+</span><a id="__codelineno-26-151" name="__codelineno-26-151"></a>    <span class="p">)</span>
+<a id="__codelineno-26-152" name="__codelineno-26-152"></a><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+<p>And so you can see how easily we can create multiple variants of tiny rules.</p>
+<details class="warning">
+<summary>CSS files can get big quickly!</summary>
+<p>You can easily see how quickly this approach leads to huge CSS files.
+As convenient as it is to generate hundreds of tiny classes on-the-fly,
+you will probably end up using less than 1% of those classes in any single file.</p>
+<p>Fortunately, <code>violetear</code> has a few ways to render only the styles you use in a
+a specific HTML file.
+Read the <a href="/violetear/guide/#minimizing-the-css-file">relevant section of the user guide</a> for more details.</p>
+</details>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/apiad/violetear" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://pypi.org/project/violetear/" target="_blank" rel="noopener" title="pypi.org" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.8 200.5c-7.7-30.9-22.3-54.2-53.4-54.2h-40.1v47.4c0 36.8-31.2 67.8-66.8 67.8H172.7c-29.2 0-53.4 25-53.4 54.3v101.8c0 29 25.2 46 53.4 54.3 33.8 9.9 66.3 11.7 106.8 0 26.9-7.8 53.4-23.5 53.4-54.3v-40.7H226.2v-13.6h160.2c31.1 0 42.6-21.7 53.4-54.2 11.2-33.5 10.7-65.7 0-108.6M286.2 444.7a20.4 20.4 0 1 1 0-40.7 20.4 20.4 0 1 1 0 40.7M167.8 248.1h106.8c29.7 0 53.4-24.5 53.4-54.3V91.9c0-29-24.4-50.7-53.4-55.6-35.8-5.9-74.7-5.6-106.8.1-45.2 8-53.4 24.7-53.4 55.6v40.7h106.9v13.6h-147c-31.1 0-58.3 18.7-66.8 54.2-9.8 40.7-10.2 66.1 0 108.6 7.6 31.6 25.7 54.2 56.8 54.2H101v-48.8c0-35.3 30.5-66.4 66.8-66.4m-6.6-183.4a20.4 20.4 0 1 1 0 40.8 20.4 20.4 0 1 1 0-40.8"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.sections", "navigation.top", "toc.integrate", "content.code.copy", "content.code.annotate"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>
