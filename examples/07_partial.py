@@ -32,6 +32,7 @@ class Room:
 # Partial route — returns an HTML fragment (no Document wrapper)
 # ---------------------------------------------------------------------------
 
+
 @app.partial("/chat/messages")
 def render_messages():
     ul = HTML.ul(id="msg-list")
@@ -45,9 +46,11 @@ def render_messages():
 # Client functions
 # ---------------------------------------------------------------------------
 
+
 @app.client.callback
 async def send_msg(event: Event):
     from violetear.js import DOM
+
     name = DOM.find("name-input").value
     text = DOM.find("msg-input").value
     if not text:
@@ -61,6 +64,7 @@ async def send_msg(event: Event):
 # Server RPC
 # ---------------------------------------------------------------------------
 
+
 @app.server.rpc
 async def post_message(name: str, text: str):
     Room.messages.append({"from": name, "text": text})
@@ -72,12 +76,18 @@ async def post_message(name: str, text: str):
 
 sheet = StyleSheet()
 
-sheet.select("body").font(size=rem(1.0), family="system-ui, sans-serif").rules(margin="0")
-sheet.select(".container").rules(max_width="600px", margin="40px auto", padding=str(px(24)))
-sheet.select("input").rules(padding=str(px(8)), border="1px solid #ccc", border_radius=str(px(4)))
-sheet.select("button").background(Colors.Indigo).color(Colors.White).rounded(px(4)).rules(
-    padding=f"{px(8)} {px(16)}", border="none", cursor="pointer"
+sheet.select("body").font(size=rem(1.0), family="system-ui, sans-serif").rules(
+    margin="0"
 )
+sheet.select(".container").rules(
+    max_width="600px", margin="40px auto", padding=str(px(24))
+)
+sheet.select("input").rules(
+    padding=str(px(8)), border="1px solid #ccc", border_radius=str(px(4))
+)
+sheet.select("button").background(Colors.Indigo).color(Colors.White).rounded(
+    px(4)
+).rules(padding=f"{px(8)} {px(16)}", border="none", cursor="pointer")
 
 app.style("/style.css", sheet)
 

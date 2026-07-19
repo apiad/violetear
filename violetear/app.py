@@ -924,13 +924,16 @@ class App:
         The route responds to GET with Content-Type: text/html containing
         the rendered fragment — no <html>/<head>/<body> wrapper, no JS bundle.
         """
+
         def decorator(func: Callable):
             @self.api.get(path)
             async def wrapper():
                 result = func()
                 html = result.render() if hasattr(result, "render") else str(result)
                 return HTMLResponse(html)
+
             return func
+
         return decorator
 
     def view(self, path: str, pwa: bool | Manifest = False):
