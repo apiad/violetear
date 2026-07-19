@@ -214,7 +214,8 @@ class _DOMEl {
   // Content
   get text() { return this._el ? this._el.textContent : ""; }
   set text(v) { if (this._el) this._el.textContent = String(v); }
-  html(content) { if (this._el) this._el.innerHTML = content; return this; }
+  get html() { return this._el ? this._el.innerHTML : ""; }
+  set html(v) { if (this._el) this._el.innerHTML = String(v); }
   async load(url) {
     const r = await fetch(url);
     if (!r.ok) { console.error(`[violetear] partial load failed: ${r.status} ${url}`); return; }

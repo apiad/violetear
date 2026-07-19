@@ -46,6 +46,11 @@ class DOMElement:
     def text(self, value: str) -> None:
         _client_only("DOMElement.text")
 
+    @property
+    def html(self) -> str:
+        _client_only("DOMElement.html")
+
+    @html.setter
     def html(self, content: str) -> None:
         """Set innerHTML without re-hydration. Use load() for reactive content."""
         _client_only("DOMElement.html")

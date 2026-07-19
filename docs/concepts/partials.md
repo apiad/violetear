@@ -58,7 +58,7 @@ Any `data-bind-*` attributes in the injected HTML are automatically registered w
 | Method | JS equivalent |
 |--------|--------------|
 | `el.text = "…"` | `el.textContent = "…"` |
-| `el.html("…")` | `el.innerHTML = "…"` (no re-hydration) |
+| `el.html = "…"` | `el.innerHTML = "…"` (no re-hydration) |
 | `await el.load(url)` | fetch + inject + re-hydrate |
 
 **Classes**

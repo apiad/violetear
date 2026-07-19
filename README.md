@@ -384,7 +384,7 @@ DOM.query("#sel")           # querySelector → DOMElement
 DOM.query_all(".cls")       # querySelectorAll → list[DOMElement]
 
 el.text = "hello"           # textContent
-el.html("<b>bold</b>")      # innerHTML (no re-hydration)
+el.html = "<b>bold</b>"     # innerHTML (no re-hydration)
 await el.load("/fragment")  # fetch + inject + re-hydrate
 
 el.add_class("active")      # classList.add
