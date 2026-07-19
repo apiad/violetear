@@ -442,3 +442,43 @@ def test_transpile_in_condition():
 
     js = transpile_function(fn)
     assert "_py.truthy(_py.contains(d, key))" in js
+
+
+# ---- Shared class transpilation tests ----
+import dataclasses
+
+
+def test_transpile_shared_class_setter_sends_shared_set():
+    from violetear.transpile import transpile_class
+
+    @dataclasses.dataclass
+    class SharedCounter:
+        count: int = 0
+
+    js = transpile_class(SharedCounter, shared=True)
+    assert '_shared.set("SharedCounter", "count", v)' in js
+    assert "_shared._receiving" in js
+
+
+def test_transpile_shared_class_server_only_field_omits_shared_set():
+    from violetear.transpile import transpile_class
+
+    @dataclasses.dataclass
+    class SharedWithReadonly:
+        mutable: int = 0
+        locked: str = dataclasses.field(default="x", metadata={"server_only": True})
+
+    js = transpile_class(SharedWithReadonly, shared=True)
+    assert '_shared.set("SharedWithReadonly", "mutable", v)' in js
+    assert '_shared.set("SharedWithReadonly", "locked", v)' not in js
+
+
+def test_transpile_local_class_unchanged():
+    from violetear.transpile import transpile_class
+
+    @dataclasses.dataclass
+    class LocalOnly:
+        x: int = 0
+
+    js = transpile_class(LocalOnly, shared=False)
+    assert "_shared.set" not in js

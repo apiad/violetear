@@ -116,3 +116,14 @@ the transpiler emits calls into (`if (_py.truthy(x))`, `_py.eq`, `_py.format`, �
   collections is a deferred follow-up (stays a JS operator for now).
 - [x] **Slice 3**: membership — `in` / `not in` via `_py.contains` (string
   substring, array value-membership, dict key-membership). Was a compile error.
+
+## Phase 8: @app.shared — Realtime Cross-Client State Sync
+
+- [x] **SharedProxy + SharedRegistry**: server-side interception of field assignments; auto-broadcast via `SocketManager`
+- [x] **SocketManager**: `broadcast_shared_sync`, `send_shared_sync`, `send_shared_error`
+- [x] **App.shared() decorator**: registers `@app.shared @dataclass`; returns proxy singleton
+- [x] **WS dispatcher**: `shared_set` → `SharedRegistry.handle_set`; `shared_sync`/`shared_error` client-side
+- [x] **transpile_class(shared=True)**: setters emit `_shared.set(...)`; `server_only` fields skip it
+- [x] **runtime.js**: `_shared` object, `_ws_send` queue, `shared_sync`/`shared_error` handlers
+- [x] **Bundle generation**: shared classes + `_shared_objects` map emitted into bundle.js
+- [x] **Example 06**: counter shared across all tabs; demonstrates zero boilerplate

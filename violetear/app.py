@@ -290,6 +290,7 @@ class SocketManager:
     async def connect(self, client_id: str, websocket: WebSocket):
         await websocket.accept()
         self.active_connections[client_id] = websocket
+        await self.app.shared_registry.push_to_new_client(client_id)
         await self.app.emit("connect", client_id)
 
     async def disconnect(self, client_id: str):
@@ -342,6 +343,54 @@ class SocketManager:
             await connection.send_text(payload)
         except Exception:
             # If sending fails (e.g. client disconnected), remove it
+            await self.disconnect(client_id)
+
+    async def broadcast_shared_sync(
+        self, cls_name: str, field: str, value: object
+    ) -> None:
+        """Broadcast a shared_sync frame to all connected clients."""
+        payload = json.dumps(
+            {"type": "shared_sync", "class": cls_name, "field": field, "value": value}
+        )
+        for client_id, conn in list(self.active_connections.items()):
+            try:
+                await conn.send_text(payload)
+            except Exception:
+                await self.disconnect(client_id)
+
+    async def send_shared_sync(
+        self, client_id: str, cls_name: str, field: str, value: object
+    ) -> None:
+        """Send a shared_sync frame to one client (late-joiner push)."""
+        payload = json.dumps(
+            {"type": "shared_sync", "class": cls_name, "field": field, "value": value}
+        )
+        conn = self.active_connections.get(client_id)
+        if conn is None:
+            return
+        try:
+            await conn.send_text(payload)
+        except Exception:
+            await self.disconnect(client_id)
+
+    async def send_shared_error(
+        self, client_id: str, cls_name: str, field: str, reason: str
+    ) -> None:
+        """Send a shared_error rejection frame to one client."""
+        payload = json.dumps(
+            {
+                "type": "shared_error",
+                "class": cls_name,
+                "field": field,
+                "reason": reason,
+            }
+        )
+        conn = self.active_connections.get(client_id)
+        if conn is None:
+            return
+        try:
+            await conn.send_text(payload)
+        except Exception:
             await self.disconnect(client_id)
 
 
@@ -453,8 +502,17 @@ class App:
                         )
                         continue
 
+                    # Dispatch 'shared_set' from clients
+                    if data.get("type") == "shared_set":
+                        await self.shared_registry.handle_set(
+                            client_id,
+                            data.get("class", ""),
+                            data.get("field", ""),
+                            data.get("value"),
+                        )
+
                     # Dispatch 'realtime' function calls
-                    if data.get("type") == "realtime":
+                    elif data.get("type") == "realtime":
                         func_name = data.get("func")
                         args = data.get("args", [])
                         kwargs = data.get("kwargs", {})
@@ -523,12 +581,21 @@ class App:
         self.client = ClientRegistry(self)
         self.server = ServerRegistry(self)
 
+        from .shared import SharedRegistry
+
+        self.shared_registry = SharedRegistry(self)
+
     def local[T](self, cls: type[T]) -> T:
         # Compile to JS at decoration time — fail fast on unsupported constructs
         js = transpile_class(cls)
         self.client._compiled_classes[cls.__name__] = js
         # Keep server-side reactive proxy (used for SSR initial values)
         return local(cls)
+
+    def shared[T](self, cls: type[T]) -> T:
+        """Decorator: @app.shared @dataclass — register a cross-client reactive state class."""
+        proxy = self.shared_registry.register(cls)
+        return proxy  # type: ignore[return-value]
 
     def _register_rpc_route(self, func: Callable):
         """
@@ -610,6 +677,17 @@ class App:
         # 1. Compiled state classes
         for js in self.client._compiled_classes.values():
             parts.append(js)
+
+        # 1b. Shared state classes (transpiled with shared=True for WS setter)
+        for cls_name, proxy in self.shared_registry._classes.items():
+            instance = object.__getattribute__(proxy, "_instance")
+            js = transpile_class(type(instance), shared=True)
+            parts.append(js)
+
+        # 1c. _shared_objects map — tells _shared.handle() which JS singletons to write
+        if self.shared_registry._classes:
+            entries = ", ".join(f'"{k}": {k}' for k in self.shared_registry._classes)
+            parts.append(f"_shared_objects = {{{entries}}};")
 
         # 2. Compiled client functions
         for fn_name, (kind, js) in self.client._compiled_functions.items():

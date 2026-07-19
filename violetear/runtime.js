@@ -387,6 +387,54 @@ function _hydrate_bindings() {
 
 let _violetear_socket = null;
 
+// Queue of messages to send when the socket opens.
+let _ws_send_queue = [];
+
+function _ws_send(obj) {
+  const msg = JSON.stringify(obj);
+  if (_violetear_socket && _violetear_socket.readyState === WebSocket.OPEN) {
+    _violetear_socket.send(msg);
+  } else {
+    _ws_send_queue.push(msg);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// _shared — handles shared_sync / shared_set for @app.shared state classes.
+// _shared_objects is populated by bundle.js (generated per-app at startup).
+// ---------------------------------------------------------------------------
+let _shared_objects = {};  // overwritten by bundle.js
+
+const _shared = {
+  _receiving: false,
+
+  set(cls, field, value) {
+    _ws_send({ type: "shared_set", class: cls, field: field, value: value });
+  },
+
+  handle(msg) {
+    const obj = _shared_objects[msg.class];
+    if (!obj) {
+      console.warn(`[violetear] shared_sync for unknown class: ${msg.class}`);
+      return;
+    }
+    _shared._receiving = true;
+    try {
+      obj[msg.field] = msg.value;
+    } catch (e) {
+      console.error(`[violetear] shared_sync assignment error: ${e.message}`);
+    } finally {
+      _shared._receiving = false;
+    }
+  },
+
+  handle_error(msg) {
+    console.error(
+      `[violetear] shared write rejected — ${msg.class}.${msg.field}: ${msg.reason}`
+    );
+  },
+};
+
 function _setup_websocket(scope, validators) {
   const protocol = location.protocol === "https:" ? "wss" : "ws";
   const url = `${protocol}://${location.host}/_violetear/ws?client_id=${_CLIENT_ID}`;
@@ -395,6 +443,10 @@ function _setup_websocket(scope, validators) {
   window.violetear_socket = socket;
 
   socket.onopen = () => {
+    // Flush any messages queued before the socket opened
+    while (_ws_send_queue.length) {
+      socket.send(_ws_send_queue.shift());
+    }
     const handlers = scope._lifecycle?.connect ?? [];
     handlers.forEach(fn => fn().catch(e => console.error("[violetear] connect handler error:", e)));
   };
@@ -412,6 +464,10 @@ function _setup_websocket(scope, validators) {
         return;
       }
       fn(data.kwargs ?? {}).catch(e => console.error(`[violetear] rpc error in ${data.func}:`, e));
+    } else if (data.type === "shared_sync") {
+      _shared.handle(data);
+    } else if (data.type === "shared_error") {
+      _shared.handle_error(data);
     }
   };
 

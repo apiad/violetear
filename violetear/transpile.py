@@ -96,12 +96,16 @@ def _js_field_default(field: dataclasses.Field) -> str:
     return "null"
 
 
-def transpile_class(cls: type) -> str:
-    """Compile an @app.local @dataclass to a reactive JS class + singleton.
+def transpile_class(cls: type, shared: bool = False) -> str:
+    """Compile an @app.local or @app.shared @dataclass to a reactive JS class + singleton.
 
     The singleton keeps the original class name so Python code translates 1:1:
         const UiState = new _UiState();
     User code writes UiState.meters in both Python and JS without name changes.
+
+    When shared=True, setters also send shared_set to the server (unless
+    _shared._receiving is set, which prevents echo during incoming shared_sync).
+    Fields with metadata={"server_only": True} omit the _shared.set call.
 
     Raises ClientCompileError for non-dataclasses or classes with user methods.
     """
@@ -145,11 +149,17 @@ def transpile_class(cls: type) -> str:
         ann = hints.get(f.name)
         checker = js_type_check(ann) if ann is not None else "_checkAny"
         lines.append(f"  get {f.name}() {{ return this._{f.name}; }}")
+        is_server_only = dict(f.metadata).get("server_only", False)
+        if shared and not is_server_only:
+            setter_extra = f' if (!_shared._receiving) {{ _shared.set("{class_name}", "{f.name}", v); }}'
+        else:
+            setter_extra = ""
         lines.append(
             f"  set {f.name}(v) {{ "
             f'({checker})(v, "{class_name}.{f.name}"); '
             f"this._{f.name} = v; "
-            f'ReactiveRegistry.notify("{class_name}.{f.name}", v); }}'
+            f'ReactiveRegistry.notify("{class_name}.{f.name}", v);'
+            f"{setter_extra} }}"
         )
 
     lines.append("}")

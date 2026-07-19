@@ -286,3 +286,56 @@ def test_inbound_realtime_positional_args_still_validate_and_run():
 
     assert ack_msg["func"] == "ack"
     assert seen == [("click", 7)]
+
+
+# ---- Shared sync message tests ----
+import json
+from unittest.mock import AsyncMock, MagicMock
+from violetear.app import SocketManager
+
+
+def _make_socket_manager():
+    app = MagicMock()
+    sm = SocketManager(app)
+    ws = AsyncMock()
+    sm.active_connections["c1"] = ws
+    return sm, ws
+
+
+def test_broadcast_shared_sync_sends_to_all():
+    sm, ws = _make_socket_manager()
+    asyncio.run(sm.broadcast_shared_sync("Room", "count", 42))
+    ws.send_text.assert_called_once()
+    payload = json.loads(ws.send_text.call_args[0][0])
+    assert payload == {
+        "type": "shared_sync",
+        "class": "Room",
+        "field": "count",
+        "value": 42,
+    }
+
+
+def test_send_shared_sync_sends_to_one():
+    sm, ws = _make_socket_manager()
+    asyncio.run(sm.send_shared_sync("c1", "Room", "count", 42))
+    ws.send_text.assert_called_once()
+    payload = json.loads(ws.send_text.call_args[0][0])
+    assert payload == {
+        "type": "shared_sync",
+        "class": "Room",
+        "field": "count",
+        "value": 42,
+    }
+
+
+def test_send_shared_error_sends_error_frame():
+    sm, ws = _make_socket_manager()
+    asyncio.run(sm.send_shared_error("c1", "Room", "version", "server_only"))
+    ws.send_text.assert_called_once()
+    payload = json.loads(ws.send_text.call_args[0][0])
+    assert payload == {
+        "type": "shared_error",
+        "class": "Room",
+        "field": "version",
+        "reason": "server_only",
+    }
