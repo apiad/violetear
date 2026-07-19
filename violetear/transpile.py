@@ -733,26 +733,21 @@ def _emit_call(node: ast.Call, ctx: _CompileContext) -> str:
     pos_args = [_emit_expr(a, ctx) for a in node.args]
     kw_args = {kw.arg: _emit_expr(kw.value, ctx) for kw in node.keywords if kw.arg}
 
-    if pos_args and kw_args:
-        raise ClientCompileError(
-            category="unsupported-construct",
-            message="mixing positional and keyword arguments is not supported; use one or the other",
-            filename=ctx.filename,
-            line=node.lineno,
-            col=node.col_offset,
-        )
-
+    # Mixed positional + keyword args: emit fn(pos..., {key: val, ...}).
+    # This matches the JS options-object convention (e.g. fetch(url, {method, body})).
     func = node.func
 
     # Named function call
     if isinstance(func, ast.Name):
         fname = func.id
-        translated = _try_builtin(fname, pos_args, kw_args, ctx, node)
-        if translated is not None:
-            return translated
+        if not (pos_args and kw_args):
+            translated = _try_builtin(fname, pos_args, kw_args, ctx, node)
+            if translated is not None:
+                return translated
         if kw_args:
             kw_str = ", ".join(f"{k}: {v}" for k, v in kw_args.items())
-            return f"{fname}({{{kw_str}}})"
+            all_args = pos_args + ["{" + kw_str + "}"]
+            return f"{fname}({', '.join(all_args)})"
         return f"{fname}({', '.join(pos_args)})"
 
     # Method call
@@ -776,7 +771,8 @@ def _emit_call(node: ast.Call, ctx: _CompileContext) -> str:
 
         if kw_args:
             kw_str = ", ".join(f"{k}: {v}" for k, v in kw_args.items())
-            return f"{obj}.{method}({{{kw_str}}})"
+            all_args = pos_args + ["{" + kw_str + "}"]
+            return f"{obj}.{method}({', '.join(all_args)})"
         return f"{obj}.{method}({', '.join(pos_args)})"
 
     raise ClientCompileError(
