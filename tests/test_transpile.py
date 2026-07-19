@@ -482,3 +482,120 @@ def test_transpile_local_class_unchanged():
 
     js = transpile_class(LocalOnly, shared=False)
     assert "_shared.set" not in js
+
+
+# ---- Issue #10: transpiler missing constructs ----
+
+
+def test_tuple_unpacking_simple():
+    from violetear.transpile import transpile_function
+
+    async def fn():
+        a, b = (1, 2)
+
+    js = transpile_function(fn)
+    assert "let _t0 = " in js
+    assert "let a = _t0[0]" in js
+    assert "let b = _t0[1]" in js
+
+
+def test_tuple_unpacking_from_function_call():
+    from violetear.transpile import transpile_function
+
+    async def fn():
+        x, y = some_pair()  # noqa: F821
+
+    js = transpile_function(fn)
+    assert "let _t0 = some_pair()" in js
+    assert "_t0[0]" in js
+    assert "_t0[1]" in js
+
+
+def test_tuple_unpacking_multiple():
+    from violetear.transpile import transpile_function
+
+    async def fn():
+        a, b = (1, 2)
+        c, d = (3, 4)
+
+    js = transpile_function(fn)
+    assert "let _t0 = " in js
+    assert "let _t1 = " in js
+
+
+def test_list_comprehension_simple():
+    from violetear.transpile import transpile_function
+
+    async def fn():
+        result = [x * 2 for x in items]  # noqa: F821
+
+    js = transpile_function(fn)
+    assert ".map(" in js
+    assert "=> " in js
+
+
+def test_list_comprehension_with_filter():
+    from violetear.transpile import transpile_function
+
+    async def fn():
+        result = [x for x in items if x > 0]  # noqa: F821
+
+    js = transpile_function(fn)
+    assert ".filter(" in js
+    assert ".map(" in js
+
+
+def test_list_comprehension_over_items():
+    from violetear.transpile import transpile_function
+
+    async def fn():
+        keys = [k for k, v in data.items()]  # noqa: F821
+
+    js = transpile_function(fn)
+    assert "Object.entries(" in js
+    assert ".map(" in js
+
+
+def test_dict_comprehension_simple():
+    from violetear.transpile import transpile_function
+
+    async def fn():
+        result = {k: v for k, v in data.items()}  # noqa: F821
+
+    js = transpile_function(fn)
+    assert "Object.fromEntries(" in js
+    assert "Object.entries(" in js
+
+
+def test_dict_comprehension_single_var():
+    from violetear.transpile import transpile_function
+
+    async def fn():
+        result = {k: 1 for k in keys}  # noqa: F821
+
+    js = transpile_function(fn)
+    assert "Object.fromEntries(" in js
+    assert ".map(" in js
+
+
+def test_computed_fstring_format_spec():
+    from violetear.transpile import transpile_function
+
+    async def fn():
+        s = f"{n:{width}d}"  # noqa: F821
+
+    js = transpile_function(fn)
+    assert "_py.format(" in js
+    # The spec should be a nested template literal containing width
+    assert "width" in js
+
+
+def test_constant_fstring_format_spec_still_works():
+    from violetear.transpile import transpile_function
+
+    async def fn():
+        s = f"{n:03d}"  # noqa: F821
+
+    js = transpile_function(fn)
+    assert "_py.format(" in js
+    assert '"03d"' in js

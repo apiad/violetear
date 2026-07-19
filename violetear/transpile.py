@@ -214,6 +214,7 @@ class _CompileContext:
     def __init__(self, filename: str):
         self.filename = filename
         self._declared: set[str] = set()
+        self._temp_idx: int = 0  # counter for generated temp var names (_t0, _t1, …)
 
     def declare(self, name: str) -> str:
         """Return 'let <name>' on first use, '<name>' on reassignment."""
@@ -221,6 +222,13 @@ class _CompileContext:
             self._declared.add(name)
             return f"let {name}"
         return name
+
+    def child(self) -> "_CompileContext":
+        """Return a new context that sees the current scope's declared names."""
+        inner = _CompileContext(self.filename)
+        inner._declared = set(self._declared)
+        inner._temp_idx = self._temp_idx
+        return inner
 
 
 def _collect_assigned_names(stmts: list[ast.stmt]) -> list[str]:
@@ -238,6 +246,72 @@ def _collect_assigned_names(stmts: list[ast.stmt]) -> list[str]:
         elif isinstance(stmt, ast.While):
             names.extend(_collect_assigned_names(stmt.body))
     return names
+
+
+def _emit_tuple_unpack(
+    target: ast.Tuple,
+    rhs_node: ast.expr,
+    ctx: _CompileContext,
+    line: int,
+    col: int,
+) -> str:
+    """Emit `a, b = expr` → `let _t0 = expr; let a = _t0[0]; let b = _t0[1];`"""
+    for elt in target.elts:
+        if not isinstance(elt, ast.Name):
+            raise ClientCompileError(
+                category="unsupported-construct",
+                message="tuple unpacking only supports plain names; starred/nested patterns not supported",
+                filename=ctx.filename,
+                line=line,
+                col=col,
+            )
+    tmp = f"_t{ctx._temp_idx}"
+    ctx._temp_idx += 1
+    rhs = _emit_expr(rhs_node, ctx)
+    stmts = [f"let {tmp} = {rhs};"]
+    for i, elt in enumerate(target.elts):
+        lhs = ctx.declare(elt.id)
+        stmts.append(f"{lhs} = {tmp}[{i}];")
+    return "\n".join(stmts)
+
+
+def _comp_gen_parts(
+    gen: ast.comprehension, ctx: _CompileContext
+) -> tuple[str, str, list[str]]:
+    """Return (iterable_js, arrow_param, loop_var_names) for a comprehension generator.
+
+    Handles single-name and 2-tuple targets; translates .items() → Object.entries().
+    """
+    target = gen.target
+    if isinstance(target, ast.Tuple):
+        if not all(isinstance(e, ast.Name) for e in target.elts):
+            raise ClientCompileError(
+                category="unsupported-construct",
+                message="comprehension tuple target only supports plain names",
+                filename=ctx.filename,
+                line=getattr(gen, "lineno", 0),
+                col=getattr(gen, "col_offset", 0),
+            )
+        vars_ = [e.id for e in target.elts]
+        param = f"([{', '.join(vars_)}])"
+        # .items() → Object.entries()
+        if (
+            isinstance(gen.iter, ast.Call)
+            and isinstance(gen.iter.func, ast.Attribute)
+            and gen.iter.func.attr == "items"
+        ):
+            obj = _emit_expr(gen.iter.func.value, ctx)
+            return f"Object.entries({obj})", param, vars_
+        return _emit_expr(gen.iter, ctx), param, vars_
+    if isinstance(target, ast.Name):
+        return _emit_expr(gen.iter, ctx), f"({target.id})", [target.id]
+    raise ClientCompileError(
+        category="unsupported-construct",
+        message="unsupported comprehension target",
+        filename=ctx.filename,
+        line=getattr(gen, "lineno", 0),
+        col=getattr(gen, "col_offset", 0),
+    )
 
 
 def _emit_block(stmts: list[ast.stmt], ctx: _CompileContext) -> str:
@@ -284,6 +358,10 @@ def _emit_stmt(node: ast.stmt, ctx: _CompileContext) -> str:  # noqa: C901
                 col=node.col_offset,
             )
         target = node.targets[0]
+        if isinstance(target, ast.Tuple):
+            return _emit_tuple_unpack(
+                target, node.value, ctx, node.lineno, node.col_offset
+            )
         rhs = _emit_expr(node.value, ctx)
         return _emit_assignment_target(
             target, rhs, None, ctx, node.lineno, node.col_offset
@@ -679,8 +757,8 @@ def _emit_expr(node: ast.expr, ctx: _CompileContext) -> str:  # noqa: C901
             elif isinstance(val, ast.FormattedValue):
                 expr = _emit_expr(val.value, ctx)
                 if val.format_spec is not None:
-                    spec = _constant_format_spec(val.format_spec, ctx, node)
-                    parts.append(f"${{_py.format({expr}, {json.dumps(spec)})}}")
+                    spec_js = _emit_format_spec(val.format_spec, ctx)
+                    parts.append(f"${{_py.format({expr}, {spec_js})}}")
                 else:
                     parts.append(f"${{{expr}}}")
             else:
@@ -710,6 +788,47 @@ def _emit_expr(node: ast.expr, ctx: _CompileContext) -> str:  # noqa: C901
     if isinstance(node, ast.Await):
         return f"await {_emit_expr(node.value, ctx)}"
 
+    if isinstance(node, ast.ListComp):
+        if len(node.generators) != 1:
+            raise ClientCompileError(
+                category="unsupported-construct",
+                message="nested list comprehensions are not supported; use a for loop",
+                filename=ctx.filename,
+                line=node.lineno,
+                col=node.col_offset,
+            )
+        gen = node.generators[0]
+        iterable, param, vars_ = _comp_gen_parts(gen, ctx)
+        inner = ctx.child()
+        for v in vars_:
+            inner._declared.add(v)
+        elt_js = _emit_expr(node.elt, inner)
+        if gen.ifs:
+            conds = " && ".join(f"_py.truthy({_emit_expr(c, inner)})" for c in gen.ifs)
+            return f"({iterable}).filter({param} => {conds}).map({param} => {elt_js})"
+        return f"({iterable}).map({param} => {elt_js})"
+
+    if isinstance(node, ast.DictComp):
+        if len(node.generators) != 1:
+            raise ClientCompileError(
+                category="unsupported-construct",
+                message="nested dict comprehensions are not supported; use a for loop",
+                filename=ctx.filename,
+                line=node.lineno,
+                col=node.col_offset,
+            )
+        gen = node.generators[0]
+        iterable, param, vars_ = _comp_gen_parts(gen, ctx)
+        inner = ctx.child()
+        for v in vars_:
+            inner._declared.add(v)
+        key_js = _emit_expr(node.key, inner)
+        val_js = _emit_expr(node.value, inner)
+        if gen.ifs:
+            conds = " && ".join(f"_py.truthy({_emit_expr(c, inner)})" for c in gen.ifs)
+            return f"Object.fromEntries(({iterable}).filter({param} => {conds}).map({param} => [{key_js}, {val_js}]))"
+        return f"Object.fromEntries(({iterable}).map({param} => [{key_js}, {val_js}]))"
+
     raise ClientCompileError(
         category="unsupported-construct",
         message=f"unsupported expression: {ast.unparse(node)!r}",
@@ -719,23 +838,41 @@ def _emit_expr(node: ast.expr, ctx: _CompileContext) -> str:  # noqa: C901
     )
 
 
-def _constant_format_spec(
-    fmt: ast.JoinedStr, ctx: _CompileContext, node: ast.expr
-) -> str:
-    """Extract a constant f-string format spec (e.g. '02d'); raise on a computed one."""
+def _emit_format_spec(fmt: ast.JoinedStr, ctx: _CompileContext) -> str:
+    """Return a JS expression (string literal or template literal) for a format spec.
+
+    Constant spec like '02d' → '"02d"'.
+    Computed spec like f'{width}d' → '`${width}d`' (nested template literal, valid JS).
+    """
     if (
         len(fmt.values) == 1
         and isinstance(fmt.values[0], ast.Constant)
         and isinstance(fmt.values[0].value, str)
     ):
-        return fmt.values[0].value
-    raise ClientCompileError(
-        category="unsupported-construct",
-        message="computed f-string format spec is not supported; use a constant like f'{x:02d}'",
-        filename=ctx.filename,
-        line=getattr(node, "lineno", 0),
-        col=getattr(node, "col_offset", 0),
-    )
+        return json.dumps(fmt.values[0].value)
+    # Computed spec — emit as a JS template literal (safe to nest inside ${ })
+    parts: list[str] = []
+    for val in fmt.values:
+        if isinstance(val, ast.Constant):
+            parts.append(str(val.value).replace("`", "\\`").replace("${", "\\${"))
+        elif isinstance(val, ast.FormattedValue):
+            parts.append(f"${{{_emit_expr(val.value, ctx)}}}")
+        else:
+            raise ClientCompileError(
+                category="unsupported-construct",
+                message="unsupported component in f-string format spec",
+                filename=ctx.filename,
+                line=getattr(fmt, "lineno", 0),
+                col=getattr(fmt, "col_offset", 0),
+            )
+    return "`" + "".join(parts) + "`"
+
+
+def _constant_format_spec(
+    fmt: ast.JoinedStr, ctx: _CompileContext, node: ast.expr
+) -> str:
+    """Kept for backward compatibility; delegates to _emit_format_spec."""
+    return _emit_format_spec(fmt, ctx)
 
 
 def _emit_call(node: ast.Call, ctx: _CompileContext) -> str:
