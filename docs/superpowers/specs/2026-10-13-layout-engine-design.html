@@ -134,7 +134,7 @@ pre .c{color:var(--faint)} pre .k{color:var(--accent)} pre .s{color:var(--ok)}
 <div class="chrome">
   <span>violetear</span>
   <span class="tab">spec · a pure-Python layout engine</span>
-  <span class="st"><span class="pill acc">design approved in chat; spec under review</span><span class="pill">2026-10-13</span></span>
+  <span class="st"><span class="pill acc">spec approved; PR 1 planned</span><span class="pill">2026-10-13</span></span>
 </div>
 
 <div class="wrap">
@@ -184,7 +184,7 @@ pre .c{color:var(--faint)} pre .k{color:var(--accent)} pre .s{color:var(--ok)}
 </div>
 
 <h2 id="decisions"><span class="n">02</span>Decisions</h2>
-<p><span class="who">maintainer</span> marks a decision the maintainer made during design. <span class="who q">proposed</span> marks one this spec proposes and nobody has ruled on yet.</p>
+<p><span class="who">maintainer</span> marks a decision the maintainer made during design or in review of this spec.</p>
 <table class="tbl">
 <thead><tr><th>Question</th><th>Decision</th><th>Why</th></tr></thead>
 <tbody>
@@ -198,10 +198,10 @@ pre .c{color:var(--faint)} pre .k{color:var(--accent)} pre .s{color:var(--ok)}
 <tr><td>Where <code>:hover</code> and <code>:focus</code> come from</td><td>A <code>state</code> set on each node, written by the caller</td><td class="why"><span class="who">maintainer</span> Hit-testing and keyboard focus belong to the application. The engine only reads the result.</td></tr>
 <tr><td>Algorithms</td><td>Follow the steps of CSS Flexbox §9 and CSS Grid §11–12 as written. Taffy is the reference wherever the spec is unclear</td><td class="why"><span class="who">maintainer</span> A literal port of Taffy is about 15k lines of Rust shaped by its ownership model. The spec is the shorter source, and Chromium settles disputes.</td></tr>
 <tr><td><code>display: block</code></td><td>Laid out as a column flex container with <code>align-items: stretch</code></td><td class="why"><span class="who">maintainer</span> That is what a stack of divs looks like in a browser, apart from margin collapsing, which v1 does not do.</td></tr>
-<tr><td>Invalid values</td><td>Raise <code>StyleError</code> by default. <code>strict=False</code> drops them with a warning, as a browser does</td><td class="why"><span class="who q">proposed</span> A silently dropped declaration is a hard bug to find on a game screen.</td></tr>
-<tr><td><code>box-sizing</code></td><td><code>border-box</code> for every element. <code>content-box</code> is rejected</td><td class="why"><span class="who q">proposed</span> It is what most CSS resets do, and it halves the sizing cases to test. The HTML render emits <code>*{box-sizing:border-box}</code> so Chromium agrees.</td></tr>
-<tr><td><code>!important</code></td><td>Rejected by the parser</td><td class="why"><span class="who q">proposed</span> Rejecting it loudly is better than ignoring it silently. It can be added if a theme needs it.</td></tr>
-<tr><td><code>overflow</code></td><td>Reported on the box, never enforced</td><td class="why"><span class="who q">proposed</span> Clipping and scrolling are drawing decisions, so they belong to the renderer.</td></tr>
+<tr><td>Invalid values</td><td>Raise <code>StyleError</code> by default. <code>strict=False</code> drops them with a warning, as a browser does</td><td class="why"><span class="who">maintainer</span> A silently dropped declaration is a hard bug to find on a game screen.</td></tr>
+<tr><td><code>box-sizing</code></td><td><code>border-box</code> for every element. <code>content-box</code> is rejected</td><td class="why"><span class="who">maintainer</span> It is what most CSS resets do, and it halves the sizing cases to test. The HTML render emits <code>*{box-sizing:border-box}</code> so Chromium agrees.</td></tr>
+<tr><td><code>!important</code></td><td>Rejected by the parser</td><td class="why"><span class="who">maintainer</span> Rejecting it loudly is better than ignoring it silently. It can be added if a theme needs it.</td></tr>
+<tr><td><code>overflow</code></td><td>Reported on the box, never enforced</td><td class="why"><span class="who">maintainer</span> Clipping and scrolling are drawing decisions, so they belong to the renderer.</td></tr>
 </tbody>
 </table>
 
